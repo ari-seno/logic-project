@@ -8,6 +8,7 @@ import {
   ArchitectureTechnologyCategoryBadge,
 } from "@/components/projects/badges";
 import { ButtonLink } from "@/components/ui/button";
+import { MermaidDiagram } from "@/components/ui/mermaid-diagram";
 import { formatDate } from "@/lib/utils";
 import { getProject } from "@/lib/projects/queries";
 import {
@@ -22,6 +23,11 @@ import {
 import {
   listArchitectureComponentDependenciesByProject,
 } from "@/lib/architecture/dependencies/queries";
+import {
+  buildArchitectureMermaid,
+  type ArchitectureComponent,
+  type ArchitectureDependency,
+} from "@/lib/diagrams/mermaid";
 
 export default async function ArchitectureOverviewPage({
   params,
@@ -42,6 +48,23 @@ export default async function ArchitectureOverviewPage({
   ]);
 
   const componentById = new Map(components.map((c) => [c.id, c]));
+
+  const diagramComponents: ArchitectureComponent[] = components.map((c) => ({
+    id: c.id,
+    name: c.name,
+    type: c.type,
+  }));
+  const diagramDependencies: ArchitectureDependency[] = dependencies.map(
+    (d) => ({
+      id: d.id,
+      source_component_id: d.source_component_id,
+      target_component_id: d.target_component_id,
+    }),
+  );
+  const diagramChart = buildArchitectureMermaid(
+    diagramComponents,
+    diagramDependencies,
+  );
 
   return (
     <div className="flex flex-col gap-6">
@@ -72,6 +95,14 @@ export default async function ArchitectureOverviewPage({
             New component
           </ButtonLink>
         </header>
+        {diagramChart ? (
+          <div className="mb-4">
+            <MermaidDiagram
+              chart={diagramChart}
+              ariaLabel="Architecture component dependency diagram"
+            />
+          </div>
+        ) : null}
         {components.length === 0 ? (
           <p className="text-sm text-[var(--muted-foreground)]">
             No components yet.

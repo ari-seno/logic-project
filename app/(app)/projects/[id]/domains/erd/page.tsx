@@ -3,9 +3,16 @@ import { notFound } from "next/navigation";
 
 import { ProjectTabs } from "@/components/projects/project-tabs";
 import { ButtonLink } from "@/components/ui/button";
+import { MermaidDiagram } from "@/components/ui/mermaid-diagram";
 import { RelationshipTypeBadge } from "@/components/projects/badges";
 import { getProject } from "@/lib/projects/queries";
 import { loadProjectErd } from "@/lib/domains/erd";
+import {
+  buildErdMermaid,
+  type ErdAttribute,
+  type ErdEntity,
+  type ErdRelationship,
+} from "@/lib/diagrams/mermaid";
 
 export default async function ProjectErdPage({
   params,
@@ -22,6 +29,29 @@ export default async function ProjectErdPage({
   const allEntities = Object.values(erd.entitiesByDomain).flat();
   const entityCount = allEntities.length;
   const entityById = new Map(allEntities.map((e) => [e.id, e]));
+
+  const diagramEntities: ErdEntity[] = allEntities.map((e) => ({
+    id: e.id,
+    name: e.name,
+    description: e.description,
+  }));
+  const diagramAttributes: ErdAttribute[] = allEntities.flatMap(
+    (entity) => erd.attributesByEntity[entity.id] ?? [],
+  );
+  const diagramRelationships: ErdRelationship[] = erd.relationships.map(
+    (rel) => ({
+      id: rel.id,
+      name: rel.name,
+      source_entity_id: rel.source_entity_id,
+      target_entity_id: rel.target_entity_id,
+      relationship_type: rel.relationship_type,
+    }),
+  );
+  const mermaidChart = buildErdMermaid(
+    diagramEntities,
+    diagramAttributes,
+    diagramRelationships,
+  );
 
   return (
     <div className="flex flex-col gap-6">
@@ -67,6 +97,23 @@ export default async function ProjectErdPage({
         </div>
       ) : (
         <div className="flex flex-col gap-6">
+          {mermaidChart ? (
+            <section className="card-glass p-6">
+              <header className="mb-4 flex items-center justify-between gap-3">
+                <h2 className="text-base font-semibold tracking-tight">
+                  Diagram
+                </h2>
+                <p className="text-xs text-[var(--muted-foreground)]">
+                  Auto-generated from entities and relationships.
+                </p>
+              </header>
+              <MermaidDiagram
+                chart={mermaidChart}
+                ariaLabel="Entity-relationship diagram"
+              />
+            </section>
+          ) : null}
+
           {erd.domains.map((domain) => {
             const entities = erd.entitiesByDomain[domain.id] ?? [];
             return (
