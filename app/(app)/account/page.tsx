@@ -36,39 +36,39 @@ export default async function AccountPage() {
         </p>
       </div>
 
-      <section className="card-glass flex flex-wrap items-center gap-4 p-6">
+      <section className="card-glass flex flex-wrap items-center gap-6 p-6">
         <div
           aria-hidden
           className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[var(--brand)] to-[var(--brand-accent)] text-xl font-semibold text-white shadow-sm"
         >
           {initials || "?"}
         </div>
-        <div className="min-w-0 flex-1">
-          <p className="truncate text-lg font-semibold">
+        <div className="min-w-0 flex-1 space-y-1.5 py-1">
+          <p className="truncate text-lg font-semibold leading-tight">
             {profile.display_name ?? "(no display name)"}
           </p>
-          <p className="truncate text-sm text-[var(--muted-foreground)]">
+          <p className="truncate text-sm leading-relaxed text-[var(--muted-foreground)]">
             {profile.email}
           </p>
         </div>
         <Link
           href="/account/settings"
-          className="text-sm font-medium text-[var(--brand)] hover:underline"
+          className="shrink-0 self-start text-sm font-medium text-[var(--brand)] hover:underline"
         >
           Edit settings →
         </Link>
       </section>
 
-      <section className="card-glass">
+      <section className="card-glass p-6">
         <h2 className="text-sm font-semibold uppercase tracking-wide text-[var(--muted-foreground)]">
           Profile
         </h2>
-        <dl className="mt-3 grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
+        <dl className="mt-5 grid grid-cols-1 gap-x-6 gap-y-5 text-sm sm:grid-cols-2">
           <div>
             <dt className="text-xs uppercase tracking-wide text-[var(--muted-foreground)]">
               Display name
             </dt>
-            <dd className="mt-1">
+            <dd className="mt-2 leading-relaxed">
               {profile.display_name ?? (
                 <span className="italic text-[var(--muted-foreground)]">
                   Not set
@@ -80,25 +80,25 @@ export default async function AccountPage() {
             <dt className="text-xs uppercase tracking-wide text-[var(--muted-foreground)]">
               Email
             </dt>
-            <dd className="mt-1">{profile.email}</dd>
+            <dd className="mt-2 leading-relaxed">{profile.email}</dd>
           </div>
           <div>
             <dt className="text-xs uppercase tracking-wide text-[var(--muted-foreground)]">
               User ID
             </dt>
-            <dd className="mt-1 font-mono text-xs">{profile.id}</dd>
+            <dd className="mt-2 font-mono text-xs leading-relaxed">{profile.id}</dd>
           </div>
           <div>
             <dt className="text-xs uppercase tracking-wide text-[var(--muted-foreground)]">
               Member since
             </dt>
-            <dd className="mt-1">{formatDate(profile.created_at)}</dd>
+            <dd className="mt-2 leading-relaxed">{formatDate(profile.created_at)}</dd>
           </div>
           <div>
             <dt className="text-xs uppercase tracking-wide text-[var(--muted-foreground)]">
               Profile updated
             </dt>
-            <dd className="mt-1">{formatDate(profile.updated_at)}</dd>
+            <dd className="mt-2 leading-relaxed">{formatDate(profile.updated_at)}</dd>
           </div>
         </dl>
       </section>
