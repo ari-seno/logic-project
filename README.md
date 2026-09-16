@@ -2,7 +2,7 @@
 
 > An AI Project Planner that structures requirements, decisions, architecture, tasks, and agent prompts. You make the calls; the tool keeps things organized.
 
-This repository contains **Part 1: Foundation & Authentication** and **Part 2: Requirements & Decisions** — a Next.js 16 app backed by Supabase Auth and Postgres, with row-level security enforced on every table.
+This repository contains **Part 1: Foundation & Authentication**, **Part 2: Requirements & Decisions**, and **Part 3: Domain & ERD** — a Next.js 16 app backed by Supabase Auth and Postgres, with row-level security enforced on every table.
 
 ## Stack
 
@@ -27,6 +27,9 @@ app/                         Next.js App Router
     projects/[id]/           overview (counts + recents + context)
     projects/[id]/requirements/   list / new / [reqId] / [reqId]/edit
     projects/[id]/decisions/      list / new / [decId] / [decId]/edit
+    projects/[id]/domains/        list / new / [domainId] / [domainId]/edit / erd
+    projects/[id]/domains/[domainId]/entities/        new / [entityId] / [entityId]/edit
+    projects/[id]/domains/relationships/               new / [relId] / [relId]/edit
   api/                       (none yet)
   globals.css                Tailwind v4 theme tokens
   page.tsx                   landing
@@ -229,13 +232,63 @@ future AI-assisted context generation — there is no AI call in Part 2.
 - No markdown rendering for descriptions (plain text only).
 - No AI context generation yet.
 
+## Part 3 — Domain & ERD
+
+Part 3 introduces structured domain modeling: a project contains **domains**, each domain holds **entities**, each entity has **attributes**, and entities are connected by **relationships**. A read-only ERD page renders the model.
+
+### Concepts
+
+| Concept | Belongs to | Has |
+| --- | --- | --- |
+| Domain | Project | name, description, entities |
+| Entity | Domain | name, description, attributes |
+| Attribute | Entity | name, data type, is required, is primary key, default, description, position |
+| Relationship | Project | source entity, target entity, type, optional name + description |
+
+### Database tables
+
+| Table | Indexes | RLS |
+| --- | --- | --- |
+| `domains` | `(project_id)`, `(updated_at)`; UNIQUE `(project_id, name)` | enabled |
+| `entities` | `(domain_id)`, `(updated_at)`; UNIQUE `(domain_id, name)` | enabled |
+| `entity_attributes` | `(entity_id)`, `(updated_at)` | enabled |
+| `entity_relationships` | `(project_id)`, `(source_entity_id)`, `(target_entity_id)`, `(updated_at)` | enabled |
+
+Foreign keys all use `ON DELETE CASCADE`. The cross-project prevention is enforced both in the database (`entity_relationships_share_project` trigger) and in the application (`assertProjectAndSharedEntities` helper inside `lib/relationships/actions.ts`).
+
+### Authorization model
+
+Same RLS pattern as Part 2: each child row's policy gates on `EXISTS (SELECT 1 FROM … WHERE … owner_id = auth.uid())` walking up the parent chain.
+
+### Available routes
+
+| Route | Purpose |
+| --- | --- |
+| `/projects/[id]/domains` | List domains in project |
+| `/projects/[id]/domains/new` | Create domain |
+| `/projects/[id]/domains/[domainId]` | Domain detail + entities list |
+| `/projects/[id]/domains/[domainId]/edit` | Edit domain |
+| `/projects/[id]/domains/[domainId]/entities/new` | Create entity |
+| `/projects/[id]/domains/[domainId]/entities/[entityId]` | Entity detail + attributes table |
+| `/projects/[id]/domains/[domainId]/entities/[entityId]/edit` | Edit entity |
+| `/projects/[id]/domains/erd` | Read-only ERD visualization |
+| `/projects/[id]/domains/relationships/new` | Create relationship |
+| `/projects/[id]/domains/relationships/[relId]` | Relationship detail |
+| `/projects/[id]/domains/relationships/[relId]/edit` | Edit relationship |
+
+### Limitations
+
+- ERD is read-only (no drag-and-drop editing). Editing is done through forms.
+- Primary-key uniqueness within an entity is enforced at the application layer, not the database.
+- No markdown rendering for descriptions.
+
 ## Roadmap
 
 | Part | Scope | Status |
 | --- | --- | --- |
 | 1 | Foundation, auth, projects CRUD | ✓ shipped |
 | 2 | Requirements & Decisions | ✓ shipped |
-| 3 | Domain / ERD | planned |
+| 3 | Domain & ERD | ✓ shipped |
 | 4 | Architecture / API / UI | planned |
 | 5 | Tasks & Dependencies | planned |
 | 6 | Agent Prompt Generation | planned |

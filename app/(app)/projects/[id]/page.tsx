@@ -20,6 +20,9 @@ import {
   countDecisions,
   listDecisions,
 } from "@/lib/decisions/queries";
+import { countDomains } from "@/lib/domains/queries";
+import { countEntitiesByProject } from "@/lib/entities/queries";
+import { countRelationshipsByProject } from "@/lib/relationships/queries";
 
 export default async function ProjectOverviewPage({
   params,
@@ -33,13 +36,23 @@ export default async function ProjectOverviewPage({
     notFound();
   }
 
-  const [requirementCount, decisionCount, recentRequirements, recentDecisions] =
-    await Promise.all([
-      countRequirements(project.id),
-      countDecisions(project.id),
-      listRequirements({ projectId: project.id, limit: 5 }),
-      listDecisions({ projectId: project.id, limit: 5 }),
-    ]);
+  const [
+    requirementCount,
+    decisionCount,
+    domainCount,
+    entityCount,
+    relationshipCount,
+    recentRequirements,
+    recentDecisions,
+  ] = await Promise.all([
+    countRequirements(project.id),
+    countDecisions(project.id),
+    countDomains(project.id),
+    countEntitiesByProject(project.id),
+    countRelationshipsByProject(project.id),
+    listRequirements({ projectId: project.id, limit: 5 }),
+    listDecisions({ projectId: project.id, limit: 5 }),
+  ]);
 
   return (
     <div className="flex flex-col gap-6">
@@ -88,33 +101,51 @@ export default async function ProjectOverviewPage({
         <h2 className="text-sm font-semibold uppercase tracking-wide text-[var(--muted-foreground)]">
           Project Context
         </h2>
-        <div className="mt-2 rounded-lg border border-[var(--border)] bg-white p-6">
-          <div className="grid grid-cols-2 gap-4 sm:max-w-md">
-            <div>
-              <p className="text-xs uppercase tracking-wide text-[var(--muted-foreground)]">
-                Requirements
-              </p>
-              <p className="mt-1 text-2xl font-semibold">{requirementCount}</p>
+          <div className="mt-2 rounded-lg border border-[var(--border)] bg-white p-6">
+            <div className="grid grid-cols-2 gap-4 sm:max-w-md sm:grid-cols-3 lg:max-w-lg">
+              <div>
+                <p className="text-xs uppercase tracking-wide text-[var(--muted-foreground)]">
+                  Requirements
+                </p>
+                <p className="mt-1 text-2xl font-semibold">{requirementCount}</p>
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-wide text-[var(--muted-foreground)]">
+                  Decisions
+                </p>
+                <p className="mt-1 text-2xl font-semibold">{decisionCount}</p>
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-wide text-[var(--muted-foreground)]">
+                  Domains
+                </p>
+                <p className="mt-1 text-2xl font-semibold">{domainCount}</p>
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-wide text-[var(--muted-foreground)]">
+                  Entities
+                </p>
+                <p className="mt-1 text-2xl font-semibold">{entityCount}</p>
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-wide text-[var(--muted-foreground)]">
+                  Relationships
+                </p>
+                <p className="mt-1 text-2xl font-semibold">{relationshipCount}</p>
+              </div>
             </div>
-            <div>
-              <p className="text-xs uppercase tracking-wide text-[var(--muted-foreground)]">
-                Decisions
+            <div className="mt-4 border-t border-[var(--border)] pt-4 text-xs text-[var(--muted-foreground)]">
+              <p>
+                Last updated:{" "}
+                <span className="text-[var(--foreground)]">
+                  {formatDate(project.updated_at)}
+                </span>
               </p>
-              <p className="mt-1 text-2xl font-semibold">{decisionCount}</p>
+              <p className="mt-1 italic">
+                AI-assisted context generation is planned for a later part.
+              </p>
             </div>
           </div>
-          <div className="mt-4 border-t border-[var(--border)] pt-4 text-xs text-[var(--muted-foreground)]">
-            <p>
-              Last updated:{" "}
-              <span className="text-[var(--foreground)]">
-                {formatDate(project.updated_at)}
-              </span>
-            </p>
-            <p className="mt-1 italic">
-              AI-assisted context generation is planned for a later part.
-            </p>
-          </div>
-        </div>
       </section>
 
       <section className="grid grid-cols-1 gap-6 lg:grid-cols-2">

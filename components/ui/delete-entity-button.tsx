@@ -7,9 +7,11 @@ import { Button } from "@/components/ui/button";
 export function DeleteEntityButton({
   action,
   entityLabel,
+  size,
 }: {
   action: (formData: FormData) => Promise<{ error?: string } | undefined>;
   entityLabel: string;
+  size?: "sm" | "md";
 }) {
   const [confirming, setConfirming] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -39,7 +41,7 @@ export function DeleteEntityButton({
           <Button
             type="button"
             variant="secondary"
-            size="sm"
+            size={size ?? "sm"}
             onClick={() => setConfirming(false)}
             disabled={pending}
           >
@@ -49,7 +51,7 @@ export function DeleteEntityButton({
         <Button
           type="button"
           variant="danger"
-          size="sm"
+          size={size ?? "sm"}
           onClick={handleDelete}
           disabled={pending}
           aria-label={

@@ -76,6 +76,71 @@ export type Decision = {
   updated_at: string;
 };
 
+export type Domain = {
+  id: string;
+  project_id: string;
+  name: string;
+  description: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type Entity = {
+  id: string;
+  domain_id: string;
+  name: string;
+  description: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export const ENTITY_DATA_TYPES = [
+  "uuid",
+  "string",
+  "text",
+  "integer",
+  "decimal",
+  "boolean",
+  "date",
+  "datetime",
+  "json",
+] as const;
+export type EntityDataType = (typeof ENTITY_DATA_TYPES)[number];
+
+export type EntityAttribute = {
+  id: string;
+  entity_id: string;
+  name: string;
+  data_type: EntityDataType;
+  is_required: boolean;
+  is_primary_key: boolean;
+  default_value: string | null;
+  description: string | null;
+  position: number;
+  created_at: string;
+  updated_at: string;
+};
+
+export const RELATIONSHIP_TYPES = [
+  "one_to_one",
+  "one_to_many",
+  "many_to_one",
+  "many_to_many",
+] as const;
+export type RelationshipType = (typeof RELATIONSHIP_TYPES)[number];
+
+export type EntityRelationship = {
+  id: string;
+  project_id: string;
+  source_entity_id: string;
+  target_entity_id: string;
+  relationship_type: RelationshipType;
+  name: string | null;
+  description: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
 type Tables = {
   profiles: {
     Row: Profile;
@@ -162,6 +227,102 @@ type Tables = {
       decision?: string;
       rationale?: string | null;
       status?: DecisionStatus;
+      created_at?: string;
+      updated_at?: string;
+    };
+    Relationships: [];
+  };
+  domains: {
+    Row: Domain;
+    Insert: {
+      id?: string;
+      project_id: string;
+      name: string;
+      description?: string | null;
+      created_at?: string;
+      updated_at?: string;
+    };
+    Update: {
+      id?: string;
+      project_id?: string;
+      name?: string;
+      description?: string | null;
+      created_at?: string;
+      updated_at?: string;
+    };
+    Relationships: [];
+  };
+  entities: {
+    Row: Entity;
+    Insert: {
+      id?: string;
+      domain_id: string;
+      name: string;
+      description?: string | null;
+      created_at?: string;
+      updated_at?: string;
+    };
+    Update: {
+      id?: string;
+      domain_id?: string;
+      name?: string;
+      description?: string | null;
+      created_at?: string;
+      updated_at?: string;
+    };
+    Relationships: [];
+  };
+  entity_attributes: {
+    Row: EntityAttribute;
+    Insert: {
+      id?: string;
+      entity_id: string;
+      name: string;
+      data_type: EntityDataType;
+      is_required?: boolean;
+      is_primary_key?: boolean;
+      default_value?: string | null;
+      description?: string | null;
+      position?: number;
+      created_at?: string;
+      updated_at?: string;
+    };
+    Update: {
+      id?: string;
+      entity_id?: string;
+      name?: string;
+      data_type?: EntityDataType;
+      is_required?: boolean;
+      is_primary_key?: boolean;
+      default_value?: string | null;
+      description?: string | null;
+      position?: number;
+      created_at?: string;
+      updated_at?: string;
+    };
+    Relationships: [];
+  };
+  entity_relationships: {
+    Row: EntityRelationship;
+    Insert: {
+      id?: string;
+      project_id: string;
+      source_entity_id: string;
+      target_entity_id: string;
+      relationship_type: RelationshipType;
+      name?: string | null;
+      description?: string | null;
+      created_at?: string;
+      updated_at?: string;
+    };
+    Update: {
+      id?: string;
+      project_id?: string;
+      source_entity_id?: string;
+      target_entity_id?: string;
+      relationship_type?: RelationshipType;
+      name?: string | null;
+      description?: string | null;
       created_at?: string;
       updated_at?: string;
     };
