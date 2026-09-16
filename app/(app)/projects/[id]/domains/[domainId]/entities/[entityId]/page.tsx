@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import { ProjectTabs } from "@/components/projects/project-tabs";
 import { ButtonLink } from "@/components/ui/button";
+import { CreateTaskFromArtifactButton } from "@/components/ui/tasks/create-task-from-artifact-button";
 import { formatDate } from "@/lib/utils";
 import { getProject } from "@/lib/projects/queries";
 import { getDomain } from "@/lib/domains/queries";
@@ -64,6 +65,13 @@ export default async function EntityDetailPage({
             </p>
           </div>
           <div className="flex shrink-0 gap-2">
+            <CreateTaskFromArtifactButton
+              kind="entity"
+              refId={entity.id}
+              projectId={project.id}
+            >
+              Create task
+            </CreateTaskFromArtifactButton>
             <ButtonLink
               href={`/projects/${project.id}/domains/${domain.id}/entities/${entity.id}/edit`}
               variant="secondary"

@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { ProjectTabs } from "@/components/projects/project-tabs";
 import { ArchitectureComponentTypeBadge } from "@/components/projects/badges";
 import { ButtonLink } from "@/components/ui/button";
+import { CreateTaskFromArtifactButton } from "@/components/ui/tasks/create-task-from-artifact-button";
 import { formatDate } from "@/lib/utils";
 import { getProject } from "@/lib/projects/queries";
 import { getArchitectureComponent } from "@/lib/architecture/components/queries";
@@ -55,6 +56,13 @@ export default async function ArchitectureComponentDetailPage({
             </p>
           </div>
           <div className="flex shrink-0 gap-2">
+            <CreateTaskFromArtifactButton
+              kind="component"
+              refId={component.id}
+              projectId={project.id}
+            >
+              Create task
+            </CreateTaskFromArtifactButton>
             <ButtonLink
               href={`/projects/${project.id}/architecture/components/${component.id}/edit`}
               variant="secondary"

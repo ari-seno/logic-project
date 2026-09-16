@@ -5,6 +5,7 @@ import { ProjectTabs } from "@/components/projects/project-tabs";
 import { DecisionStatusBadge } from "@/components/projects/badges";
 import { ButtonLink } from "@/components/ui/button";
 import { DeleteEntityButton } from "@/components/ui/delete-entity-button";
+import { CreateTaskFromArtifactButton } from "@/components/ui/tasks/create-task-from-artifact-button";
 import { formatDateTime } from "@/lib/utils";
 import { getProject } from "@/lib/projects/queries";
 import { getDecision } from "@/lib/decisions/queries";
@@ -59,6 +60,13 @@ export default async function DecisionDetailPage({
             </div>
           </div>
           <div className="flex shrink-0 flex-col items-end gap-2">
+            <CreateTaskFromArtifactButton
+              kind="decision"
+              refId={decision.id}
+              projectId={project.id}
+            >
+              Create task
+            </CreateTaskFromArtifactButton>
             <ButtonLink
               href={`/projects/${project.id}/decisions/${decision.id}/edit`}
               size="sm"

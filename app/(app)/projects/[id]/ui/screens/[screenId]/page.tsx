@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import { ProjectTabs } from "@/components/projects/project-tabs";
 import { ButtonLink } from "@/components/ui/button";
+import { CreateTaskFromArtifactButton } from "@/components/ui/tasks/create-task-from-artifact-button";
 import {
   ApiAuthBadge,
   ApiMethodBadge,
@@ -220,13 +221,22 @@ export default async function UiScreenDetailPage({
               Updated {formatDate(screen.updated_at)}
             </p>
           </div>
-          <ButtonLink
-            href={`/projects/${project.id}/ui/screens/${screen.id}/edit`}
-            variant="secondary"
-            size="sm"
-          >
-            Edit screen
-          </ButtonLink>
+          <div className="flex shrink-0 gap-2">
+            <CreateTaskFromArtifactButton
+              kind="screen"
+              refId={screen.id}
+              projectId={project.id}
+            >
+              Create task
+            </CreateTaskFromArtifactButton>
+            <ButtonLink
+              href={`/projects/${project.id}/ui/screens/${screen.id}/edit`}
+              variant="secondary"
+              size="sm"
+            >
+              Edit screen
+            </ButtonLink>
+          </div>
         </div>
       </div>
 

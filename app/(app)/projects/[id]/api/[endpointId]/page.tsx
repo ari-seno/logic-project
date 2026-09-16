@@ -10,6 +10,7 @@ import {
   ApiStatusCodeBadge,
 } from "@/components/projects/badges";
 import { ButtonLink } from "@/components/ui/button";
+import { CreateTaskFromArtifactButton } from "@/components/ui/tasks/create-task-from-artifact-button";
 import { formatDate } from "@/lib/utils";
 import { getProject } from "@/lib/projects/queries";
 import {
@@ -126,6 +127,13 @@ export default async function ApiEndpointDetailPage({
             </p>
           </div>
           <div className="flex shrink-0 gap-2">
+            <CreateTaskFromArtifactButton
+              kind="endpoint"
+              refId={endpoint.id}
+              projectId={project.id}
+            >
+              Create task
+            </CreateTaskFromArtifactButton>
             <ButtonLink
               href={`/projects/${project.id}/api/${endpoint.id}/edit`}
               variant="secondary"
