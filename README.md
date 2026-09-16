@@ -2,7 +2,7 @@
 
 > An AI Project Planner that structures requirements, decisions, architecture, tasks, and agent prompts. You make the calls; the tool keeps things organized.
 
-This repository contains **Part 1: Foundation & Authentication** — a Next.js 16 app backed by Supabase Auth and Postgres, with row-level security enforced on every table.
+This repository contains **Part 1: Foundation & Authentication** and **Part 2: Requirements & Decisions** — a Next.js 16 app backed by Supabase Auth and Postgres, with row-level security enforced on every table.
 
 ## Stack
 
@@ -23,30 +23,45 @@ This repository contains **Part 1: Foundation & Authentication** — a Next.js 1
 ```
 app/                         Next.js App Router
   (auth)/                    /login, /register
-  (app)/                     protected layout + dashboard/projects
+  (app)/                     protected layout + dashboard + projects
+    projects/[id]/           overview (counts + recents + context)
+    projects/[id]/requirements/   list / new / [reqId] / [reqId]/edit
+    projects/[id]/decisions/      list / new / [decId] / [decId]/edit
   api/                       (none yet)
   globals.css                Tailwind v4 theme tokens
   page.tsx                   landing
   proxy.ts -> lib/supabase/middleware.ts
 components/
-  ui/                        Button, Input, Textarea, Label, Alert
+  ui/                        Button, ButtonLink, Input, Textarea, Label,
+                             Alert, FieldError, Select, DeleteEntityButton
   auth/                      login-form, register-form, logout-button
-  projects/                  project-form, delete-project-button
+  projects/                  project-form, delete-project-button,
+                             project-tabs, project-header, badges
+  requirements/              requirement-form
+  decisions/                 decision-form
 lib/
   auth/actions.ts            signIn / signUp / signOut server actions
   projects/queries.ts        listProjects, getProject
   projects/actions.ts        createProject, deleteProject
+  requirements/queries.ts    listRequirements, countRequirements, getRequirement
+  requirements/actions.ts    createRequirement, updateRequirement, deleteRequirement
+  decisions/queries.ts       listDecisions, countDecisions, getDecision
+  decisions/actions.ts       createDecision, updateDecision, deleteDecision
   supabase/                  client, server, middleware, types, path helpers
   validation/                zod schemas + action state types
   utils.ts                   cn, formatDate, formatDateTime
 supabase/
   config.toml                `supabase init` output
   migrations/
-    20250916120000_init_schema.sql   profiles + projects + RLS + triggers
+    20250916120000_init_schema.sql              profiles + projects + RLS + triggers
+    20250916180000_part2_requirements_decisions.sql   requirements + decisions + RLS + triggers
 tests/
-  *.test.ts                  Vitest unit tests
-  e2e/                       Playwright specs (auth, protected, projects, cross-user)
+  *.test.ts                  Vitest unit tests (auth, project, utils,
+                             middleware, requirement, decision validation)
+  e2e/                       Playwright specs (auth, protected, projects,
+                             requirements, decisions, cross-user)
 docs/
+  MANUAL_TESTING.md          manual test walkthrough (Part 1)
   superpowers/plans/         implementation plans
 proxy.ts                     Next.js 16 middleware (named "proxy")
 ```
@@ -129,24 +144,100 @@ Configure these at https://github.com/ari-seno/logic-project/settings/secrets/ac
 See **[docs/MANUAL_TESTING.md](docs/MANUAL_TESTING.md)** for a step-by-step
 walkthrough of the user flows and the security boundaries they verify.
 
-## Security model (Part 1)
+## Security model
 
 - **Authentication**: Supabase Auth (email + password). Sessions are stored as
   HTTP-only cookies via `@supabase/ssr`. The Next.js `proxy` refreshes the
   session on every request to `/dashboard` or `/projects`.
-- **Authorization**: Every Supabase query runs as the current user with the
-  anon key. Row-Level Security policies in `20250916120000_init_schema.sql`
-  scope reads and writes to rows whose `owner_id` equals `auth.uid()`.
-- **Server-side re-checks**: Even with RLS in place, server components and
-  server actions call `supabase.auth.getUser()` again before mutating data.
+- **Authorization**:
+  - `profiles`, `projects` rows are scoped to `owner_id = auth.uid()` (Part 1).
+  - `requirements`, `decisions` rows are scoped through their parent project:
+    `EXISTS (SELECT 1 FROM projects p WHERE p.id = <table>.project_id AND p.owner_id = auth.uid())`.
+    This enforces "user owns parent project" without weakening Part 1 RLS.
+  - RLS policies are checked at the database, not in application code.
+- **Server-side re-checks**: Every server action re-fetches the parent
+  project via `getProject` (which is itself RLS-gated) before mutating
+  children, so URL tampering can never bypass authorization.
 - **No service-role key in client code**: The service-role key (if added later)
   must remain server-only.
 
+## Part 2 — Requirements & Decisions
+
+Adds two structured-knowledge subsystems to every project:
+
+### Requirements
+Structured capture of what a project must accomplish.
+
+| Field | Type | Notes |
+| --- | --- | --- |
+| `type` | enum | `functional`, `non_functional` |
+| `status` | enum | `draft`, `approved`, `rejected`, `implemented` |
+| `priority` | enum | `low`, `medium`, `high`, `critical` |
+| `title` | string | required, 1–200 chars |
+| `description` | string | optional, ≤ 5000 chars |
+
+### Decisions
+An append-only decision log; `superseded` decisions remain in the database so the reasoning stays auditable.
+
+| Field | Type | Notes |
+| --- | --- | --- |
+| `status` | enum | `proposed`, `accepted`, `superseded` |
+| `title` | string | required, 1–200 chars |
+| `context` | string | optional, ≤ 5000 chars |
+| `decision` | string | required, ≤ 2000 chars |
+| `rationale` | string | optional, ≤ 5000 chars |
+
+### Available routes
+| URL | Purpose |
+| --- | --- |
+| `/projects/[id]` | Overview — counts, recent requirements/decisions, project context block |
+| `/projects/[id]/requirements` | List + empty state |
+| `/projects/[id]/requirements/new` | Create form |
+| `/projects/[id]/requirements/[reqId]` | Detail + edit/delete |
+| `/projects/[id]/requirements/[reqId]/edit` | Edit form |
+| `/projects/[id]/decisions` | List + empty state |
+| `/projects/[id]/decisions/new` | Create form |
+| `/projects/[id]/decisions/[decId]` | Detail + edit/delete |
+| `/projects/[id]/decisions/[decId]/edit` | Edit form |
+
+The top of every project page renders `<ProjectTabs>` (Overview /
+Requirements / Decisions) with `aria-current="page"` on the active tab.
+
+### Database tables
+- `requirements` — FK to `projects(id) ON DELETE CASCADE`, indexes on
+  `project_id`, `status`, `priority`, `updated_at`, `set_updated_at` trigger.
+- `decisions` — FK to `projects(id) ON DELETE CASCADE`, indexes on
+  `project_id`, `status`, `updated_at`, `set_updated_at` trigger.
+- Both have CHECK constraints on their enum columns so the database rejects
+  invalid values even if application validation is bypassed.
+
+### Authorization model
+- A requirement or decision is visible to **a user only if that user owns the
+  parent project**. The RLS `EXISTS` check in every policy enforces this.
+- Server actions re-check ownership before any mutation.
+- Deleting a project cascades to its requirements and decisions (intentional:
+  child rows belong to a single project; orphaned records were not useful).
+
+### Project context (preview)
+The overview page surfaces a `Project Context` block with requirement count,
+decision count, and "Last updated" timestamp. This is a UI placeholder for the
+future AI-assisted context generation — there is no AI call in Part 2.
+
+### Current limitations
+- No version history beyond the `superseded` decision state.
+- No bulk import/export.
+- No markdown rendering for descriptions (plain text only).
+- No AI context generation yet.
+
 ## Roadmap
 
-| Part | Scope |
-| --- | --- |
-| 1 | Foundation, auth, projects CRUD (this release) |
-| 2 | Project requirements + AI suggestions |
-| 3 | Decision log + architecture canvas |
-| 4 | Tasks + agent prompt library |
+| Part | Scope | Status |
+| --- | --- | --- |
+| 1 | Foundation, auth, projects CRUD | ✓ shipped |
+| 2 | Requirements & Decisions | ✓ shipped |
+| 3 | Domain / ERD | planned |
+| 4 | Architecture / API / UI | planned |
+| 5 | Tasks & Dependencies | planned |
+| 6 | Agent Prompt Generation | planned |
+| 7 | AI Assistance | planned |
+| 8 | Coding Agent Integration | planned |
