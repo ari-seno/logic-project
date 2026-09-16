@@ -18,6 +18,7 @@ export function AttributeSection({
   attributes: EntityAttribute[];
 }) {
   const [showForm, setShowForm] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   return (
     <div className="flex flex-col gap-4">
@@ -45,18 +46,44 @@ export function AttributeSection({
               </tr>
             </thead>
             <tbody>
-              {attributes.map((attr, idx) => (
-                <AttributeRow
-                  key={attr.id}
-                  attr={attr}
-                  canMoveUp={idx > 0}
-                  canMoveDown={idx < attributes.length - 1}
-                />
-              ))}
+              {attributes.map((attr, idx) => {
+                const isEditing = editingId === attr.id;
+                return (
+                  <AttributeRow
+                    key={attr.id}
+                    attr={attr}
+                    canMoveUp={idx > 0}
+                    canMoveDown={idx < attributes.length - 1}
+                    onStartEdit={() => setEditingId(attr.id)}
+                    isEditing={isEditing}
+                  />
+                );
+              })}
             </tbody>
           </table>
         </div>
       )}
+
+      {editingId ? (
+        <div className="flex flex-col gap-3 rounded-lg border border-[var(--border)] bg-white p-5">
+          <h3 className="text-sm font-semibold">
+            Edit attribute:{" "}
+            {attributes.find((a) => a.id === editingId)?.name}
+          </h3>
+          <AttributeForm
+            entityId={entityId}
+            attribute={attributes.find((a) => a.id === editingId)}
+          />
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            onClick={() => setEditingId(null)}
+          >
+            Cancel
+          </Button>
+        </div>
+      ) : null}
 
       {showForm ? (
         <div className="flex flex-col gap-3 rounded-lg border border-[var(--border)] bg-white p-5">
@@ -72,16 +99,18 @@ export function AttributeSection({
           </Button>
         </div>
       ) : (
-        <div>
-          <Button
-            type="button"
-            variant="secondary"
-            size="sm"
-            onClick={() => setShowForm(true)}
-          >
-            Add attribute
-          </Button>
-        </div>
+        !editingId && (
+          <div>
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              onClick={() => setShowForm(true)}
+            >
+              Add attribute
+            </Button>
+          </div>
+        )
       )}
     </div>
   );

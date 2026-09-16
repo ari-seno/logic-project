@@ -1,6 +1,7 @@
 "use client";
 
 import { DataTypeBadge } from "@/components/projects/badges";
+import { Button } from "@/components/ui/button";
 import { DeleteEntityButton } from "@/components/ui/delete-entity-button";
 import { PositionStepper } from "@/components/ui/position-stepper";
 import { formatDate } from "@/lib/utils";
@@ -11,13 +12,27 @@ import {
   handleAttributeMove,
 } from "./attribute-actions";
 
-export function AttributeRow({ attr, canMoveUp, canMoveDown }: {
+export function AttributeRow({
+  attr,
+  canMoveUp,
+  canMoveDown,
+  onStartEdit,
+  isEditing,
+}: {
   attr: EntityAttribute;
   canMoveUp: boolean;
   canMoveDown: boolean;
+  onStartEdit: () => void;
+  isEditing: boolean;
 }) {
   return (
-    <tr className="border-b border-[var(--border)] last:border-b-0">
+    <tr
+      className={
+        isEditing
+          ? "bg-[var(--brand-soft)]/30"
+          : "border-b border-[var(--border)] last:border-b-0"
+      }
+    >
       <td className="px-3 py-2 font-medium">{attr.name}</td>
       <td className="px-3 py-2">
         <DataTypeBadge dataType={attr.data_type} />
@@ -41,6 +56,17 @@ export function AttributeRow({ attr, canMoveUp, canMoveDown }: {
             parentField="entityId"
             label={attr.name}
           />
+          {!isEditing ? (
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              onClick={onStartEdit}
+              aria-label={`Edit ${attr.name}`}
+            >
+              Edit
+            </Button>
+          ) : null}
           <DeleteEntityButton
             action={handleAttributeDelete}
             entityLabel={attr.name}
