@@ -2,7 +2,7 @@
 
 > An AI Project Planner that structures requirements, decisions, architecture, tasks, and agent prompts. You make the calls; the tool keeps things organized.
 
-This repository contains **Part 1: Foundation & Authentication**, **Part 2: Requirements & Decisions**, **Part 3: Domain & ERD**, **Part 4: Architecture Foundation**, **Part 5: API Design Foundation**, and **Part 6: UI Design Foundation** — a Next.js 16 app backed by Supabase Auth and Postgres, with row-level security enforced on every table.
+This repository contains **Part 1: Foundation & Authentication**, **Part 2: Requirements & Decisions**, **Part 3: Domain & ERD**, **Part 4: Architecture Foundation**, **Part 5: API Design Foundation**, **Part 6: UI Design Foundation**, and **Part 7: Tasks & Dependencies** — a Next.js 16 app backed by Supabase Auth and Postgres, with row-level security enforced on every table.
 
 ## Stack
 
@@ -33,6 +33,7 @@ app/                         Next.js App Router
     projects/[id]/architecture/      overview + components/technologies/decisions/dependencies CRUD
     projects/[id]/api/           overview + groups + endpoints CRUD + sub-resources + traceability
     projects/[id]/ui/            overview + screens + components + navigation CRUD + screen detail (components/forms/states/interactions/traceability)
+    projects/[id]/tasks/        flat list (filter/sort) + board + detail (deps + traceability + context summary) + create/edit
   globals.css                Tailwind v4 theme tokens
   page.tsx                   landing
   proxy.ts -> lib/supabase/middleware.ts
@@ -88,6 +89,7 @@ supabase/
     20250916200000_part4_architecture.sql       components + technologies + arch decisions + dependencies + RLS + triggers
     20250916210000_part5_api_design.sql         api_groups + api_endpoints + parameters + request_bodies + responses + errors + traceability
     20250916220000_part6_ui_design.sql         ui_screens + ui_components + ui_screen_components + ui_forms + ui_form_fields + ui_states + ui_interactions + ui_navigation_items + traceability tables
+    20250916230000_part7_tasks.sql            tasks + task_dependencies + task traceability tables
 tests/
   *.test.ts                  Vitest unit tests (auth, project, utils,
                              middleware, requirement, decision, domain,
@@ -194,8 +196,11 @@ walkthrough of the user flows and the security boundaries they verify.
     `api_errors`, `api_endpoint_entities`, `api_endpoint_requirements`, `ui_screens`,
     `ui_components`, `ui_screen_components`, `ui_forms`, `ui_form_fields`,
     `ui_states`, `ui_interactions`, `ui_interaction_endpoints`,
-    `ui_screen_requirements`, `ui_screen_entities`, `ui_navigation_items`, and
-    `ui_navigation_screens` rows are scoped through their parent project:
+    `ui_screen_requirements`, `ui_screen_entities`, `ui_navigation_items`,
+    `ui_navigation_screens`, `tasks`, `task_dependencies`, `task_requirements`,
+    `task_decisions`, `task_domains`, `task_architecture_components`,
+    `task_api_endpoints`, and `task_ui_screens` rows are scoped through their
+    parent project:
     `EXISTS (SELECT 1 FROM projects p WHERE p.id = <table>.project_id AND p.owner_id = auth.uid())`.
     This enforces "user owns parent project" without weakening Part 1 RLS.
   - RLS policies are checked at the database, not in application code.
@@ -579,6 +584,112 @@ Each screen detail page surfaces its requirements, entities, and (per interactio
 - Specifications are text-based; markdown rendering of fields/descriptions is plain text only.
 - Navigation items do not yet track ordering relative to siblings beyond the `position` field.
 
+## Part 7 — Tasks & Dependencies
+
+Part 7 turns structured project planning into executable implementation units. The user remains the decision maker; tasks are created manually and traceability links are deterministic (no AI).
+
+### Concepts
+
+| Concept | Belongs to | Has |
+| --- | --- | --- |
+| Task | Project (optional parent) | title, description, type, status, priority, effort, acceptance criteria, implementation notes |
+| Task dependency | Project | depends-on task, dependency type (`blocks` / `related`), description |
+| Task ↔ Requirement | (link) | the requirement this task fulfils |
+| Task ↔ Decision | (link) | the decision that informs the task |
+| Task ↔ Domain entity | (link) | the entity involved in the task |
+| Task ↔ Architecture component | (link) | the component this task changes |
+| Task ↔ API endpoint | (link) | the endpoint this task implements |
+| Task ↔ UI screen | (link) | the screen this task implements |
+
+### Enum values
+
+| Type | Values |
+| --- | --- |
+| Task type | `feature`, `bug`, `refactor`, `database`, `backend`, `frontend`, `infrastructure`, `testing`, `documentation`, `security`, `other` |
+| Status | `todo`, `ready`, `in_progress`, `blocked`, `review`, `done`, `cancelled` |
+| Priority | `low`, `medium`, `high`, `critical` |
+| Estimated effort | `xs`, `s`, `m`, `l`, `xl` |
+| Dependency type | `blocks`, `related` |
+
+### Database tables
+
+| Table | Notes | RLS |
+| --- | --- | --- |
+| `tasks` | CHECK on type/status/priority/effort; CHECK `parent_task_id <> id` | enabled |
+| `task_dependencies` | UNIQUE `(task_id, depends_on_task_id)`; CHECK `task_id <> depends_on_task_id` | enabled |
+| `task_requirements` | UNIQUE `(task_id, requirement_id)` | enabled |
+| `task_decisions` | UNIQUE `(task_id, decision_id)` | enabled |
+| `task_domains` | UNIQUE `(task_id, entity_id)` | enabled |
+| `task_architecture_components` | UNIQUE `(task_id, component_id)` | enabled |
+| `task_api_endpoints` | UNIQUE `(task_id, endpoint_id)` | enabled |
+| `task_ui_screens` | UNIQUE `(task_id, screen_id)` | enabled |
+
+All FKs cascade.
+
+### Circular dependency prevention
+
+Before inserting a `blocks` dependency `taskId → dependsOnId`, the application walks the predecessors of `dependsOnId` and rejects the insert if it would close a cycle (predecessor reaches `taskId`). The check runs server-side in `wouldCreateDependencyCycle` in `lib/tasks/dependencies/queries.ts`; the database does not store cycles even if the application regressed.
+
+### Stored status vs. derived blocking state
+
+The `tasks.status` column is user-controlled. A task is *derived blocked* when at least one `blocks` dependency points to a task whose stored status is not `done` or `cancelled`. The detail page displays a `Blocked` badge and a sentence listing the blocking tasks — the stored status is never overwritten.
+
+### Available routes
+
+| Route | Purpose |
+| --- | --- |
+| `/projects/[id]/tasks` | Flat list with status / type / sort filters |
+| `/projects/[id]/tasks/board` | Kanban-style grouping by status |
+| `/projects/[id]/tasks/new` | Create task |
+| `/projects/[id]/tasks/[taskId]` | Detail with hierarchy, dependencies, traceability, context summary, dependency chain |
+| `/projects/[id]/tasks/[taskId]/edit` | Edit task |
+
+### Task context summary
+
+The detail page renders a read-only summary as preformatted text:
+
+```
+TASK
+Implement POST /api/projects
+
+Acceptance criteria
+- happy path
+- validation errors
+
+Dependencies
+- Schema migration
+
+Requirements
+- User can create a project
+
+Decisions
+(...)
+
+Domain
+(...)
+
+Architecture
+(...)
+
+API
+- POST /api/projects (Create project)
+
+UI
+- Create Project
+```
+
+This summary is the foundation for Part 8 (Agent Prompt generation).
+
+### Deterministic task creation
+
+Coming soon: `Create task from this requirement / endpoint / screen / entity / component` buttons prefill a new task from the chosen artifact and attach the artifact automatically. Templates are deterministic, no AI involved.
+
+### Limitations
+
+- Reordering tasks requires manual position edits (delete + re-add).
+- No markdown rendering of acceptance criteria or implementation notes.
+- The board is read-only — status is changed on the detail page.
+
 ## Roadmap
 
 | Part | Scope | Status |
@@ -589,7 +700,7 @@ Each screen detail page surfaces its requirements, entities, and (per interactio
 | 4 | Architecture Foundation | ✓ shipped |
 | 5 | API Design Foundation | ✓ shipped |
 | 6 | UI Design Foundation | ✓ shipped |
-| 7 | Tasks & Dependencies | planned |
+| 7 | Tasks & Dependencies | ✓ shipped |
 | 8 | Agent Prompt Generation | planned |
 | 9 | AI Assistance | planned |
 | 10 | Coding Agent Integration | planned |

@@ -31,6 +31,7 @@ import { countApiGroupsByProject } from "@/lib/api/groups/queries";
 import { countApiEndpointsByProject } from "@/lib/api/endpoints/queries";
 import { countUiScreensByProject } from "@/lib/ui/screens/queries";
 import { countUiComponentsByProject } from "@/lib/ui/components/queries";
+import { countTasksByStatus } from "@/lib/tasks/queries";
 
 export default async function ProjectOverviewPage({
   params,
@@ -58,6 +59,7 @@ export default async function ProjectOverviewPage({
     apiEndpointCount,
     uiScreenCount,
     uiComponentCount,
+    taskCounts,
     recentRequirements,
     recentDecisions,
   ] = await Promise.all([
@@ -74,6 +76,7 @@ export default async function ProjectOverviewPage({
     countApiEndpointsByProject(project.id),
     countUiScreensByProject(project.id),
     countUiComponentsByProject(project.id),
+    countTasksByStatus(project.id),
     listRequirements({ projectId: project.id, limit: 5 }),
     listDecisions({ projectId: project.id, limit: 5 }),
   ]);
@@ -141,6 +144,9 @@ export default async function ProjectOverviewPage({
             <Stat label="API endpoints" value={apiEndpointCount} />
             <Stat label="UI screens" value={uiScreenCount} />
             <Stat label="UI components" value={uiComponentCount} />
+            <Stat label="Tasks" value={taskCounts.total} />
+            <Stat label="In progress" value={taskCounts.in_progress} />
+            <Stat label="Done" value={taskCounts.done} />
           </div>
           <div className="mt-5 border-t border-[var(--border)] pt-4 text-xs text-[var(--muted-foreground)]">
             <p>

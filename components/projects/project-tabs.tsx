@@ -9,7 +9,8 @@ type TabKey =
   | "domain"
   | "architecture"
   | "api"
-  | "ui";
+  | "ui"
+  | "tasks";
 
 export function ProjectTabs({
   projectId,
@@ -49,6 +50,11 @@ export function ProjectTabs({
       key: "ui",
       label: "UI",
       href: `/projects/${projectId}/ui`,
+    },
+    {
+      key: "tasks",
+      label: "Tasks",
+      href: `/projects/${projectId}/tasks`,
     },
   ];
 

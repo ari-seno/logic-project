@@ -11,6 +11,11 @@ import type {
   RequirementStatus,
   RequirementType,
   RelationshipType,
+  TaskDependencyType,
+  TaskEffort,
+  TaskPriority,
+  TaskStatus,
+  TaskType,
   UiComponentType,
   UiFieldType,
   UiScreenEntityRole,
@@ -499,6 +504,120 @@ export function UiScreenEntityRoleBadge({
   return (
     <Pill className={UI_ENTITY_ROLE_LABELS[role].cls}>
       {UI_ENTITY_ROLE_LABELS[role].label}
+    </Pill>
+  );
+}
+
+const TASK_STATUS_LABELS: Record<TaskStatus, { label: string; cls: string }> = {
+  todo: { label: "Todo", cls: "bg-zinc-50 text-zinc-700 ring-zinc-200" },
+  ready: { label: "Ready", cls: "bg-blue-50 text-blue-700 ring-blue-200" },
+  in_progress: {
+    label: "In progress",
+    cls: "bg-amber-50 text-amber-700 ring-amber-200",
+  },
+  blocked: { label: "Blocked", cls: "bg-red-50 text-red-700 ring-red-200" },
+  review: { label: "Review", cls: "bg-violet-50 text-violet-700 ring-violet-200" },
+  done: { label: "Done", cls: "bg-emerald-50 text-emerald-700 ring-emerald-200" },
+  cancelled: { label: "Cancelled", cls: "bg-zinc-50 text-zinc-500 ring-zinc-200" },
+};
+
+export function TaskStatusBadge({ status }: { status: TaskStatus }) {
+  return (
+    <Pill className={TASK_STATUS_LABELS[status].cls}>
+      {TASK_STATUS_LABELS[status].label}
+    </Pill>
+  );
+}
+
+const TASK_PRIORITY_LABELS: Record<TaskPriority, { label: string; cls: string }> = {
+  low: { label: "Low", cls: "bg-zinc-50 text-zinc-700 ring-zinc-200" },
+  medium: { label: "Medium", cls: "bg-blue-50 text-blue-700 ring-blue-200" },
+  high: { label: "High", cls: "bg-amber-50 text-amber-700 ring-amber-200" },
+  critical: { label: "Critical", cls: "bg-red-50 text-red-700 ring-red-200" },
+};
+
+export function TaskPriorityBadge({ priority }: { priority: TaskPriority }) {
+  return (
+    <Pill className={TASK_PRIORITY_LABELS[priority].cls}>
+      {TASK_PRIORITY_LABELS[priority].label}
+    </Pill>
+  );
+}
+
+const TASK_TYPE_LABELS: Record<TaskType, { label: string; cls: string }> = {
+  feature: { label: "Feature", cls: "bg-blue-50 text-blue-700 ring-blue-200" },
+  bug: { label: "Bug", cls: "bg-red-50 text-red-700 ring-red-200" },
+  refactor: { label: "Refactor", cls: "bg-amber-50 text-amber-700 ring-amber-200" },
+  database: { label: "Database", cls: "bg-emerald-50 text-emerald-700 ring-emerald-200" },
+  backend: { label: "Backend", cls: "bg-sky-50 text-sky-700 ring-sky-200" },
+  frontend: { label: "Frontend", cls: "bg-violet-50 text-violet-700 ring-violet-200" },
+  infrastructure: {
+    label: "Infrastructure",
+    cls: "bg-indigo-50 text-indigo-700 ring-indigo-200",
+  },
+  testing: {
+    label: "Testing",
+    cls: "bg-teal-50 text-teal-700 ring-teal-200",
+  },
+  documentation: {
+    label: "Documentation",
+    cls: "bg-zinc-50 text-zinc-700 ring-zinc-200",
+  },
+  security: {
+    label: "Security",
+    cls: "bg-rose-50 text-rose-700 ring-rose-200",
+  },
+  other: { label: "Other", cls: "bg-zinc-50 text-zinc-500 ring-zinc-200" },
+};
+
+export function TaskTypeBadge({ type }: { type: TaskType }) {
+  return (
+    <Pill className={TASK_TYPE_LABELS[type].cls}>
+      {TASK_TYPE_LABELS[type].label}
+    </Pill>
+  );
+}
+
+const TASK_EFFORT_LABELS: Record<TaskEffort, { label: string; cls: string }> = {
+  xs: { label: "XS", cls: "bg-zinc-50 text-zinc-500 ring-zinc-200" },
+  s: { label: "S", cls: "bg-zinc-50 text-zinc-600 ring-zinc-200" },
+  m: { label: "M", cls: "bg-amber-50 text-amber-600 ring-amber-200" },
+  l: { label: "L", cls: "bg-amber-50 text-amber-700 ring-amber-200" },
+  xl: { label: "XL", cls: "bg-red-50 text-red-700 ring-red-200" },
+};
+
+export function TaskEffortBadge({ effort }: { effort: TaskEffort }) {
+  return (
+    <Pill className={TASK_EFFORT_LABELS[effort].cls}>
+      {TASK_EFFORT_LABELS[effort].label}
+    </Pill>
+  );
+}
+
+const TASK_DEP_LABELS: Record<TaskDependencyType, { label: string; cls: string }> = {
+  blocks: { label: "Blocks", cls: "bg-red-50 text-red-700 ring-red-200" },
+  related: {
+    label: "Related",
+    cls: "bg-violet-50 text-violet-700 ring-violet-200",
+  },
+};
+
+export function TaskDependencyTypeBadge({
+  type,
+}: {
+  type: TaskDependencyType;
+}) {
+  return (
+    <Pill className={TASK_DEP_LABELS[type].cls}>
+      {TASK_DEP_LABELS[type].label}
+    </Pill>
+  );
+}
+
+export function TaskBlockedBadge() {
+  return (
+    <Pill className="bg-red-50 text-red-700 ring-red-200">
+      Blocked
     </Pill>
   );
 }

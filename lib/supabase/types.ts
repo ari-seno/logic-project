@@ -564,6 +564,105 @@ export type UiNavigationScreen = {
   created_at: string;
 };
 
+export const TASK_TYPES = [
+  "feature",
+  "bug",
+  "refactor",
+  "database",
+  "backend",
+  "frontend",
+  "infrastructure",
+  "testing",
+  "documentation",
+  "security",
+  "other",
+] as const;
+export type TaskType = (typeof TASK_TYPES)[number];
+
+export const TASK_STATUSES = [
+  "todo",
+  "ready",
+  "in_progress",
+  "blocked",
+  "review",
+  "done",
+  "cancelled",
+] as const;
+export type TaskStatus = (typeof TASK_STATUSES)[number];
+
+export const TASK_PRIORITIES = ["low", "medium", "high", "critical"] as const;
+export type TaskPriority = (typeof TASK_PRIORITIES)[number];
+
+export const TASK_EFFORTS = ["xs", "s", "m", "l", "xl"] as const;
+export type TaskEffort = (typeof TASK_EFFORTS)[number];
+
+export const TASK_DEPENDENCY_TYPES = ["blocks", "related"] as const;
+export type TaskDependencyType = (typeof TASK_DEPENDENCY_TYPES)[number];
+
+export type Task = {
+  id: string;
+  project_id: string;
+  parent_task_id: string | null;
+  title: string;
+  description: string | null;
+  task_type: TaskType;
+  status: TaskStatus;
+  priority: TaskPriority;
+  estimated_effort: TaskEffort | null;
+  acceptance_criteria: string | null;
+  implementation_notes: string | null;
+  position: number;
+  created_at: string;
+  updated_at: string;
+};
+
+export type TaskDependency = {
+  id: string;
+  project_id: string;
+  task_id: string;
+  depends_on_task_id: string;
+  dependency_type: TaskDependencyType;
+  description: string | null;
+  created_at: string;
+};
+
+export type TaskRequirementLink = {
+  id: string;
+  task_id: string;
+  requirement_id: string;
+  created_at: string;
+};
+export type TaskDecisionLink = {
+  id: string;
+  task_id: string;
+  decision_id: string;
+  created_at: string;
+};
+export type TaskDomainLink = {
+  id: string;
+  task_id: string;
+  entity_id: string;
+  created_at: string;
+};
+export type TaskArchitectureComponentLink = {
+  id: string;
+  task_id: string;
+  component_id: string;
+  created_at: string;
+};
+export type TaskApiEndpointLink = {
+  id: string;
+  task_id: string;
+  endpoint_id: string;
+  created_at: string;
+};
+export type TaskUiScreenLink = {
+  id: string;
+  task_id: string;
+  screen_id: string;
+  created_at: string;
+};
+
 type Tables = {
   profiles: {
     Row: Profile;
@@ -1320,6 +1419,160 @@ type Tables = {
     Update: {
       id?: string;
       navigation_item_id?: string;
+      screen_id?: string;
+      created_at?: string;
+    };
+    Relationships: [];
+  };
+  tasks: {
+    Row: Task;
+    Insert: {
+      id?: string;
+      project_id: string;
+      parent_task_id?: string | null;
+      title: string;
+      description?: string | null;
+      task_type: TaskType;
+      status?: TaskStatus;
+      priority?: TaskPriority;
+      estimated_effort?: TaskEffort | null;
+      acceptance_criteria?: string | null;
+      implementation_notes?: string | null;
+      position?: number;
+      created_at?: string;
+      updated_at?: string;
+    };
+    Update: {
+      id?: string;
+      project_id?: string;
+      parent_task_id?: string | null;
+      title?: string;
+      description?: string | null;
+      task_type?: TaskType;
+      status?: TaskStatus;
+      priority?: TaskPriority;
+      estimated_effort?: TaskEffort | null;
+      acceptance_criteria?: string | null;
+      implementation_notes?: string | null;
+      position?: number;
+      created_at?: string;
+      updated_at?: string;
+    };
+    Relationships: [];
+  };
+  task_dependencies: {
+    Row: TaskDependency;
+    Insert: {
+      id?: string;
+      project_id: string;
+      task_id: string;
+      depends_on_task_id: string;
+      dependency_type?: TaskDependencyType;
+      description?: string | null;
+      created_at?: string;
+    };
+    Update: {
+      id?: string;
+      project_id?: string;
+      task_id?: string;
+      depends_on_task_id?: string;
+      dependency_type?: TaskDependencyType;
+      description?: string | null;
+      created_at?: string;
+    };
+    Relationships: [];
+  };
+  task_requirements: {
+    Row: TaskRequirementLink;
+    Insert: {
+      id?: string;
+      task_id: string;
+      requirement_id: string;
+      created_at?: string;
+    };
+    Update: {
+      id?: string;
+      task_id?: string;
+      requirement_id?: string;
+      created_at?: string;
+    };
+    Relationships: [];
+  };
+  task_decisions: {
+    Row: TaskDecisionLink;
+    Insert: {
+      id?: string;
+      task_id: string;
+      decision_id: string;
+      created_at?: string;
+    };
+    Update: {
+      id?: string;
+      task_id?: string;
+      decision_id?: string;
+      created_at?: string;
+    };
+    Relationships: [];
+  };
+  task_domains: {
+    Row: TaskDomainLink;
+    Insert: {
+      id?: string;
+      task_id: string;
+      entity_id: string;
+      created_at?: string;
+    };
+    Update: {
+      id?: string;
+      task_id?: string;
+      entity_id?: string;
+      created_at?: string;
+    };
+    Relationships: [];
+  };
+  task_architecture_components: {
+    Row: TaskArchitectureComponentLink;
+    Insert: {
+      id?: string;
+      task_id: string;
+      component_id: string;
+      created_at?: string;
+    };
+    Update: {
+      id?: string;
+      task_id?: string;
+      component_id?: string;
+      created_at?: string;
+    };
+    Relationships: [];
+  };
+  task_api_endpoints: {
+    Row: TaskApiEndpointLink;
+    Insert: {
+      id?: string;
+      task_id: string;
+      endpoint_id: string;
+      created_at?: string;
+    };
+    Update: {
+      id?: string;
+      task_id?: string;
+      endpoint_id?: string;
+      created_at?: string;
+    };
+    Relationships: [];
+  };
+  task_ui_screens: {
+    Row: TaskUiScreenLink;
+    Insert: {
+      id?: string;
+      task_id: string;
+      screen_id: string;
+      created_at?: string;
+    };
+    Update: {
+      id?: string;
+      task_id?: string;
       screen_id?: string;
       created_at?: string;
     };
