@@ -18,11 +18,13 @@ export function DeleteEntityButton({
   entityLabel,
   itemKind = "entity",
   size,
+  extraFields,
 }: {
   action: (formData: FormData) => Promise<{ error?: string } | undefined>;
   entityLabel: string;
   itemKind?: ItemKind;
   size?: "sm" | "md";
+  extraFields?: Record<string, string>;
 }) {
   const [open, setOpen] = useState(false);
   const [pending, startTransition] = useTransition();
@@ -31,6 +33,11 @@ export function DeleteEntityButton({
   function handleConfirm() {
     setError(null);
     const formData = new FormData();
+    if (extraFields) {
+      for (const [key, value] of Object.entries(extraFields)) {
+        formData.set(key, value);
+      }
+    }
     startTransition(async () => {
       const result = await action(formData);
       if (result && "error" in result && result.error) {

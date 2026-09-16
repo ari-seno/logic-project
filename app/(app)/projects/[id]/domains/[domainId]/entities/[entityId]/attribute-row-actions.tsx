@@ -7,10 +7,7 @@ import { PositionStepper } from "@/components/ui/position-stepper";
 import { formatDate } from "@/lib/utils";
 import type { EntityAttribute } from "@/lib/supabase/types";
 
-import {
-  handleAttributeDelete,
-  handleAttributeMove,
-} from "./attribute-actions";
+import { handleAttributeDelete, handleAttributeMove } from "./attribute-actions";
 
 export function AttributeRow({
   attr,
@@ -72,6 +69,7 @@ export function AttributeRow({
             entityLabel={attr.name}
             itemKind="attribute"
             size="sm"
+            extraFields={{ id: attr.id, entityId: attr.entity_id }}
           />
         </div>
       </td>
