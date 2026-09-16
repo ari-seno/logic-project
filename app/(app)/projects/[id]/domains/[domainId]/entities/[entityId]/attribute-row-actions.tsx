@@ -43,7 +43,8 @@ export function AttributeRow({ attr, canMoveUp, canMoveDown }: {
           />
           <DeleteEntityButton
             action={handleAttributeDelete}
-            entityLabel="attribute"
+            entityLabel={attr.name}
+            itemKind="attribute"
             size="sm"
           />
         </div>

@@ -5,10 +5,12 @@ export function EntityDetailActions({
   projectId: _projectId,
   domainId,
   entityId,
+  entityName,
 }: {
   projectId: string;
   domainId: string;
   entityId: string;
+  entityName: string;
 }) {
   void _projectId;
   async function handleDelete() {
@@ -20,6 +22,11 @@ export function EntityDetailActions({
   }
 
   return (
-    <DeleteEntityButton action={handleDelete} entityLabel="entity" size="sm" />
+    <DeleteEntityButton
+      action={handleDelete}
+      entityLabel={entityName}
+      itemKind="entity"
+      size="sm"
+    />
   );
 }

@@ -83,6 +83,7 @@ export default async function EntityDetailPage({
               projectId={project.id}
               domainId={domain.id}
               entityId={entity.id}
+              entityName={entity.name}
             />
           </div>
         </div>

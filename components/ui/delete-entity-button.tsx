@@ -5,13 +5,23 @@ import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
+type ItemKind = "entity" | "attribute";
+
+const KIND_DESCRIPTION: Record<ItemKind, string> = {
+  entity:
+    "This removes the entity and its attributes. Relationships that reference it will also be removed.",
+  attribute: "This permanently removes this attribute from the entity.",
+};
+
 export function DeleteEntityButton({
   action,
   entityLabel,
+  itemKind = "entity",
   size,
 }: {
   action: (formData: FormData) => Promise<{ error?: string } | undefined>;
   entityLabel: string;
+  itemKind?: ItemKind;
   size?: "sm" | "md";
 }) {
   const [open, setOpen] = useState(false);
@@ -46,8 +56,8 @@ export function DeleteEntityButton({
         open={open}
         onOpenChange={setOpen}
         title={`Delete ${entityLabel}?`}
-        description="This removes the entity and its attributes. Relationships that reference it will also be removed."
-        confirmLabel="Delete entity"
+        description={KIND_DESCRIPTION[itemKind]}
+        confirmLabel={`Delete ${entityLabel}`}
         typeToConfirm={entityLabel}
         pending={pending}
         onConfirm={handleConfirm}
