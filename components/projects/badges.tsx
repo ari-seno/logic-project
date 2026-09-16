@@ -11,6 +11,11 @@ import type {
   RequirementStatus,
   RequirementType,
   RelationshipType,
+  UiComponentType,
+  UiFieldType,
+  UiScreenEntityRole,
+  UiScreenType,
+  UiStateType,
 } from "@/lib/supabase/types";
 
 function Pill({
@@ -348,5 +353,152 @@ export function ApiRequiredBadge({
     <Pill className="bg-blue-50 text-blue-700 ring-blue-200">Required</Pill>
   ) : (
     <Pill className="bg-zinc-50 text-zinc-500 ring-zinc-200">Optional</Pill>
+  );
+}
+
+const UI_SCREEN_TYPE_LABELS: Record<UiScreenType, { label: string; cls: string }> = {
+  page: { label: "Page", cls: "bg-blue-50 text-blue-700 ring-blue-200" },
+  modal: { label: "Modal", cls: "bg-violet-50 text-violet-700 ring-violet-200" },
+  drawer: { label: "Drawer", cls: "bg-violet-50 text-violet-700 ring-violet-200" },
+  dialog: { label: "Dialog", cls: "bg-violet-50 text-violet-700 ring-violet-200" },
+  wizard: { label: "Wizard", cls: "bg-indigo-50 text-indigo-700 ring-indigo-200" },
+  dashboard: { label: "Dashboard", cls: "bg-sky-50 text-sky-700 ring-sky-200" },
+  form: { label: "Form", cls: "bg-amber-50 text-amber-700 ring-amber-200" },
+  list: { label: "List", cls: "bg-emerald-50 text-emerald-700 ring-emerald-200" },
+  detail: { label: "Detail", cls: "bg-teal-50 text-teal-700 ring-teal-200" },
+  settings: { label: "Settings", cls: "bg-zinc-50 text-zinc-700 ring-zinc-200" },
+  authentication: {
+    label: "Authentication",
+    cls: "bg-red-50 text-red-700 ring-red-200",
+  },
+  error: { label: "Error", cls: "bg-rose-50 text-rose-700 ring-rose-200" },
+  other: { label: "Other", cls: "bg-zinc-50 text-zinc-500 ring-zinc-200" },
+};
+
+export function UiScreenTypeBadge({ type }: { type: UiScreenType }) {
+  return (
+    <Pill className={UI_SCREEN_TYPE_LABELS[type].cls}>
+      {UI_SCREEN_TYPE_LABELS[type].label}
+    </Pill>
+  );
+}
+
+const UI_COMPONENT_TYPE_LABELS: Record<
+  UiComponentType,
+  { label: string; cls: string }
+> = {
+  layout: { label: "Layout", cls: "bg-zinc-50 text-zinc-700 ring-zinc-200" },
+  navigation: { label: "Navigation", cls: "bg-blue-50 text-blue-700 ring-blue-200" },
+  header: { label: "Header", cls: "bg-sky-50 text-sky-700 ring-sky-200" },
+  footer: { label: "Footer", cls: "bg-sky-50 text-sky-700 ring-sky-200" },
+  sidebar: { label: "Sidebar", cls: "bg-sky-50 text-sky-700 ring-sky-200" },
+  card: { label: "Card", cls: "bg-emerald-50 text-emerald-700 ring-emerald-200" },
+  table: { label: "Table", cls: "bg-teal-50 text-teal-700 ring-teal-200" },
+  list: { label: "List", cls: "bg-emerald-50 text-emerald-700 ring-emerald-200" },
+  form: { label: "Form", cls: "bg-amber-50 text-amber-700 ring-amber-200" },
+  input: { label: "Input", cls: "bg-amber-50 text-amber-700 ring-amber-200" },
+  textarea: { label: "Textarea", cls: "bg-amber-50 text-amber-700 ring-amber-200" },
+  select: { label: "Select", cls: "bg-amber-50 text-amber-700 ring-amber-200" },
+  checkbox: { label: "Checkbox", cls: "bg-amber-50 text-amber-700 ring-amber-200" },
+  radio: { label: "Radio", cls: "bg-amber-50 text-amber-700 ring-amber-200" },
+  button: { label: "Button", cls: "bg-indigo-50 text-indigo-700 ring-indigo-200" },
+  modal: { label: "Modal", cls: "bg-violet-50 text-violet-700 ring-violet-200" },
+  dialog: { label: "Dialog", cls: "bg-violet-50 text-violet-700 ring-violet-200" },
+  drawer: { label: "Drawer", cls: "bg-violet-50 text-violet-700 ring-violet-200" },
+  tabs: { label: "Tabs", cls: "bg-blue-50 text-blue-700 ring-blue-200" },
+  badge: { label: "Badge", cls: "bg-zinc-50 text-zinc-500 ring-zinc-200" },
+  alert: { label: "Alert", cls: "bg-rose-50 text-rose-700 ring-rose-200" },
+  notification: {
+    label: "Notification",
+    cls: "bg-rose-50 text-rose-700 ring-rose-200",
+  },
+  chart: { label: "Chart", cls: "bg-fuchsia-50 text-fuchsia-700 ring-fuchsia-200" },
+  custom: { label: "Custom", cls: "bg-zinc-50 text-zinc-500 ring-zinc-200" },
+  other: { label: "Other", cls: "bg-zinc-50 text-zinc-500 ring-zinc-200" },
+};
+
+export function UiComponentTypeBadge({ type }: { type: UiComponentType }) {
+  return (
+    <Pill className={UI_COMPONENT_TYPE_LABELS[type].cls}>
+      {UI_COMPONENT_TYPE_LABELS[type].label}
+    </Pill>
+  );
+}
+
+const UI_FIELD_TYPE_LABELS: Record<UiFieldType, { label: string; cls: string }> = {
+  text: { label: "Text", cls: "bg-zinc-50 text-zinc-700 ring-zinc-200" },
+  textarea: { label: "Textarea", cls: "bg-zinc-50 text-zinc-700 ring-zinc-200" },
+  email: { label: "Email", cls: "bg-blue-50 text-blue-700 ring-blue-200" },
+  password: { label: "Password", cls: "bg-red-50 text-red-700 ring-red-200" },
+  number: { label: "Number", cls: "bg-amber-50 text-amber-700 ring-amber-200" },
+  date: { label: "Date", cls: "bg-sky-50 text-sky-700 ring-sky-200" },
+  datetime: { label: "Datetime", cls: "bg-sky-50 text-sky-700 ring-sky-200" },
+  select: { label: "Select", cls: "bg-amber-50 text-amber-700 ring-amber-200" },
+  checkbox: { label: "Checkbox", cls: "bg-amber-50 text-amber-700 ring-amber-200" },
+  radio: { label: "Radio", cls: "bg-amber-50 text-amber-700 ring-amber-200" },
+  file: { label: "File", cls: "bg-violet-50 text-violet-700 ring-violet-200" },
+  hidden: { label: "Hidden", cls: "bg-zinc-50 text-zinc-500 ring-zinc-200" },
+  other: { label: "Other", cls: "bg-zinc-50 text-zinc-500 ring-zinc-200" },
+};
+
+export function UiFieldTypeBadge({ type }: { type: UiFieldType }) {
+  return (
+    <Pill className={UI_FIELD_TYPE_LABELS[type].cls}>
+      {UI_FIELD_TYPE_LABELS[type].label}
+    </Pill>
+  );
+}
+
+const UI_STATE_TYPE_LABELS: Record<UiStateType, { label: string; cls: string }> = {
+  default: { label: "Default", cls: "bg-zinc-50 text-zinc-700 ring-zinc-200" },
+  loading: { label: "Loading", cls: "bg-blue-50 text-blue-700 ring-blue-200" },
+  empty: { label: "Empty", cls: "bg-zinc-50 text-zinc-500 ring-zinc-200" },
+  success: { label: "Success", cls: "bg-emerald-50 text-emerald-700 ring-emerald-200" },
+  error: { label: "Error", cls: "bg-red-50 text-red-700 ring-red-200" },
+  disabled: { label: "Disabled", cls: "bg-zinc-50 text-zinc-500 ring-zinc-200" },
+  unauthorized: {
+    label: "Unauthorized",
+    cls: "bg-amber-50 text-amber-700 ring-amber-200",
+  },
+  forbidden: { label: "Forbidden", cls: "bg-rose-50 text-rose-700 ring-rose-200" },
+  not_found: { label: "Not found", cls: "bg-rose-50 text-rose-700 ring-rose-200" },
+  validation_error: {
+    label: "Validation",
+    cls: "bg-amber-50 text-amber-700 ring-amber-200",
+  },
+  offline: { label: "Offline", cls: "bg-zinc-50 text-zinc-500 ring-zinc-200" },
+  custom: { label: "Custom", cls: "bg-violet-50 text-violet-700 ring-violet-200" },
+};
+
+export function UiStateTypeBadge({ type }: { type: UiStateType }) {
+  return (
+    <Pill className={UI_STATE_TYPE_LABELS[type].cls}>
+      {UI_STATE_TYPE_LABELS[type].label}
+    </Pill>
+  );
+}
+
+const UI_ENTITY_ROLE_LABELS: Record<
+  UiScreenEntityRole,
+  { label: string; cls: string }
+> = {
+  displayed: { label: "Displayed", cls: "bg-blue-50 text-blue-700 ring-blue-200" },
+  created: { label: "Created", cls: "bg-emerald-50 text-emerald-700 ring-emerald-200" },
+  edited: { label: "Edited", cls: "bg-amber-50 text-amber-700 ring-amber-200" },
+  deleted: { label: "Deleted", cls: "bg-red-50 text-red-700 ring-red-200" },
+  filtered: { label: "Filtered", cls: "bg-violet-50 text-violet-700 ring-violet-200" },
+  selected: { label: "Selected", cls: "bg-indigo-50 text-indigo-700 ring-indigo-200" },
+  related: { label: "Related", cls: "bg-zinc-50 text-zinc-500 ring-zinc-200" },
+};
+
+export function UiScreenEntityRoleBadge({
+  role,
+}: {
+  role: UiScreenEntityRole;
+}) {
+  return (
+    <Pill className={UI_ENTITY_ROLE_LABELS[role].cls}>
+      {UI_ENTITY_ROLE_LABELS[role].label}
+    </Pill>
   );
 }

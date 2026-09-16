@@ -29,6 +29,8 @@ import { countArchitectureDecisionsByProject } from "@/lib/architecture/decision
 import { countArchitectureComponentDependenciesByProject } from "@/lib/architecture/dependencies/queries";
 import { countApiGroupsByProject } from "@/lib/api/groups/queries";
 import { countApiEndpointsByProject } from "@/lib/api/endpoints/queries";
+import { countUiScreensByProject } from "@/lib/ui/screens/queries";
+import { countUiComponentsByProject } from "@/lib/ui/components/queries";
 
 export default async function ProjectOverviewPage({
   params,
@@ -54,6 +56,8 @@ export default async function ProjectOverviewPage({
     dependencyCount,
     apiGroupCount,
     apiEndpointCount,
+    uiScreenCount,
+    uiComponentCount,
     recentRequirements,
     recentDecisions,
   ] = await Promise.all([
@@ -68,6 +72,8 @@ export default async function ProjectOverviewPage({
     countArchitectureComponentDependenciesByProject(project.id),
     countApiGroupsByProject(project.id),
     countApiEndpointsByProject(project.id),
+    countUiScreensByProject(project.id),
+    countUiComponentsByProject(project.id),
     listRequirements({ projectId: project.id, limit: 5 }),
     listDecisions({ projectId: project.id, limit: 5 }),
   ]);
@@ -133,6 +139,8 @@ export default async function ProjectOverviewPage({
             <Stat label="Dependencies" value={dependencyCount} />
             <Stat label="API groups" value={apiGroupCount} />
             <Stat label="API endpoints" value={apiEndpointCount} />
+            <Stat label="UI screens" value={uiScreenCount} />
+            <Stat label="UI components" value={uiComponentCount} />
           </div>
           <div className="mt-5 border-t border-[var(--border)] pt-4 text-xs text-[var(--muted-foreground)]">
             <p>

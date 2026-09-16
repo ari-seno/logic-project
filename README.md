@@ -2,7 +2,7 @@
 
 > An AI Project Planner that structures requirements, decisions, architecture, tasks, and agent prompts. You make the calls; the tool keeps things organized.
 
-This repository contains **Part 1: Foundation & Authentication**, **Part 2: Requirements & Decisions**, **Part 3: Domain & ERD**, **Part 4: Architecture Foundation**, and **Part 5: API Design Foundation** — a Next.js 16 app backed by Supabase Auth and Postgres, with row-level security enforced on every table.
+This repository contains **Part 1: Foundation & Authentication**, **Part 2: Requirements & Decisions**, **Part 3: Domain & ERD**, **Part 4: Architecture Foundation**, **Part 5: API Design Foundation**, and **Part 6: UI Design Foundation** — a Next.js 16 app backed by Supabase Auth and Postgres, with row-level security enforced on every table.
 
 ## Stack
 
@@ -32,6 +32,7 @@ app/                         Next.js App Router
     projects/[id]/domains/relationships/               new / [relId] / [relId]/edit
     projects/[id]/architecture/      overview + components/technologies/decisions/dependencies CRUD
     projects/[id]/api/           overview + groups + endpoints CRUD + sub-resources + traceability
+    projects/[id]/ui/            overview + screens + components + navigation CRUD + screen detail (components/forms/states/interactions/traceability)
   globals.css                Tailwind v4 theme tokens
   page.tsx                   landing
   proxy.ts -> lib/supabase/middleware.ts
@@ -52,6 +53,10 @@ components/
   api/                       group-form, endpoint-form, parameter-form,
                              request-body-form, response-form, error-form,
                              traceability-forms
+  ui (in components/ui/screens): screen-form, component-form, navigation-form,
+                             ui-form-form, ui-form-field-form, ui-state-form,
+                             ui-interaction-form, add-screen-component-form,
+                             traceability-forms, actions wrappers
 lib/
   auth/actions.ts            signIn / signUp / signOut server actions
   projects/queries.ts        listProjects, getProject
@@ -68,6 +73,9 @@ lib/
                              (queries + actions each)
   api/                       groups/ (queries + actions) + endpoints/
                              (queries + actions + sub-actions + traceability-actions)
+  ui/                        screens/ + components/ + screen-components/ +
+                             forms/ (incl. sub-actions) + navigation/ +
+                             traceability/ (queries + actions)
   supabase/                  client, server, middleware, types, path helpers
   validation/                zod schemas + action state types
   utils.ts                   cn, formatDate, formatDateTime
@@ -79,6 +87,7 @@ supabase/
     20250916190000_part3_domain_erd.sql         domains + entities + attributes + relationships + RLS + triggers
     20250916200000_part4_architecture.sql       components + technologies + arch decisions + dependencies + RLS + triggers
     20250916210000_part5_api_design.sql         api_groups + api_endpoints + parameters + request_bodies + responses + errors + traceability
+    20250916220000_part6_ui_design.sql         ui_screens + ui_components + ui_screen_components + ui_forms + ui_form_fields + ui_states + ui_interactions + ui_navigation_items + traceability tables
 tests/
   *.test.ts                  Vitest unit tests (auth, project, utils,
                              middleware, requirement, decision, domain,
@@ -182,8 +191,11 @@ walkthrough of the user flows and the security boundaries they verify.
     `entity_relationships`, `architecture_components`, `architecture_technologies`,
     `architecture_decisions`, `architecture_component_dependencies`, `api_groups`,
     `api_endpoints`, `api_parameters`, `api_request_bodies`, `api_responses`,
-    `api_errors`, `api_endpoint_entities`, and `api_endpoint_requirements` rows are
-    scoped through their parent project:
+    `api_errors`, `api_endpoint_entities`, `api_endpoint_requirements`, `ui_screens`,
+    `ui_components`, `ui_screen_components`, `ui_forms`, `ui_form_fields`,
+    `ui_states`, `ui_interactions`, `ui_interaction_endpoints`,
+    `ui_screen_requirements`, `ui_screen_entities`, `ui_navigation_items`, and
+    `ui_navigation_screens` rows are scoped through their parent project:
     `EXISTS (SELECT 1 FROM projects p WHERE p.id = <table>.project_id AND p.owner_id = auth.uid())`.
     This enforces "user owns parent project" without weakening Part 1 RLS.
   - RLS policies are checked at the database, not in application code.
@@ -460,6 +472,113 @@ Both link types are surfaced on the endpoint detail page so future Tasks and Age
 - Per-endpoint request body is one-per-endpoint; future versions may allow multiple alternative content-types.
 - API auth model in the preview only supports boolean `authentication_required`; granular roles (per-endpoint) live in the `errors` table.
 
+## Part 6 — UI Design Foundation
+
+Part 6 introduces a structured UI blueprint per project. **This is a planning module** — Logic Project does not generate, scaffold, or execute real UI code for the user's application.
+
+### Concepts
+
+| Concept | Belongs to | Has |
+| --- | --- | --- |
+| Screen | Project | name, route, screen_type, description, purpose, authentication_required |
+| Component | Project | name, component_type, description, purpose, technology |
+| Screen component placement | Screen | component reference, optional parent placement (hierarchy), label override, description, required flag |
+| Form | Screen | name, description, submit_label, success_behavior |
+| Form field | Form | name, label, field_type, required, placeholder, help_text, default_value |
+| State | Screen | name, state_type, description, behavior |
+| Interaction | Screen | name, trigger, action, description |
+| Navigation item | Project (optional parent) | name, label, route, parent_id, description |
+
+### Enum values
+
+| Type | Values |
+| --- | --- |
+| Screen type | `page`, `modal`, `drawer`, `dialog`, `wizard`, `dashboard`, `form`, `list`, `detail`, `settings`, `authentication`, `error`, `other` |
+| Component type | `layout`, `navigation`, `header`, `footer`, `sidebar`, `card`, `table`, `list`, `form`, `input`, `textarea`, `select`, `checkbox`, `radio`, `button`, `modal`, `dialog`, `drawer`, `tabs`, `badge`, `alert`, `notification`, `chart`, `custom`, `other` |
+| Field type | `text`, `textarea`, `email`, `password`, `number`, `date`, `datetime`, `select`, `checkbox`, `radio`, `file`, `hidden`, `other` |
+| State type | `default`, `loading`, `empty`, `success`, `error`, `disabled`, `unauthorized`, `forbidden`, `not_found`, `validation_error`, `offline`, `custom` |
+| Entity role | `displayed`, `created`, `edited`, `deleted`, `filtered`, `selected`, `related` |
+
+### Database tables
+
+| Table | Notes | RLS |
+| --- | --- | --- |
+| `ui_screens` | Direct `project_id`; CHECK on screen_type | enabled |
+| `ui_components` | Direct `project_id`; CHECK on component_type | enabled |
+| `ui_screen_components` | Hierarchical placements; UNIQUE `(screen_id, component_id, parent_id)` via `parent_id <> id` check | enabled |
+| `ui_forms` | 1:N with screen | enabled |
+| `ui_form_fields` | 1:N with form | enabled |
+| `ui_states` | 1:N with screen | enabled |
+| `ui_interactions` | 1:N with screen | enabled |
+| `ui_interaction_endpoints` | UNIQUE `(interaction_id, endpoint_id)`; UI ↔ API | enabled |
+| `ui_screen_requirements` | UNIQUE `(screen_id, requirement_id)`; UI ↔ Requirements | enabled |
+| `ui_screen_entities` | UNIQUE `(screen_id, entity_id, role)`; UI ↔ Domain | enabled |
+| `ui_navigation_items` | Hierarchical; parent must be same project; self-parent prohibited | enabled |
+| `ui_navigation_screens` | UNIQUE `(navigation_item_id, screen_id)` | enabled |
+
+All FKs cascade appropriately; every parent table has a `set_updated_at` trigger.
+
+### Design vs. implementation
+
+Part 6 is strictly a design tool. It does not produce React/Vue/etc. components or route handlers, and it does not perform visual drag-and-drop editing. Reordering is achieved by deleting and re-adding placements, matching the structured nature of the data.
+
+### Available routes
+
+| Route | Purpose |
+| --- | --- |
+| `/projects/[id]/ui` | Overview with summary, screens, components, navigation tree, specification preview |
+| `/projects/[id]/ui/screens/new` | Create screen |
+| `/projects/[id]/ui/screens/[screenId]` | Detail with components tree, forms + fields, states, interactions, traceability |
+| `/projects/[id]/ui/screens/[screenId]/edit` | Edit screen |
+| `/projects/[id]/ui/components/new` | Create component |
+| `/projects/[id]/ui/components/[componentId]/edit` | Edit component |
+| `/projects/[id]/ui/navigation/new` | Create navigation item |
+| `/projects/[id]/ui/navigation/[itemId]/edit` | Edit navigation item |
+
+### Specification preview
+
+A read-only structured summary is rendered on the overview page:
+
+```
+# UI specification (preview)
+# 3 screens, 8 components, 4 navigation items
+
+## Screens
+  - Home (page) route=/home auth=required
+  - Project Detail (detail) route=/projects/:id auth=required
+  ...
+
+## Components
+  - Header (header)
+  - Project Card (card)
+  ...
+
+## Navigation
+  - Dashboard
+  - Projects
+    - All Projects
+    - Recent
+```
+
+Derived entirely from the stored data; never stored separately.
+
+### Traceability
+
+| Link | Source | Use |
+| --- | --- | --- |
+| Screen ↔ Requirement | `ui_screen_requirements` | Captures which requirements a screen fulfils |
+| Screen ↔ Domain entity | `ui_screen_entities` | Captures which entities participate (with role) |
+| Interaction ↔ API endpoint | `ui_interaction_endpoints` | Captures which endpoint an interaction fires |
+
+Each screen detail page surfaces its requirements, entities, and (per interaction) endpoints. Future Tasks and Agent Prompts use these maps to derive implementation work.
+
+### Limitations
+
+- No visual drag-and-drop screen builder.
+- Reordering requires delete + re-add.
+- Specifications are text-based; markdown rendering of fields/descriptions is plain text only.
+- Navigation items do not yet track ordering relative to siblings beyond the `position` field.
+
 ## Roadmap
 
 | Part | Scope | Status |
@@ -469,7 +588,8 @@ Both link types are surfaced on the endpoint detail page so future Tasks and Age
 | 3 | Domain & ERD | ✓ shipped |
 | 4 | Architecture Foundation | ✓ shipped |
 | 5 | API Design Foundation | ✓ shipped |
-| 6 | Tasks & Dependencies | planned |
-| 7 | Agent Prompt Generation | planned |
-| 8 | AI Assistance | planned |
-| 9 | Coding Agent Integration | planned |
+| 6 | UI Design Foundation | ✓ shipped |
+| 7 | Tasks & Dependencies | planned |
+| 8 | Agent Prompt Generation | planned |
+| 9 | AI Assistance | planned |
+| 10 | Coding Agent Integration | planned |

@@ -344,6 +344,226 @@ export type ApiEndpointRequirement = {
   created_at: string;
 };
 
+export const UI_SCREEN_TYPES = [
+  "page",
+  "modal",
+  "drawer",
+  "dialog",
+  "wizard",
+  "dashboard",
+  "form",
+  "list",
+  "detail",
+  "settings",
+  "authentication",
+  "error",
+  "other",
+] as const;
+export type UiScreenType = (typeof UI_SCREEN_TYPES)[number];
+
+export const UI_COMPONENT_TYPES = [
+  "layout",
+  "navigation",
+  "header",
+  "footer",
+  "sidebar",
+  "card",
+  "table",
+  "list",
+  "form",
+  "input",
+  "textarea",
+  "select",
+  "checkbox",
+  "radio",
+  "button",
+  "modal",
+  "dialog",
+  "drawer",
+  "tabs",
+  "badge",
+  "alert",
+  "notification",
+  "chart",
+  "custom",
+  "other",
+] as const;
+export type UiComponentType = (typeof UI_COMPONENT_TYPES)[number];
+
+export const UI_FIELD_TYPES = [
+  "text",
+  "textarea",
+  "email",
+  "password",
+  "number",
+  "date",
+  "datetime",
+  "select",
+  "checkbox",
+  "radio",
+  "file",
+  "hidden",
+  "other",
+] as const;
+export type UiFieldType = (typeof UI_FIELD_TYPES)[number];
+
+export const UI_STATE_TYPES = [
+  "default",
+  "loading",
+  "empty",
+  "success",
+  "error",
+  "disabled",
+  "unauthorized",
+  "forbidden",
+  "not_found",
+  "validation_error",
+  "offline",
+  "custom",
+] as const;
+export type UiStateType = (typeof UI_STATE_TYPES)[number];
+
+export const UI_SCREEN_ENTITY_ROLES = [
+  "displayed",
+  "created",
+  "edited",
+  "deleted",
+  "filtered",
+  "selected",
+  "related",
+] as const;
+export type UiScreenEntityRole = (typeof UI_SCREEN_ENTITY_ROLES)[number];
+
+export type UiScreen = {
+  id: string;
+  project_id: string;
+  name: string;
+  route: string | null;
+  screen_type: UiScreenType;
+  description: string | null;
+  purpose: string | null;
+  authentication_required: boolean;
+  position: number;
+  created_at: string;
+  updated_at: string;
+};
+
+export type UiComponent = {
+  id: string;
+  project_id: string;
+  name: string;
+  component_type: UiComponentType;
+  description: string | null;
+  purpose: string | null;
+  technology: string | null;
+  position: number;
+  created_at: string;
+  updated_at: string;
+};
+
+export type UiScreenComponent = {
+  id: string;
+  screen_id: string;
+  component_id: string;
+  parent_id: string | null;
+  label: string | null;
+  description: string | null;
+  position: number;
+  required: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
+export type UiForm = {
+  id: string;
+  screen_id: string;
+  name: string;
+  description: string | null;
+  submit_label: string | null;
+  success_behavior: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type UiFormField = {
+  id: string;
+  form_id: string;
+  name: string;
+  label: string;
+  field_type: UiFieldType;
+  required: boolean;
+  placeholder: string | null;
+  help_text: string | null;
+  default_value: string | null;
+  position: number;
+  created_at: string;
+  updated_at: string;
+};
+
+export type UiState = {
+  id: string;
+  screen_id: string;
+  name: string;
+  state_type: UiStateType;
+  description: string | null;
+  behavior: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type UiInteraction = {
+  id: string;
+  screen_id: string;
+  name: string;
+  trigger: string;
+  action: string;
+  description: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type UiInteractionEndpoint = {
+  id: string;
+  interaction_id: string;
+  endpoint_id: string;
+  created_at: string;
+};
+
+export type UiScreenRequirement = {
+  id: string;
+  screen_id: string;
+  requirement_id: string;
+  created_at: string;
+};
+
+export type UiScreenEntity = {
+  id: string;
+  screen_id: string;
+  entity_id: string;
+  role: UiScreenEntityRole;
+  created_at: string;
+};
+
+export type UiNavigationItem = {
+  id: string;
+  project_id: string;
+  name: string;
+  label: string;
+  route: string | null;
+  parent_id: string | null;
+  position: number;
+  description: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type UiNavigationScreen = {
+  id: string;
+  navigation_item_id: string;
+  screen_id: string;
+  created_at: string;
+};
+
 type Tables = {
   profiles: {
     Row: Profile;
@@ -817,6 +1037,290 @@ type Tables = {
       id?: string;
       endpoint_id?: string;
       requirement_id?: string;
+      created_at?: string;
+    };
+    Relationships: [];
+  };
+  ui_screens: {
+    Row: UiScreen;
+    Insert: {
+      id?: string;
+      project_id: string;
+      name: string;
+      route?: string | null;
+      screen_type: UiScreenType;
+      description?: string | null;
+      purpose?: string | null;
+      authentication_required?: boolean;
+      position?: number;
+      created_at?: string;
+      updated_at?: string;
+    };
+    Update: {
+      id?: string;
+      project_id?: string;
+      name?: string;
+      route?: string | null;
+      screen_type?: UiScreenType;
+      description?: string | null;
+      purpose?: string | null;
+      authentication_required?: boolean;
+      position?: number;
+      created_at?: string;
+      updated_at?: string;
+    };
+    Relationships: [];
+  };
+  ui_components: {
+    Row: UiComponent;
+    Insert: {
+      id?: string;
+      project_id: string;
+      name: string;
+      component_type: UiComponentType;
+      description?: string | null;
+      purpose?: string | null;
+      technology?: string | null;
+      position?: number;
+      created_at?: string;
+      updated_at?: string;
+    };
+    Update: {
+      id?: string;
+      project_id?: string;
+      name?: string;
+      component_type?: UiComponentType;
+      description?: string | null;
+      purpose?: string | null;
+      technology?: string | null;
+      position?: number;
+      created_at?: string;
+      updated_at?: string;
+    };
+    Relationships: [];
+  };
+  ui_screen_components: {
+    Row: UiScreenComponent;
+    Insert: {
+      id?: string;
+      screen_id: string;
+      component_id: string;
+      parent_id?: string | null;
+      label?: string | null;
+      description?: string | null;
+      position?: number;
+      required?: boolean;
+      created_at?: string;
+      updated_at?: string;
+    };
+    Update: {
+      id?: string;
+      screen_id?: string;
+      component_id?: string;
+      parent_id?: string | null;
+      label?: string | null;
+      description?: string | null;
+      position?: number;
+      required?: boolean;
+      created_at?: string;
+      updated_at?: string;
+    };
+    Relationships: [];
+  };
+  ui_forms: {
+    Row: UiForm;
+    Insert: {
+      id?: string;
+      screen_id: string;
+      name: string;
+      description?: string | null;
+      submit_label?: string | null;
+      success_behavior?: string | null;
+      created_at?: string;
+      updated_at?: string;
+    };
+    Update: {
+      id?: string;
+      screen_id?: string;
+      name?: string;
+      description?: string | null;
+      submit_label?: string | null;
+      success_behavior?: string | null;
+      created_at?: string;
+      updated_at?: string;
+    };
+    Relationships: [];
+  };
+  ui_form_fields: {
+    Row: UiFormField;
+    Insert: {
+      id?: string;
+      form_id: string;
+      name: string;
+      label: string;
+      field_type: UiFieldType;
+      required?: boolean;
+      placeholder?: string | null;
+      help_text?: string | null;
+      default_value?: string | null;
+      position?: number;
+      created_at?: string;
+      updated_at?: string;
+    };
+    Update: {
+      id?: string;
+      form_id?: string;
+      name?: string;
+      label?: string;
+      field_type?: UiFieldType;
+      required?: boolean;
+      placeholder?: string | null;
+      help_text?: string | null;
+      default_value?: string | null;
+      position?: number;
+      created_at?: string;
+      updated_at?: string;
+    };
+    Relationships: [];
+  };
+  ui_states: {
+    Row: UiState;
+    Insert: {
+      id?: string;
+      screen_id: string;
+      name: string;
+      state_type: UiStateType;
+      description?: string | null;
+      behavior?: string | null;
+      created_at?: string;
+      updated_at?: string;
+    };
+    Update: {
+      id?: string;
+      screen_id?: string;
+      name?: string;
+      state_type?: UiStateType;
+      description?: string | null;
+      behavior?: string | null;
+      created_at?: string;
+      updated_at?: string;
+    };
+    Relationships: [];
+  };
+  ui_interactions: {
+    Row: UiInteraction;
+    Insert: {
+      id?: string;
+      screen_id: string;
+      name: string;
+      trigger: string;
+      action: string;
+      description?: string | null;
+      created_at?: string;
+      updated_at?: string;
+    };
+    Update: {
+      id?: string;
+      screen_id?: string;
+      name?: string;
+      trigger?: string;
+      action?: string;
+      description?: string | null;
+      created_at?: string;
+      updated_at?: string;
+    };
+    Relationships: [];
+  };
+  ui_interaction_endpoints: {
+    Row: UiInteractionEndpoint;
+    Insert: {
+      id?: string;
+      interaction_id: string;
+      endpoint_id: string;
+      created_at?: string;
+    };
+    Update: {
+      id?: string;
+      interaction_id?: string;
+      endpoint_id?: string;
+      created_at?: string;
+    };
+    Relationships: [];
+  };
+  ui_screen_requirements: {
+    Row: UiScreenRequirement;
+    Insert: {
+      id?: string;
+      screen_id: string;
+      requirement_id: string;
+      created_at?: string;
+    };
+    Update: {
+      id?: string;
+      screen_id?: string;
+      requirement_id?: string;
+      created_at?: string;
+    };
+    Relationships: [];
+  };
+  ui_screen_entities: {
+    Row: UiScreenEntity;
+    Insert: {
+      id?: string;
+      screen_id: string;
+      entity_id: string;
+      role: UiScreenEntityRole;
+      created_at?: string;
+    };
+    Update: {
+      id?: string;
+      screen_id?: string;
+      entity_id?: string;
+      role?: UiScreenEntityRole;
+      created_at?: string;
+    };
+    Relationships: [];
+  };
+  ui_navigation_items: {
+    Row: UiNavigationItem;
+    Insert: {
+      id?: string;
+      project_id: string;
+      name: string;
+      label: string;
+      route?: string | null;
+      parent_id?: string | null;
+      position?: number;
+      description?: string | null;
+      created_at?: string;
+      updated_at?: string;
+    };
+    Update: {
+      id?: string;
+      project_id?: string;
+      name?: string;
+      label?: string;
+      route?: string | null;
+      parent_id?: string | null;
+      position?: number;
+      description?: string | null;
+      created_at?: string;
+      updated_at?: string;
+    };
+    Relationships: [];
+  };
+  ui_navigation_screens: {
+    Row: UiNavigationScreen;
+    Insert: {
+      id?: string;
+      navigation_item_id: string;
+      screen_id: string;
+      created_at?: string;
+    };
+    Update: {
+      id?: string;
+      navigation_item_id?: string;
+      screen_id?: string;
       created_at?: string;
     };
     Relationships: [];
