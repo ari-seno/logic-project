@@ -15,10 +15,10 @@ import {
 } from "@/lib/attributes/queries";
 import { getEntityWithProject } from "@/lib/entities/queries";
 
-function emptyToNull(value: FormDataEntryValue | null): string | null {
-  if (typeof value !== "string") return null;
+function emptyToOptional(value: FormDataEntryValue | null): string | undefined {
+  if (typeof value !== "string") return undefined;
   const trimmed = value.trim();
-  return trimmed.length === 0 ? null : trimmed;
+  return trimmed.length === 0 ? undefined : trimmed;
 }
 
 function parseCheckbox(value: FormDataEntryValue | null): boolean {
@@ -51,8 +51,8 @@ export async function createAttribute(
     data_type: formData.get("data_type"),
     is_required: parseCheckbox(formData.get("is_required")),
     is_primary_key: parseCheckbox(formData.get("is_primary_key")),
-    default_value: emptyToNull(formData.get("default_value")),
-    description: emptyToNull(formData.get("description")),
+    default_value: emptyToOptional(formData.get("default_value")),
+    description: emptyToOptional(formData.get("description")),
   });
 
   if (!parsed.success) {
@@ -117,8 +117,8 @@ export async function updateAttribute(
     data_type: formData.get("data_type"),
     is_required: parseCheckbox(formData.get("is_required")),
     is_primary_key: parseCheckbox(formData.get("is_primary_key")),
-    default_value: emptyToNull(formData.get("default_value")),
-    description: emptyToNull(formData.get("description")),
+    default_value: emptyToOptional(formData.get("default_value")),
+    description: emptyToOptional(formData.get("description")),
   });
 
   if (!parsed.success) {

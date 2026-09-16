@@ -89,4 +89,29 @@ describe("attributeInputSchema", () => {
     });
     expect(result.success).toBe(false);
   });
+
+  it("accepts undefined description and default_value (FormData empty submit)", () => {
+    const result = attributeInputSchema.safeParse({
+      name: "isbn",
+      data_type: "string" as const,
+      is_required: false,
+      is_primary_key: false,
+      default_value: undefined,
+      description: undefined,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects null for description and default_value (regression for emptyToNull helper)", () => {
+    const result = attributeInputSchema.safeParse({
+      ...valid,
+      default_value: null as unknown as string,
+      description: null as unknown as string,
+    });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.flatten().fieldErrors.default_value).toBeDefined();
+      expect(result.error.flatten().fieldErrors.description).toBeDefined();
+    }
+  });
 });

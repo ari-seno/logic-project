@@ -1,0 +1,70 @@
+- generic [active] [ref=f5e1]:
+  - generic [ref=f5e2]:
+    - banner [ref=f5e3]:
+      - generic [ref=f5e4]:
+        - generic [ref=f5e5]:
+          - link "Logic Project" [ref=f5e6] [cursor=pointer]:
+            - /url: /dashboard
+          - navigation [ref=f5e11]:
+            - link "Dashboard" [ref=f5e12] [cursor=pointer]:
+              - /url: /dashboard
+            - link "Projects" [ref=f5e13] [cursor=pointer]:
+              - /url: /projects
+        - generic [ref=f5e14]:
+          - link "Open account" [ref=f5e15] [cursor=pointer]:
+            - /url: /account
+            - paragraph [ref=f5e16]: ariseno.dev
+            - paragraph [ref=f5e17]: ariseno.dev@gmail.com
+          - button "Sign out" [ref=f5e19] [cursor=pointer]
+    - generic [ref=f5e21]:
+      - navigation "Project sections" [ref=f5e22]:
+        - link "Overview" [ref=f5e23] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308
+        - link "Requirements" [ref=f5e24] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/requirements
+        - link "Decisions" [ref=f5e25] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/decisions
+        - link "Domain" [ref=f5e26] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/domains
+        - link "Architecture" [ref=f5e27] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/architecture
+        - link "API" [ref=f5e28] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/api
+        - link "UI" [ref=f5e29] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/ui
+        - link "Tasks" [ref=f5e30] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/tasks
+      - generic [ref=f5e31]:
+        - link "← Back to requirements" [ref=f5e32] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/requirements
+        - heading "New requirement" [level=1] [ref=f5e33]
+        - paragraph [ref=f5e34]: Library Management System
+      - generic [ref=f5e36]:
+        - generic [ref=f5e37]:
+          - generic [ref=f5e38]: Title
+          - textbox "Title" [ref=f5e39]
+        - generic [ref=f5e40]:
+          - generic [ref=f5e41]: Description
+          - textbox "Description" [ref=f5e42]
+        - generic [ref=f5e43]:
+          - generic [ref=f5e44]:
+            - generic [ref=f5e45]: Type
+            - combobox "Type" [ref=f5e47]:
+              - option "functional" [selected]
+              - option "non functional"
+          - generic [ref=f5e48]:
+            - generic [ref=f5e49]: Status
+            - combobox "Status" [ref=f5e51]:
+              - option "draft" [selected]
+              - option "approved"
+              - option "rejected"
+              - option "implemented"
+          - generic [ref=f5e52]:
+            - generic [ref=f5e53]: Priority
+            - combobox "Priority" [ref=f5e55]:
+              - option "low"
+              - option "medium" [selected]
+              - option "high"
+              - option "critical"
+        - button "Create requirement" [ref=f5e56] [cursor=pointer]
+  - alert [ref=f5e57]

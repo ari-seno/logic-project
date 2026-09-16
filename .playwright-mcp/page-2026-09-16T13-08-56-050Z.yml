@@ -1,0 +1,51 @@
+- generic [active] [ref=f23e1]:
+  - generic [ref=f23e2]:
+    - banner [ref=f23e3]:
+      - generic [ref=f23e4]:
+        - generic [ref=f23e5]:
+          - link "Logic Project" [ref=f23e6] [cursor=pointer]:
+            - /url: /dashboard
+          - navigation [ref=f23e11]:
+            - link "Dashboard" [ref=f23e12] [cursor=pointer]:
+              - /url: /dashboard
+            - link "Projects" [ref=f23e13] [cursor=pointer]:
+              - /url: /projects
+        - generic [ref=f23e14]:
+          - link "Open account" [ref=f23e15] [cursor=pointer]:
+            - /url: /account
+            - paragraph [ref=f23e16]: ariseno.dev
+            - paragraph [ref=f23e17]: ariseno.dev@gmail.com
+          - button "Sign out" [ref=f23e19] [cursor=pointer]
+    - generic [ref=f23e49]:
+      - navigation "Project sections" [ref=f23e50]:
+        - link "Overview" [ref=f23e51] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308
+        - link "Requirements" [ref=f23e52] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/requirements
+        - link "Decisions" [ref=f23e53] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/decisions
+        - link "Domain" [ref=f23e54] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/domains
+        - link "Architecture" [ref=f23e55] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/architecture
+        - link "API" [ref=f23e56] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/api
+        - link "UI" [ref=f23e57] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/ui
+        - link "Tasks" [ref=f23e58] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/tasks
+      - generic [ref=f23e59]:
+        - link "← Back to components" [ref=f23e60] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/architecture/components
+        - generic [ref=f23e61]:
+          - generic [ref=f23e62]:
+            - heading "Library Web App" [level=1] [ref=f23e63]
+            - generic [ref=f23e64]: Frontend
+            - paragraph [ref=f23e66]: Aplikasi web Next.js untuk katalog, dashboard anggota, dan panel pustakawan.
+            - paragraph [ref=f23e67]: Updated Sep 16, 2026
+          - generic [ref=f23e68]:
+            - button "Create task" [ref=f23e70] [cursor=pointer]
+            - link "Edit" [ref=f23e71] [cursor=pointer]:
+              - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/architecture/components/c3b8efba-911d-4792-b782-ad741f3377ff/edit
+            - button "Delete component" [ref=f23e74] [cursor=pointer]: Delete
+  - alert [ref=f23e48]: Library Web App

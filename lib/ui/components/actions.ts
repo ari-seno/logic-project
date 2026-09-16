@@ -72,7 +72,7 @@ export async function createUiComponent(
   if (error || !data) return { error: error?.message ?? "Failed to create component." };
 
   revalidatePath(`/projects/${projectId}/ui`);
-  redirect(`/projects/${projectId}/ui/components/${data.id}/edit`);
+  redirect(`/projects/${projectId}/ui`);
 }
 
 export async function updateUiComponent(

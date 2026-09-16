@@ -1,0 +1,70 @@
+- generic [active] [ref=f9e1]:
+  - generic [ref=f9e2]:
+    - banner [ref=f9e3]:
+      - generic [ref=f9e4]:
+        - generic [ref=f9e5]:
+          - link "Logic Project" [ref=f9e6] [cursor=pointer]:
+            - /url: /dashboard
+          - navigation [ref=f9e11]:
+            - link "Dashboard" [ref=f9e12] [cursor=pointer]:
+              - /url: /dashboard
+            - link "Projects" [ref=f9e13] [cursor=pointer]:
+              - /url: /projects
+        - generic [ref=f9e14]:
+          - link "Open account" [ref=f9e15] [cursor=pointer]:
+            - /url: /account
+            - paragraph [ref=f9e16]: ariseno.dev
+            - paragraph [ref=f9e17]: ariseno.dev@gmail.com
+          - button "Sign out" [ref=f9e19] [cursor=pointer]
+    - generic [ref=f9e21]:
+      - navigation "Project sections" [ref=f9e22]:
+        - link "Overview" [ref=f9e23] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308
+        - link "Requirements" [ref=f9e24] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/requirements
+        - link "Decisions" [ref=f9e25] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/decisions
+        - link "Domain" [ref=f9e26] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/domains
+        - link "Architecture" [ref=f9e27] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/architecture
+        - link "API" [ref=f9e28] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/api
+        - link "UI" [ref=f9e29] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/ui
+        - link "Tasks" [ref=f9e30] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/tasks
+      - generic [ref=f9e31]:
+        - link "← Back to decisions" [ref=f9e32] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/decisions
+        - heading "New decision" [level=1] [ref=f9e33]
+        - paragraph [ref=f9e34]: Library Management System
+      - generic [ref=f9e36]:
+        - generic [ref=f9e37]:
+          - generic [ref=f9e38]: Title
+          - textbox "Title" [ref=f9e39]:
+            - /placeholder: e.g. Choose database
+            - text: Pakai Supabase untuk auth dan database
+        - generic [ref=f9e40]:
+          - generic [ref=f9e41]: Context
+          - textbox "Context" [ref=f9e42]:
+            - /placeholder: What situation prompted this decision?
+            - text: "Butuh backend yang cepat di-setup dengan auth, Postgres, dan RLS out-of-the-box. Alternatif: NestJS + Prisma + Postgres self-hosted."
+        - generic [ref=f9e43]:
+          - generic [ref=f9e44]: Decision
+          - textbox "Decision" [ref=f9e45]:
+            - /placeholder: What was decided?
+            - text: Pakai Supabase (managed Postgres + auth + RLS) sebagai backend utama.
+        - generic [ref=f9e46]:
+          - generic [ref=f9e47]: Rationale
+          - textbox "Rationale" [ref=f9e48]:
+            - /placeholder: Why was this decision made?
+            - text: Waktu setup 1-2 hari vs 1-2 minggu. RLS menutup celah otorisasi di level database. Bisa migrasi ke self-hosted kapan saja.
+        - generic [ref=f9e49]:
+          - generic [ref=f9e50]: Status
+          - combobox "Status" [ref=f9e52]:
+            - option "proposed"
+            - option "accepted" [selected]
+            - option "superseded"
+        - button "Creating…" [disabled]
+  - alert [ref=f9e54]

@@ -1,0 +1,58 @@
+- generic [active] [ref=f5e1]:
+  - generic [ref=f5e2]:
+    - banner [ref=f5e3]:
+      - generic [ref=f5e4]:
+        - generic [ref=f5e5]:
+          - link "Logic Project" [ref=f5e6] [cursor=pointer]:
+            - /url: /dashboard
+          - navigation [ref=f5e11]:
+            - link "Dashboard" [ref=f5e12] [cursor=pointer]:
+              - /url: /dashboard
+            - link "Projects" [ref=f5e13] [cursor=pointer]:
+              - /url: /projects
+        - generic [ref=f5e14]:
+          - link "Open account" [ref=f5e15] [cursor=pointer]:
+            - /url: /account
+            - paragraph [ref=f5e16]: ariseno.dev
+            - paragraph [ref=f5e17]: ariseno.dev@gmail.com
+          - button "Sign out" [ref=f5e19] [cursor=pointer]
+    - generic [ref=f5e58]:
+      - navigation "Project sections" [ref=f5e59]:
+        - link "Overview" [ref=f5e60] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308
+        - link "Requirements" [ref=f5e61] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/requirements
+        - link "Decisions" [ref=f5e62] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/decisions
+        - link "Domain" [ref=f5e63] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/domains
+        - link "Architecture" [ref=f5e64] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/architecture
+        - link "API" [ref=f5e65] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/api
+        - link "UI" [ref=f5e66] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/ui
+        - link "Tasks" [ref=f5e67] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/tasks
+      - generic [ref=f5e68]:
+        - link "← Back to requirements" [ref=f5e69] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/requirements
+        - generic [ref=f5e70]:
+          - generic [ref=f5e71]:
+            - heading "Book catalog search" [level=1] [ref=f5e72]
+            - generic [ref=f5e73]:
+              - generic [ref=f5e74]: Functional
+              - generic [ref=f5e75]: Approved
+              - generic [ref=f5e76]: High
+            - generic [ref=f5e77]:
+              - generic [ref=f5e78]: Created Sep 16, 2026, 01:02 PM
+              - generic [ref=f5e79]: Updated Sep 16, 2026, 01:02 PM
+          - generic [ref=f5e80]:
+            - button "Create task" [ref=f5e82] [cursor=pointer]
+            - link "Edit" [ref=f5e83] [cursor=pointer]:
+              - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/requirements/f5e07969-c39c-456d-98bd-5efac69f5302/edit
+            - button "Delete requirement \"Book catalog search\"" [ref=f5e86] [cursor=pointer]: Delete
+      - generic [ref=f5e87]:
+        - heading "Description" [level=2] [ref=f5e88]
+        - paragraph [ref=f5e89]: Anggota dapat mencari buku berdasarkan judul, pengarang, ISBN, atau kategori. Hasil pencarian menampilkan ketersediaan (tersedia/dipinjam).
+  - alert [ref=f5e57]: Book catalog search

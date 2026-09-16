@@ -1,0 +1,9 @@
+- generic [active] [ref=f32e1]:
+  - main [ref=f32e2]:
+    - generic [ref=f32e3]:
+      - paragraph [ref=f32e4]: "404"
+      - heading "Page not found" [level=1] [ref=f32e5]
+      - paragraph [ref=f32e6]: The page you're looking for doesn't exist or has been moved.
+      - link "Go home" [ref=f32e7] [cursor=pointer]:
+        - /url: /
+  - alert [ref=f32e8]

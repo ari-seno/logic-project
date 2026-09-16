@@ -1,0 +1,161 @@
+- generic [active] [ref=f38e1]:
+  - generic [ref=f38e2]:
+    - banner [ref=f38e3]:
+      - generic [ref=f38e4]:
+        - generic [ref=f38e5]:
+          - link "Logic Project" [ref=f38e6] [cursor=pointer]:
+            - /url: /dashboard
+          - navigation [ref=f38e11]:
+            - link "Dashboard" [ref=f38e12] [cursor=pointer]:
+              - /url: /dashboard
+            - link "Projects" [ref=f38e13] [cursor=pointer]:
+              - /url: /projects
+        - generic [ref=f38e14]:
+          - link "Open account" [ref=f38e15] [cursor=pointer]:
+            - /url: /account
+            - paragraph [ref=f38e16]: ariseno.dev
+            - paragraph [ref=f38e17]: ariseno.dev@gmail.com
+          - button "Sign out" [ref=f38e19] [cursor=pointer]
+    - generic [ref=f38e73]:
+      - navigation "Project sections" [ref=f38e74]:
+        - link "Overview" [ref=f38e75] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308
+        - link "Requirements" [ref=f38e76] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/requirements
+        - link "Decisions" [ref=f38e77] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/decisions
+        - link "Domain" [ref=f38e78] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/domains
+        - link "Architecture" [ref=f38e79] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/architecture
+        - link "API" [ref=f38e80] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/api
+        - link "UI" [ref=f38e81] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/ui
+        - link "Tasks" [ref=f38e82] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/tasks
+      - generic [ref=f38e83]:
+        - generic [ref=f38e84]:
+          - link "← Back to Tasks" [ref=f38e85] [cursor=pointer]:
+            - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/tasks
+          - generic [ref=f38e86]:
+            - generic [ref=f38e87]: Database
+            - generic [ref=f38e88]: Done
+            - generic [ref=f38e89]: High
+            - generic [ref=f38e90]: L
+          - 'heading "Schema migration: tables + RLS" [level=1] [ref=f38e91]'
+          - paragraph [ref=f38e92]: Updated Sep 16, 2026
+        - generic [ref=f38e93]:
+          - combobox "Change status" [ref=f38e95]:
+            - option "todo"
+            - option "ready"
+            - option "in progress"
+            - option "blocked"
+            - option "review"
+            - option "done" [selected]
+            - option "cancelled"
+          - link "Edit" [ref=f38e96] [cursor=pointer]:
+            - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/tasks/b685e5f5-e011-4665-a661-85b2f2152c9a/edit
+          - button "Delete task" [ref=f38e99] [cursor=pointer]: Delete
+      - generic [ref=f38e100]:
+        - heading "Description" [level=2] [ref=f38e101]
+        - paragraph [ref=f38e102]: Buat tabel books, members, loans + policies RLS untuk isolasi data per project.
+        - heading "Acceptance criteria" [level=3] [ref=f38e103]
+        - generic [ref=f38e104]: "- Migration ter-apply ke staging\\n- Test RLS: user A tidak bisa baca row user B"
+        - heading "Implementation notes" [level=3] [ref=f38e105]
+        - generic [ref=f38e106]: Pakai supabase migration CLI. Generate types otomatis setelah apply.
+      - generic [ref=f38e107]:
+        - heading "Hierarchy" [level=2] [ref=f38e108]
+        - generic [ref=f38e109]:
+          - generic [ref=f38e110]:
+            - heading "Parent" [level=3] [ref=f38e111]
+            - paragraph [ref=f38e112]: Top-level task
+          - generic [ref=f38e113]:
+            - heading "Subtasks (0)" [level=3] [ref=f38e114]
+            - paragraph [ref=f38e115]: No subtasks.
+      - generic [ref=f38e116]:
+        - heading "Dependencies" [level=2] [ref=f38e117]
+        - generic [ref=f38e118]:
+          - generic [ref=f38e119]:
+            - heading "Depends on (0)" [level=3] [ref=f38e120]
+            - paragraph [ref=f38e121]: Nothing.
+          - generic [ref=f38e122]:
+            - heading "Blocks (0)" [level=3] [ref=f38e123]
+            - paragraph [ref=f38e124]: Nothing.
+        - generic [ref=f38e125]:
+          - heading "Add dependency" [level=3] [ref=f38e126]
+          - paragraph [ref=f38e128]: No other tasks in this project to depend on.
+      - generic [ref=f38e129]:
+        - heading "Requirements" [level=2] [ref=f38e130]
+        - paragraph [ref=f38e131]: None linked.
+        - generic [ref=f38e133]:
+          - generic [ref=f38e134]:
+            - generic [ref=f38e135]: Requirement
+            - combobox "Requirement" [ref=f38e137]:
+              - option "Select…" [selected]
+              - option "Member registration (functional)"
+              - option "Book catalog search (functional)"
+              - option "Loan & return workflow (functional)"
+              - 'option "Performance: search p95 under 300ms (non_functional)"'
+          - button "Attach" [ref=f38e138] [cursor=pointer]
+      - generic [ref=f38e139]:
+        - heading "Decisions" [level=2] [ref=f38e140]
+        - paragraph [ref=f38e141]: None linked.
+        - generic [ref=f38e143]:
+          - generic [ref=f38e144]:
+            - generic [ref=f38e145]: Decision
+            - combobox "Decision" [ref=f38e147]:
+              - option "Select…" [selected]
+              - option "Pakai Supabase untuk auth dan database (accepted)"
+          - button "Attach" [ref=f38e148] [cursor=pointer]
+      - generic [ref=f38e149]:
+        - heading "Domain entities" [level=2] [ref=f38e150]
+        - paragraph [ref=f38e151]: None linked.
+        - generic [ref=f38e153]:
+          - generic [ref=f38e154]:
+            - generic [ref=f38e155]: Domain entity
+            - combobox "Domain entity" [ref=f38e157]:
+              - option "Select…" [selected]
+              - option "Book (Library Core)"
+              - option "Member (Library Core)"
+              - option "Loan (Library Core)"
+          - button "Attach" [ref=f38e158] [cursor=pointer]
+      - generic [ref=f38e159]:
+        - heading "Architecture components" [level=2] [ref=f38e160]
+        - paragraph [ref=f38e161]: None linked.
+        - generic [ref=f38e163]:
+          - generic [ref=f38e164]:
+            - generic [ref=f38e165]: Architecture component
+            - combobox "Architecture component" [ref=f38e167]:
+              - option "Select…" [selected]
+              - option "Catalog Service (backend)"
+              - option "Library Web App (frontend)"
+          - button "Attach" [ref=f38e168] [cursor=pointer]
+      - generic [ref=f38e169]:
+        - heading "API endpoints" [level=2] [ref=f38e170]
+        - paragraph [ref=f38e171]: None linked.
+        - generic [ref=f38e173]:
+          - generic [ref=f38e174]:
+            - generic [ref=f38e175]: API endpoint
+            - combobox "API endpoint" [ref=f38e177]:
+              - option "Select…" [selected]
+              - option "Search books (GET /api/catalog/books)"
+              - option "Create loan (POST /api/catalog/loans)"
+          - button "Attach" [ref=f38e178] [cursor=pointer]
+      - generic [ref=f38e179]:
+        - heading "UI screens" [level=2] [ref=f38e180]
+        - paragraph [ref=f38e181]: None linked.
+        - generic [ref=f38e183]:
+          - generic [ref=f38e184]:
+            - generic [ref=f38e185]: UI screen
+            - combobox "UI screen" [ref=f38e187]:
+              - option "Select…" [selected]
+              - option "Catalog browse (list)"
+          - button "Attach" [ref=f38e188] [cursor=pointer]
+      - generic [ref=f38e189]:
+        - heading "Task context summary" [level=2] [ref=f38e190]
+        - generic [ref=f38e191]: "TASK Schema migration: tables + RLS Acceptance criteria - Migration ter-apply ke staging\\n- Test RLS: user A tidak bisa baca row user B Dependencies (none) Requirements (none) Decisions (none) Domain (none) Architecture (none) API (none) UI (none)"
+      - generic [ref=f38e192]:
+        - heading "Dependency chain (derived)" [level=2] [ref=f38e193]
+        - generic [ref=f38e194]: "Schema migration: tables + RLS"
+  - alert [ref=f38e72]: "Schema migration: tables + RLS"

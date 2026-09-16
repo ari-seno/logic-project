@@ -1,0 +1,59 @@
+- generic [active] [ref=f21e1]:
+  - generic [ref=f21e2]:
+    - banner [ref=f21e3]:
+      - generic [ref=f21e4]:
+        - generic [ref=f21e5]:
+          - link "Logic Project" [ref=f21e6] [cursor=pointer]:
+            - /url: /dashboard
+          - navigation [ref=f21e11]:
+            - link "Dashboard" [ref=f21e12] [cursor=pointer]:
+              - /url: /dashboard
+            - link "Projects" [ref=f21e13] [cursor=pointer]:
+              - /url: /projects
+        - generic [ref=f21e14]:
+          - link "Open account" [ref=f21e15] [cursor=pointer]:
+            - /url: /account
+            - paragraph [ref=f21e16]: ariseno.dev
+            - paragraph [ref=f21e17]: ariseno.dev@gmail.com
+          - button "Sign out" [ref=f21e19] [cursor=pointer]
+    - generic [ref=f21e55]:
+      - navigation "Project sections" [ref=f21e56]:
+        - link "Overview" [ref=f21e57] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308
+        - link "Requirements" [ref=f21e58] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/requirements
+        - link "Decisions" [ref=f21e59] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/decisions
+        - link "Domain" [ref=f21e60] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/domains
+        - link "Architecture" [ref=f21e61] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/architecture
+        - link "API" [ref=f21e62] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/api
+        - link "UI" [ref=f21e63] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/ui
+        - link "Tasks" [ref=f21e64] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/tasks
+      - generic [ref=f21e65]:
+        - link "← Back to decisions" [ref=f21e66] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/architecture/decisions
+        - generic [ref=f21e67]:
+          - generic [ref=f21e68]:
+            - heading "Server Actions untuk mutasi data" [level=1] [ref=f21e69]
+            - generic [ref=f21e70]: Accepted
+            - paragraph [ref=f21e72]: Updated Sep 16, 2026
+          - generic [ref=f21e73]:
+            - link "Edit" [ref=f21e74] [cursor=pointer]:
+              - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/architecture/decisions/3140c490-acd0-4529-96ec-8f76fe620fcf/edit
+            - button "Delete decision" [ref=f21e77] [cursor=pointer]: Delete
+      - generic [ref=f21e78]:
+        - generic [ref=f21e79]:
+          - paragraph [ref=f21e80]: Context
+          - paragraph [ref=f21e81]: "Butuh endpoint internal untuk form submission dan CRUD. Alternatif: REST route handlers."
+        - generic [ref=f21e82]:
+          - paragraph [ref=f21e83]: Decision
+          - paragraph [ref=f21e84]: Pakai Server Actions Next.js 15 untuk semua mutasi data dari form.
+        - generic [ref=f21e85]:
+          - paragraph [ref=f21e86]: Rationale
+          - paragraph [ref=f21e87]: Type-safe, no manual fetch, progressive enhancement tetap jalan. RLS tetap sumber kebenaran otorisasi.
+  - alert [ref=f21e54]: Server Actions untuk mutasi data

@@ -1,0 +1,50 @@
+- generic [active] [ref=f12e1]:
+  - generic [ref=f12e2]:
+    - banner [ref=f12e3]:
+      - generic [ref=f12e4]:
+        - generic [ref=f12e5]:
+          - link "Logic Project" [ref=f12e6] [cursor=pointer]:
+            - /url: /dashboard
+          - navigation [ref=f12e11]:
+            - link "Dashboard" [ref=f12e12] [cursor=pointer]:
+              - /url: /dashboard
+            - link "Projects" [ref=f12e13] [cursor=pointer]:
+              - /url: /projects
+        - generic [ref=f12e14]:
+          - link "Open account" [ref=f12e15] [cursor=pointer]:
+            - /url: /account
+            - paragraph [ref=f12e16]: ariseno.dev
+            - paragraph [ref=f12e17]: ariseno.dev@gmail.com
+          - button "Sign out" [ref=f12e19] [cursor=pointer]
+    - generic [ref=f12e21]:
+      - navigation "Project sections" [ref=f12e22]:
+        - link "Overview" [ref=f12e23] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308
+        - link "Requirements" [ref=f12e24] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/requirements
+        - link "Decisions" [ref=f12e25] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/decisions
+        - link "Domain" [ref=f12e26] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/domains
+        - link "Architecture" [ref=f12e27] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/architecture
+        - link "API" [ref=f12e28] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/api
+        - link "UI" [ref=f12e29] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/ui
+        - link "Tasks" [ref=f12e30] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/tasks
+      - generic [ref=f12e31]:
+        - link "← Back to Library Core" [ref=f12e32] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/domains/c6060e01-02b0-4db6-b6e7-437ac46de0c4
+        - heading "New entity" [level=1] [ref=f12e33]
+        - paragraph [ref=f12e34]: Library Core
+      - generic [ref=f12e36]:
+        - generic [ref=f12e37]:
+          - generic [ref=f12e38]: Name
+          - textbox "Name" [ref=f12e39]: Member
+        - generic [ref=f12e40]:
+          - generic [ref=f12e41]: Description
+          - textbox "Description" [ref=f12e42]: Anggota perpustakaan yang terdaftar.
+        - button "Creating…" [disabled]
+  - alert [ref=f12e44]

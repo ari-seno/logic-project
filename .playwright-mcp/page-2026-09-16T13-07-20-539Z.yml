@@ -1,0 +1,79 @@
+- generic [active] [ref=f16e1]:
+  - generic [ref=f16e2]:
+    - banner [ref=f16e3]:
+      - generic [ref=f16e4]:
+        - generic [ref=f16e5]:
+          - link "Logic Project" [ref=f16e6] [cursor=pointer]:
+            - /url: /dashboard
+          - navigation [ref=f16e11]:
+            - link "Dashboard" [ref=f16e12] [cursor=pointer]:
+              - /url: /dashboard
+            - link "Projects" [ref=f16e13] [cursor=pointer]:
+              - /url: /projects
+        - generic [ref=f16e14]:
+          - link "Open account" [ref=f16e15] [cursor=pointer]:
+            - /url: /account
+            - paragraph [ref=f16e16]: ariseno.dev
+            - paragraph [ref=f16e17]: ariseno.dev@gmail.com
+          - button "Sign out" [ref=f16e19] [cursor=pointer]
+    - generic [ref=f16e21]:
+      - generic [ref=f16e22]:
+        - link "← Back to domains" [ref=f16e23] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/domains
+        - generic [ref=f16e24]:
+          - generic [ref=f16e25]:
+            - heading "ERD" [level=1] [ref=f16e26]
+            - paragraph [ref=f16e27]: Library Management System
+          - link "New relationship" [ref=f16e28] [cursor=pointer]:
+            - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/domains/relationships/new
+        - navigation "Project sections" [ref=f16e30]:
+          - link "Overview" [ref=f16e31] [cursor=pointer]:
+            - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308
+          - link "Requirements" [ref=f16e32] [cursor=pointer]:
+            - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/requirements
+          - link "Decisions" [ref=f16e33] [cursor=pointer]:
+            - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/decisions
+          - link "Domain" [ref=f16e34] [cursor=pointer]:
+            - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/domains
+          - link "Architecture" [ref=f16e35] [cursor=pointer]:
+            - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/architecture
+          - link "API" [ref=f16e36] [cursor=pointer]:
+            - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/api
+          - link "UI" [ref=f16e37] [cursor=pointer]:
+            - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/ui
+          - link "Tasks" [ref=f16e38] [cursor=pointer]:
+            - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/tasks
+      - generic [ref=f16e39]:
+        - generic [ref=f16e40]:
+          - generic [ref=f16e42]:
+            - heading "Library Core" [level=2] [ref=f16e43]
+            - paragraph [ref=f16e44]: "Bounded context inti: katalog buku, anggota, dan transaksi peminjaman."
+          - generic [ref=f16e45]:
+            - link [ref=f16e46] [cursor=pointer]:
+              - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/domains/c6060e01-02b0-4db6-b6e7-437ac46de0c4/entities/2230c728-72c3-4c2c-879e-1e32c3ffab8a
+              - paragraph [ref=f16e47]: Book
+              - paragraph [ref=f16e48]: no attributes
+            - link [ref=f16e49] [cursor=pointer]:
+              - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/domains/c6060e01-02b0-4db6-b6e7-437ac46de0c4/entities/21b95aaa-1f1f-4e53-8a82-b3f53f797ad0
+              - paragraph [ref=f16e50]: Loan
+              - paragraph [ref=f16e51]: no attributes
+            - link [ref=f16e52] [cursor=pointer]:
+              - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/domains/c6060e01-02b0-4db6-b6e7-437ac46de0c4/entities/fdbd423b-bc12-4053-8eec-ec1520713ac1
+              - paragraph [ref=f16e53]: Member
+              - paragraph [ref=f16e54]: no attributes
+        - generic [ref=f16e55]:
+          - heading "Relationships" [level=2] [ref=f16e56]
+          - list [ref=f16e57]:
+            - listitem [ref=f16e58]:
+              - link "borrows" [ref=f16e59] [cursor=pointer]:
+                - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/domains/relationships/6b6ce52c-8974-4e25-8d6a-813d58cf8813
+              - generic [ref=f16e60]: Member
+              - generic [ref=f16e61]: 1 → N
+              - generic [ref=f16e62]: → Loan
+            - listitem [ref=f16e63]:
+              - link "is borrowed via" [ref=f16e64] [cursor=pointer]:
+                - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/domains/relationships/2bedecce-0e60-4f14-9923-5c3cea4e8cff
+              - generic [ref=f16e65]: Book
+              - generic [ref=f16e66]: 1 → N
+              - generic [ref=f16e67]: → Loan
+  - alert [ref=f16e68]

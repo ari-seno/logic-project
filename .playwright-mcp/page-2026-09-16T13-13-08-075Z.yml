@@ -1,0 +1,190 @@
+- generic [active] [ref=f41e1]:
+  - generic [ref=f41e2]:
+    - banner [ref=f41e3]:
+      - generic [ref=f41e4]:
+        - generic [ref=f41e5]:
+          - link "Logic Project" [ref=f41e6] [cursor=pointer]:
+            - /url: /dashboard
+          - navigation [ref=f41e11]:
+            - link "Dashboard" [ref=f41e12] [cursor=pointer]:
+              - /url: /dashboard
+            - link "Projects" [ref=f41e13] [cursor=pointer]:
+              - /url: /projects
+        - generic [ref=f41e14]:
+          - link "Open account" [ref=f41e15] [cursor=pointer]:
+            - /url: /account
+            - paragraph [ref=f41e16]: ariseno.dev
+            - paragraph [ref=f41e17]: ariseno.dev@gmail.com
+          - button "Sign out" [ref=f41e19] [cursor=pointer]
+    - generic [ref=f41e73]:
+      - navigation "Project sections" [ref=f41e74]:
+        - link "Overview" [ref=f41e75] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308
+        - link "Requirements" [ref=f41e76] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/requirements
+        - link "Decisions" [ref=f41e77] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/decisions
+        - link "Domain" [ref=f41e78] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/domains
+        - link "Architecture" [ref=f41e79] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/architecture
+        - link "API" [ref=f41e80] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/api
+        - link "UI" [ref=f41e81] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/ui
+        - link "Tasks" [ref=f41e82] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/tasks
+      - generic [ref=f41e83]:
+        - generic [ref=f41e84]:
+          - link "← Back to Tasks" [ref=f41e85] [cursor=pointer]:
+            - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/tasks
+          - generic [ref=f41e86]:
+            - generic [ref=f41e87]: Backend
+            - generic [ref=f41e88]: Todo
+            - generic [ref=f41e89]: Medium
+            - generic [ref=f41e90]: S
+          - heading "Loan overdue email reminder" [level=1] [ref=f41e91]
+          - paragraph [ref=f41e92]: Updated Sep 16, 2026
+        - generic [ref=f41e93]:
+          - combobox "Change status" [ref=f41e95]:
+            - option "todo" [selected]
+            - option "ready"
+            - option "in progress"
+            - option "blocked"
+            - option "review"
+            - option "done"
+            - option "cancelled"
+          - link "Edit" [ref=f41e96] [cursor=pointer]:
+            - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/tasks/45b71521-9a2c-4148-a7f4-b3207137d5dd/edit
+          - button "Delete task" [ref=f41e99] [cursor=pointer]: Delete
+      - generic [ref=f41e100]:
+        - heading "Description" [level=2] [ref=f41e101]
+        - paragraph [ref=f41e102]: "Cron job harian: kirim email pengingat H-1 sebelum due_at."
+        - heading "Acceptance criteria" [level=3] [ref=f41e103]
+        - generic [ref=f41e104]: "- Cron harian jam 08:00\\n- Email hanya untuk loan aktif\\n- Subject: 'Buku [title] jatuh tempo besok'"
+        - heading "Implementation notes" [level=3] [ref=f41e105]
+        - generic [ref=f41e106]: (none)
+      - generic [ref=f41e107]:
+        - heading "Hierarchy" [level=2] [ref=f41e108]
+        - generic [ref=f41e109]:
+          - generic [ref=f41e110]:
+            - heading "Parent" [level=3] [ref=f41e111]
+            - paragraph [ref=f41e112]: Top-level task
+          - generic [ref=f41e113]:
+            - heading "Subtasks (0)" [level=3] [ref=f41e114]
+            - paragraph [ref=f41e115]: No subtasks.
+        - paragraph [ref=f41e116]:
+          - text: "Sibling tasks:"
+          - 'link "Schema migration: tables + RLS" [ref=f41e118] [cursor=pointer]':
+            - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/tasks/b685e5f5-e011-4665-a661-85b2f2152c9a
+          - generic [ref=f41e119]:
+            - text: ","
+            - link "Implement book search endpoint" [ref=f41e120] [cursor=pointer]:
+              - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/tasks/aafcd4d8-aa66-4df9-965b-9a33b3e74207
+          - generic [ref=f41e121]:
+            - text: ","
+            - link "Build BookCard UI" [ref=f41e122] [cursor=pointer]:
+              - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/tasks/2acfb312-77fa-42ed-9a6e-3557ce0412f7
+      - generic [ref=f41e123]:
+        - heading "Dependencies" [level=2] [ref=f41e124]
+        - generic [ref=f41e125]:
+          - generic [ref=f41e126]:
+            - heading "Depends on (0)" [level=3] [ref=f41e127]
+            - paragraph [ref=f41e128]: Nothing.
+          - generic [ref=f41e129]:
+            - heading "Blocks (0)" [level=3] [ref=f41e130]
+            - paragraph [ref=f41e131]: Nothing.
+        - generic [ref=f41e132]:
+          - heading "Add dependency" [level=3] [ref=f41e133]
+          - generic [ref=f41e135]:
+            - generic [ref=f41e136]:
+              - generic [ref=f41e137]:
+                - generic [ref=f41e138]: Depends on
+                - combobox "Depends on" [ref=f41e140]:
+                  - option "Select…" [selected]
+                  - 'option "Schema migration: tables + RLS"'
+                  - option "Implement book search endpoint"
+                  - option "Build BookCard UI"
+              - generic [ref=f41e141]:
+                - generic [ref=f41e142]: Type
+                - combobox "Type" [ref=f41e144]:
+                  - option "blocks" [selected]
+                  - option "related"
+            - generic [ref=f41e145]:
+              - generic [ref=f41e146]: Description
+              - textbox "Description" [ref=f41e147]
+            - button "Add dependency" [ref=f41e148] [cursor=pointer]
+      - generic [ref=f41e149]:
+        - heading "Requirements" [level=2] [ref=f41e150]
+        - paragraph [ref=f41e151]: None linked.
+        - generic [ref=f41e153]:
+          - generic [ref=f41e154]:
+            - generic [ref=f41e155]: Requirement
+            - combobox "Requirement" [ref=f41e157]:
+              - option "Select…" [selected]
+              - option "Member registration (functional)"
+              - option "Book catalog search (functional)"
+              - option "Loan & return workflow (functional)"
+              - 'option "Performance: search p95 under 300ms (non_functional)"'
+          - button "Attach" [ref=f41e158] [cursor=pointer]
+      - generic [ref=f41e159]:
+        - heading "Decisions" [level=2] [ref=f41e160]
+        - paragraph [ref=f41e161]: None linked.
+        - generic [ref=f41e163]:
+          - generic [ref=f41e164]:
+            - generic [ref=f41e165]: Decision
+            - combobox "Decision" [ref=f41e167]:
+              - option "Select…" [selected]
+              - option "Pakai Supabase untuk auth dan database (accepted)"
+          - button "Attach" [ref=f41e168] [cursor=pointer]
+      - generic [ref=f41e169]:
+        - heading "Domain entities" [level=2] [ref=f41e170]
+        - paragraph [ref=f41e171]: None linked.
+        - generic [ref=f41e173]:
+          - generic [ref=f41e174]:
+            - generic [ref=f41e175]: Domain entity
+            - combobox "Domain entity" [ref=f41e177]:
+              - option "Select…" [selected]
+              - option "Book (Library Core)"
+              - option "Member (Library Core)"
+              - option "Loan (Library Core)"
+          - button "Attach" [ref=f41e178] [cursor=pointer]
+      - generic [ref=f41e179]:
+        - heading "Architecture components" [level=2] [ref=f41e180]
+        - paragraph [ref=f41e181]: None linked.
+        - generic [ref=f41e183]:
+          - generic [ref=f41e184]:
+            - generic [ref=f41e185]: Architecture component
+            - combobox "Architecture component" [ref=f41e187]:
+              - option "Select…" [selected]
+              - option "Catalog Service (backend)"
+              - option "Library Web App (frontend)"
+          - button "Attach" [ref=f41e188] [cursor=pointer]
+      - generic [ref=f41e189]:
+        - heading "API endpoints" [level=2] [ref=f41e190]
+        - paragraph [ref=f41e191]: None linked.
+        - generic [ref=f41e193]:
+          - generic [ref=f41e194]:
+            - generic [ref=f41e195]: API endpoint
+            - combobox "API endpoint" [ref=f41e197]:
+              - option "Select…" [selected]
+              - option "Search books (GET /api/catalog/books)"
+              - option "Create loan (POST /api/catalog/loans)"
+          - button "Attach" [ref=f41e198] [cursor=pointer]
+      - generic [ref=f41e199]:
+        - heading "UI screens" [level=2] [ref=f41e200]
+        - paragraph [ref=f41e201]: None linked.
+        - generic [ref=f41e203]:
+          - generic [ref=f41e204]:
+            - generic [ref=f41e205]: UI screen
+            - combobox "UI screen" [ref=f41e207]:
+              - option "Select…" [selected]
+              - option "Catalog browse (list)"
+          - button "Attach" [ref=f41e208] [cursor=pointer]
+      - generic [ref=f41e209]:
+        - heading "Task context summary" [level=2] [ref=f41e210]
+        - generic [ref=f41e211]: "TASK Loan overdue email reminder Acceptance criteria - Cron harian jam 08:00\\n- Email hanya untuk loan aktif\\n- Subject: 'Buku [title] jatuh tempo besok' Dependencies (none) Requirements (none) Decisions (none) Domain (none) Architecture (none) API (none) UI (none)"
+      - generic [ref=f41e212]:
+        - heading "Dependency chain (derived)" [level=2] [ref=f41e213]
+        - generic [ref=f41e214]: Loan overdue email reminder
+  - alert [ref=f41e72]: Loan overdue email reminder

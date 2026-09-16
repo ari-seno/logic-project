@@ -108,7 +108,7 @@ export async function createUiNavigationItem(
   if (error || !data) return { error: error?.message ?? "Failed to create navigation item." };
 
   revalidatePath(`/projects/${projectId}/ui`);
-  redirect(`/projects/${projectId}/ui/navigation/${data.id}/edit`);
+  redirect(`/projects/${projectId}/ui`);
 }
 
 export async function updateUiNavigationItem(

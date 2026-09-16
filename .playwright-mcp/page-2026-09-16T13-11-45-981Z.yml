@@ -1,0 +1,71 @@
+- generic [active] [ref=f37e1]:
+  - generic [ref=f37e2]:
+    - banner [ref=f37e3]:
+      - generic [ref=f37e4]:
+        - generic [ref=f37e5]:
+          - link "Logic Project" [ref=f37e6] [cursor=pointer]:
+            - /url: /dashboard
+          - navigation [ref=f37e11]:
+            - link "Dashboard" [ref=f37e12] [cursor=pointer]:
+              - /url: /dashboard
+            - link "Projects" [ref=f37e13] [cursor=pointer]:
+              - /url: /projects
+        - generic [ref=f37e14]:
+          - link "Open account" [ref=f37e15] [cursor=pointer]:
+            - /url: /account
+            - paragraph [ref=f37e16]: ariseno.dev
+            - paragraph [ref=f37e17]: ariseno.dev@gmail.com
+          - button "Sign out" [ref=f37e19] [cursor=pointer]
+    - generic [ref=f37e21]:
+      - navigation "Project sections" [ref=f37e22]:
+        - link "Overview" [ref=f37e23] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308
+        - link "Requirements" [ref=f37e24] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/requirements
+        - link "Decisions" [ref=f37e25] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/decisions
+        - link "Domain" [ref=f37e26] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/domains
+        - link "Architecture" [ref=f37e27] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/architecture
+        - link "API" [ref=f37e28] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/api
+        - link "UI" [ref=f37e29] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/ui
+        - link "Tasks" [ref=f37e30] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/tasks
+      - generic [ref=f37e31]:
+        - generic [ref=f37e32]:
+          - heading "Tasks" [level=1] [ref=f37e33]
+          - paragraph [ref=f37e34]: Library Management System · 0 tasks
+        - generic [ref=f37e35]:
+          - link "Board" [ref=f37e36] [cursor=pointer]:
+            - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/tasks/board
+          - link "New task" [ref=f37e37] [cursor=pointer]:
+            - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/tasks/new
+      - generic [ref=f37e38]:
+        - generic [ref=f37e39]:
+          - generic [ref=f37e40]: Status
+          - combobox "Status" [ref=f37e41]:
+            - option "all" [selected]
+            - option "todo"
+            - option "ready"
+            - option "in progress"
+            - option "blocked"
+            - option "review"
+            - option "done"
+            - option "cancelled"
+        - generic [ref=f37e42]:
+          - generic [ref=f37e43]: Type
+          - combobox "Type" [ref=f37e44]:
+            - option "All" [selected]
+        - generic [ref=f37e45]:
+          - generic [ref=f37e46]: Sort by
+          - combobox "Sort by" [ref=f37e47]:
+            - option "Position" [selected]
+            - option "Priority"
+            - option "Updated"
+            - option "Title"
+        - button "Apply" [ref=f37e48] [cursor=pointer]
+      - paragraph [ref=f37e50]: No tasks match these filters.
+  - alert [ref=f37e51]

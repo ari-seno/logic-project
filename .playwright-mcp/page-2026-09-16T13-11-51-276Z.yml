@@ -1,0 +1,102 @@
+- generic [active] [ref=f38e1]:
+  - generic [ref=f38e2]:
+    - banner [ref=f38e3]:
+      - generic [ref=f38e4]:
+        - generic [ref=f38e5]:
+          - link "Logic Project" [ref=f38e6] [cursor=pointer]:
+            - /url: /dashboard
+          - navigation [ref=f38e11]:
+            - link "Dashboard" [ref=f38e12] [cursor=pointer]:
+              - /url: /dashboard
+            - link "Projects" [ref=f38e13] [cursor=pointer]:
+              - /url: /projects
+        - generic [ref=f38e14]:
+          - link "Open account" [ref=f38e15] [cursor=pointer]:
+            - /url: /account
+            - paragraph [ref=f38e16]: ariseno.dev
+            - paragraph [ref=f38e17]: ariseno.dev@gmail.com
+          - button "Sign out" [ref=f38e19] [cursor=pointer]
+    - generic [ref=f38e21]:
+      - navigation "Project sections" [ref=f38e22]:
+        - link "Overview" [ref=f38e23] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308
+        - link "Requirements" [ref=f38e24] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/requirements
+        - link "Decisions" [ref=f38e25] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/decisions
+        - link "Domain" [ref=f38e26] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/domains
+        - link "Architecture" [ref=f38e27] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/architecture
+        - link "API" [ref=f38e28] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/api
+        - link "UI" [ref=f38e29] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/ui
+        - link "Tasks" [ref=f38e30] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/tasks
+      - generic [ref=f38e31]:
+        - link "← Back to Tasks" [ref=f38e32] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/tasks
+        - heading "New task" [level=1] [ref=f38e33]
+        - paragraph [ref=f38e34]: Library Management System
+      - generic [ref=f38e36]:
+        - generic [ref=f38e37]:
+          - generic [ref=f38e38]: Title
+          - textbox "Title" [ref=f38e39]
+        - generic [ref=f38e40]:
+          - generic [ref=f38e41]:
+            - generic [ref=f38e42]: Type
+            - combobox "Type" [ref=f38e44]:
+              - option "feature" [selected]
+              - option "bug"
+              - option "refactor"
+              - option "database"
+              - option "backend"
+              - option "frontend"
+              - option "infrastructure"
+              - option "testing"
+              - option "documentation"
+              - option "security"
+              - option "other"
+          - generic [ref=f38e45]:
+            - generic [ref=f38e46]: Priority
+            - combobox "Priority" [ref=f38e48]:
+              - option "low"
+              - option "medium" [selected]
+              - option "high"
+              - option "critical"
+        - generic [ref=f38e49]:
+          - generic [ref=f38e50]:
+            - generic [ref=f38e51]: Status
+            - combobox "Status" [ref=f38e53]:
+              - option "todo" [selected]
+              - option "ready"
+              - option "in progress"
+              - option "blocked"
+              - option "review"
+              - option "done"
+              - option "cancelled"
+          - generic [ref=f38e54]:
+            - generic [ref=f38e55]: Effort
+            - combobox "Effort" [ref=f38e57]:
+              - option "(none)" [selected]
+              - option "xs"
+              - option "s"
+              - option "m"
+              - option "l"
+              - option "xl"
+        - generic [ref=f38e58]:
+          - generic [ref=f38e59]: Parent task
+          - combobox "Parent task" [ref=f38e61]:
+            - option "(top level)" [selected]
+        - generic [ref=f38e62]:
+          - generic [ref=f38e63]: Description
+          - textbox "Description" [ref=f38e64]
+        - generic [ref=f38e65]:
+          - generic [ref=f38e66]: Acceptance criteria
+          - textbox "Acceptance criteria" [ref=f38e67]
+        - generic [ref=f38e68]:
+          - generic [ref=f38e69]: Implementation notes
+          - textbox "Implementation notes" [ref=f38e70]
+        - button "Create task" [ref=f38e71] [cursor=pointer]
+  - alert [ref=f38e72]

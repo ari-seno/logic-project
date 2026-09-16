@@ -1,0 +1,50 @@
+- generic [active] [ref=f10e1]:
+  - generic [ref=f10e2]:
+    - banner [ref=f10e3]:
+      - generic [ref=f10e4]:
+        - generic [ref=f10e5]:
+          - link "Logic Project" [ref=f10e6] [cursor=pointer]:
+            - /url: /dashboard
+          - navigation [ref=f10e11]:
+            - link "Dashboard" [ref=f10e12] [cursor=pointer]:
+              - /url: /dashboard
+            - link "Projects" [ref=f10e13] [cursor=pointer]:
+              - /url: /projects
+        - generic [ref=f10e14]:
+          - link "Open account" [ref=f10e15] [cursor=pointer]:
+            - /url: /account
+            - paragraph [ref=f10e16]: ariseno.dev
+            - paragraph [ref=f10e17]: ariseno.dev@gmail.com
+          - button "Sign out" [ref=f10e19] [cursor=pointer]
+    - generic [ref=f10e21]:
+      - navigation "Project sections" [ref=f10e22]:
+        - link "Overview" [ref=f10e23] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308
+        - link "Requirements" [ref=f10e24] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/requirements
+        - link "Decisions" [ref=f10e25] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/decisions
+        - link "Domain" [ref=f10e26] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/domains
+        - link "Architecture" [ref=f10e27] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/architecture
+        - link "API" [ref=f10e28] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/api
+        - link "UI" [ref=f10e29] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/ui
+        - link "Tasks" [ref=f10e30] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/tasks
+      - generic [ref=f10e31]:
+        - link "← Back to domains" [ref=f10e32] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/domains
+        - heading "New domain" [level=1] [ref=f10e33]
+        - paragraph [ref=f10e34]: Library Management System
+      - generic [ref=f10e36]:
+        - generic [ref=f10e37]:
+          - generic [ref=f10e38]: Name
+          - textbox "Name" [ref=f10e39]
+        - generic [ref=f10e40]:
+          - generic [ref=f10e41]: Description
+          - textbox "Description" [ref=f10e42]
+        - button "Create domain" [ref=f10e43] [cursor=pointer]
+  - alert [ref=f10e44]

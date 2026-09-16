@@ -1,0 +1,65 @@
+- generic [active] [ref=f27e1]:
+  - generic [ref=f27e2]:
+    - banner [ref=f27e3]:
+      - generic [ref=f27e4]:
+        - generic [ref=f27e5]:
+          - link "Logic Project" [ref=f27e6] [cursor=pointer]:
+            - /url: /dashboard
+          - navigation [ref=f27e11]:
+            - link "Dashboard" [ref=f27e12] [cursor=pointer]:
+              - /url: /dashboard
+            - link "Projects" [ref=f27e13] [cursor=pointer]:
+              - /url: /projects
+        - generic [ref=f27e14]:
+          - link "Open account" [ref=f27e15] [cursor=pointer]:
+            - /url: /account
+            - paragraph [ref=f27e16]: ariseno.dev
+            - paragraph [ref=f27e17]: ariseno.dev@gmail.com
+          - button "Sign out" [ref=f27e19] [cursor=pointer]
+    - generic [ref=f27e50]:
+      - navigation "Project sections" [ref=f27e51]:
+        - link "Overview" [ref=f27e52] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308
+        - link "Requirements" [ref=f27e53] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/requirements
+        - link "Decisions" [ref=f27e54] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/decisions
+        - link "Domain" [ref=f27e55] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/domains
+        - link "Architecture" [ref=f27e56] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/architecture
+        - link "API" [ref=f27e57] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/api
+        - link "UI" [ref=f27e58] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/ui
+        - link "Tasks" [ref=f27e59] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/tasks
+      - generic [ref=f27e60]:
+        - generic [ref=f27e61]:
+          - heading "API design" [level=1] [ref=f27e62]
+          - paragraph [ref=f27e63]: Library Management System · Design the contract of your future application.
+        - generic [ref=f27e64]:
+          - link "New group" [ref=f27e65] [cursor=pointer]:
+            - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/api/groups/new
+          - link "New endpoint" [ref=f27e66] [cursor=pointer]:
+            - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/api/endpoints/new
+      - generic [ref=f27e67]:
+        - heading "Groups" [level=2] [ref=f27e68]
+        - list [ref=f27e69]:
+          - listitem [ref=f27e70]:
+            - generic [ref=f27e71]:
+              - generic [ref=f27e72]:
+                - link "Catalog" [ref=f27e73] [cursor=pointer]:
+                  - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/api/groups/376eee8f-ee67-487f-a30f-f33faa8b6e1b/edit
+                - generic [ref=f27e74]: /api/catalog
+              - paragraph [ref=f27e75]: Endpoint terkait pencarian buku dan detail katalog.
+              - paragraph [ref=f27e76]: 0 endpoints · Updated Sep 16, 2026
+            - button "Delete group" [ref=f27e79] [cursor=pointer]: Delete
+      - generic [ref=f27e80]:
+        - heading "Endpoints" [level=2] [ref=f27e81]
+        - paragraph [ref=f27e82]: No endpoints yet.
+      - generic [ref=f27e83]:
+        - heading "Contract preview" [level=2] [ref=f27e84]
+        - paragraph [ref=f27e85]: Read-only summary generated from the stored API data. Not editable.
+        - paragraph [ref=f27e86]: Add endpoints to see the contract preview.
+  - alert [ref=f27e49]: API design

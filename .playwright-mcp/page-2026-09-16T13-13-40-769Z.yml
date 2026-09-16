@@ -1,0 +1,42 @@
+- generic [active] [ref=f44e1]:
+  - generic [ref=f44e2]:
+    - banner [ref=f44e3]:
+      - generic [ref=f44e4]:
+        - generic [ref=f44e5]:
+          - link "Logic Project" [ref=f44e6] [cursor=pointer]:
+            - /url: /dashboard
+          - navigation [ref=f44e11]:
+            - link "Dashboard" [ref=f44e12] [cursor=pointer]:
+              - /url: /dashboard
+            - link "Projects" [ref=f44e13] [cursor=pointer]:
+              - /url: /projects
+        - generic [ref=f44e14]:
+          - link "Open account" [ref=f44e15] [cursor=pointer]:
+            - /url: /account
+            - paragraph [ref=f44e16]: Ari Seno
+            - paragraph [ref=f44e17]: ariseno.dev@gmail.com
+          - button "Sign out" [ref=f44e19] [cursor=pointer]
+    - generic [ref=f44e43]:
+      - generic [ref=f44e44]:
+        - link "← Back to account" [ref=f44e45] [cursor=pointer]:
+          - /url: /account
+        - heading "Account settings" [level=1] [ref=f44e46]
+        - paragraph [ref=f44e47]: Update your profile display name.
+      - status [ref=f44e48]: Profile updated.
+      - generic [ref=f44e49]:
+        - heading "Profile" [level=2] [ref=f44e50]
+        - generic [ref=f44e52]:
+          - generic [ref=f44e53]:
+            - generic [ref=f44e54]: Email
+            - textbox "Email" [ref=f44e55]: ariseno.dev@gmail.com
+            - paragraph [ref=f44e56]: Email is managed by your auth provider and cannot be changed here.
+          - generic [ref=f44e57]:
+            - generic [ref=f44e58]: Display name
+            - textbox "Display name" [ref=f44e59]:
+              - /placeholder: How you'd like to be addressed
+              - text: Ari Seno
+          - button "Save changes" [ref=f44e61] [cursor=pointer]
+      - generic [ref=f44e62]:
+        - heading "Account security" [level=2] [ref=f44e63]
+        - paragraph [ref=f44e64]: Password changes and sign-out controls are managed by your auth provider. Use the sign-out button in the header to end your current session.
+  - alert [ref=f44e42]: Account settings

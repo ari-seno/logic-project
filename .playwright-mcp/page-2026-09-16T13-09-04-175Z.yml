@@ -1,0 +1,59 @@
+- generic [active] [ref=f24e1]:
+  - generic [ref=f24e2]:
+    - banner [ref=f24e3]:
+      - generic [ref=f24e4]:
+        - generic [ref=f24e5]:
+          - link "Logic Project" [ref=f24e6] [cursor=pointer]:
+            - /url: /dashboard
+          - navigation [ref=f24e11]:
+            - link "Dashboard" [ref=f24e12] [cursor=pointer]:
+              - /url: /dashboard
+            - link "Projects" [ref=f24e13] [cursor=pointer]:
+              - /url: /projects
+        - generic [ref=f24e14]:
+          - link "Open account" [ref=f24e15] [cursor=pointer]:
+            - /url: /account
+            - paragraph [ref=f24e16]: ariseno.dev
+            - paragraph [ref=f24e17]: ariseno.dev@gmail.com
+          - button "Sign out" [ref=f24e19] [cursor=pointer]
+    - generic [ref=f24e21]:
+      - navigation "Project sections" [ref=f24e22]:
+        - link "Overview" [ref=f24e23] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308
+        - link "Requirements" [ref=f24e24] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/requirements
+        - link "Decisions" [ref=f24e25] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/decisions
+        - link "Domain" [ref=f24e26] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/domains
+        - link "Architecture" [ref=f24e27] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/architecture
+        - link "API" [ref=f24e28] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/api
+        - link "UI" [ref=f24e29] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/ui
+        - link "Tasks" [ref=f24e30] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/tasks
+      - generic [ref=f24e31]:
+        - link "← Back to architecture" [ref=f24e32] [cursor=pointer]:
+          - /url: /projects/1fa6a64c-7ade-49a7-8296-0167d612e308/architecture
+        - heading "New component dependency" [level=1] [ref=f24e33]
+        - paragraph [ref=f24e34]: Library Management System
+      - generic [ref=f24e36]:
+        - generic [ref=f24e37]:
+          - generic [ref=f24e38]: Source component
+          - combobox "Source component" [ref=f24e40]:
+            - option "Select…" [selected]
+            - option "Catalog Service"
+            - option "Library Web App"
+        - generic [ref=f24e41]:
+          - generic [ref=f24e42]: Target component
+          - combobox "Target component" [ref=f24e44]:
+            - option "Select…" [selected]
+            - option "Catalog Service"
+            - option "Library Web App"
+        - generic [ref=f24e45]:
+          - generic [ref=f24e46]: Description
+          - textbox "Description" [ref=f24e47]
+        - button "Create dependency" [ref=f24e48] [cursor=pointer]
+  - alert [ref=f24e49]
