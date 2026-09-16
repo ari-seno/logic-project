@@ -102,7 +102,10 @@ export default async function TasksListPage({
           >
             Board
           </ButtonLink>
-          <ButtonLink href={`/projects/${project.id}/tasks/new`}>
+          <ButtonLink
+            href={`/projects/${project.id}/tasks/new`}
+            variant="secondary"
+          >
             New task
           </ButtonLink>
         </div>

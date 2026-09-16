@@ -57,7 +57,10 @@ export default async function ApiOverviewPage({
           >
             New group
           </ButtonLink>
-          <ButtonLink href={`/projects/${project.id}/api/endpoints/new`}>
+          <ButtonLink
+            href={`/projects/${project.id}/api/endpoints/new`}
+            variant="secondary"
+          >
             New endpoint
           </ButtonLink>
         </div>

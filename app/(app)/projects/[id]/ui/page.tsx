@@ -120,7 +120,10 @@ export default async function UiOverviewPage({
           >
             New component
           </ButtonLink>
-          <ButtonLink href={`/projects/${project.id}/ui/navigation/new`}>
+          <ButtonLink
+            href={`/projects/${project.id}/ui/navigation/new`}
+            variant="secondary"
+          >
             New navigation
           </ButtonLink>
         </div>

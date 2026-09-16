@@ -91,6 +91,7 @@ export default async function ArchitectureOverviewPage({
           <ButtonLink
             href={`/projects/${project.id}/architecture/components/new`}
             size="sm"
+            variant="secondary"
           >
             New component
           </ButtonLink>
@@ -133,6 +134,7 @@ export default async function ArchitectureOverviewPage({
           <ButtonLink
             href={`/projects/${project.id}/architecture/technologies/new`}
             size="sm"
+            variant="secondary"
           >
             New technology
           </ButtonLink>
@@ -177,6 +179,7 @@ export default async function ArchitectureOverviewPage({
           <ButtonLink
             href={`/projects/${project.id}/architecture/decisions/new`}
             size="sm"
+            variant="secondary"
           >
             New decision
           </ButtonLink>
@@ -212,6 +215,7 @@ export default async function ArchitectureOverviewPage({
             <ButtonLink
               href={`/projects/${project.id}/architecture/dependencies/new`}
               size="sm"
+              variant="secondary"
             >
               New dependency
             </ButtonLink>

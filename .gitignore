@@ -55,3 +55,5 @@ next-env.d.ts
 # Playwright browser tour artifacts
 .playwright-mcp/
 tour-*.png
+audit-*.png
+erd-*.png

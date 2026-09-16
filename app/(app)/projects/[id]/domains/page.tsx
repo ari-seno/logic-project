@@ -45,7 +45,10 @@ export default async function DomainsListPage({
               {project.name}
             </p>
           </div>
-          <ButtonLink href={`/projects/${project.id}/domains/new`}>
+          <ButtonLink
+            href={`/projects/${project.id}/domains/new`}
+            variant="secondary"
+          >
             New domain
           </ButtonLink>
         </div>
