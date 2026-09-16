@@ -128,34 +128,16 @@ export default async function ProjectOverviewPage({
       ) : null}
 
       <section className="card-glass p-6">
-        <div className="flex items-end justify-between gap-3">
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-[var(--muted-foreground)]">
-            Description
-          </h2>
-          <ButtonLink
-            href={`/projects/${project.id}/edit`}
-            variant="ghost"
-            size="sm"
-          >
-            Edit
-          </ButtonLink>
-        </div>
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-[var(--muted-foreground)]">
+          Description
+        </h2>
         {project.description ? (
           <p className="mt-4 whitespace-pre-wrap text-sm leading-7">
             {project.description}
           </p>
         ) : (
           <p className="mt-4 italic text-sm text-[var(--muted-foreground)]">
-            No description yet.{" "}
-            <ButtonLink
-              href={`/projects/${project.id}/edit`}
-              variant="ghost"
-              size="sm"
-              className="italic"
-            >
-              Add one
-            </ButtonLink>
-            .
+            No description yet.
           </p>
         )}
       </section>
