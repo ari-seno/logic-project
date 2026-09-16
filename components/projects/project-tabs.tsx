@@ -34,7 +34,7 @@ export function ProjectTabs({
     {
       key: "domain",
       label: "Domain",
-      href: `/projects/${projectId}/domains`,
+      href: `/projects/${projectId}/domains/erd`,
     },
     {
       key: "architecture",
