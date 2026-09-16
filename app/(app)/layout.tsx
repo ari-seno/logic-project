@@ -63,10 +63,14 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             </nav>
           </div>
           <div className="flex items-center gap-3">
-            <div className="hidden text-right text-xs leading-tight sm:block">
+            <Link
+              href="/account"
+              className="hidden text-right text-xs leading-tight hover:underline sm:block"
+              aria-label="Open account"
+            >
               <p className="font-medium text-[var(--foreground)]">{displayName}</p>
               <p className="text-[var(--muted-foreground)]">{user.email}</p>
-            </div>
+            </Link>
             <LogoutButton />
           </div>
         </div>

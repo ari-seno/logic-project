@@ -34,6 +34,7 @@ app/                         Next.js App Router
     projects/[id]/api/           overview + groups + endpoints CRUD + sub-resources + traceability
     projects/[id]/ui/            overview + screens + components + navigation CRUD + screen detail (components/forms/states/interactions/traceability)
     projects/[id]/tasks/        flat list (filter/sort) + board + detail (deps + traceability + context summary) + create/edit
+    account/                profile (read-only) + settings (editable display name)
   globals.css                Tailwind v4 theme tokens
   page.tsx                   landing
   proxy.ts -> lib/supabase/middleware.ts
@@ -77,6 +78,7 @@ lib/
   ui/                        screens/ + components/ + screen-components/ +
                              forms/ (incl. sub-actions) + navigation/ +
                              traceability/ (queries + actions)
+  profile/                   queries + actions + zod schema
   supabase/                  client, server, middleware, types, path helpers
   validation/                zod schemas + action state types
   utils.ts                   cn, formatDate, formatDateTime
