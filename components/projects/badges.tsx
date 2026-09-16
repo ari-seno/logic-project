@@ -1,5 +1,7 @@
 import { cn } from "@/lib/utils";
 import type {
+  ApiEndpointEntityRole,
+  ApiHttpMethod,
   ArchitectureComponentType,
   ArchitectureDecisionStatus,
   ArchitectureTechnologyCategory,
@@ -236,4 +238,115 @@ export function ArchitectureDecisionStatusBadge({
     },
   };
   return <Pill className={map[status].cls}>{map[status].label}</Pill>;
+}
+
+const API_METHOD_LABELS: Record<ApiHttpMethod, { label: string; cls: string }> = {
+  GET: {
+    label: "GET",
+    cls: "bg-emerald-50 text-emerald-700 ring-emerald-200",
+  },
+  POST: {
+    label: "POST",
+    cls: "bg-blue-50 text-blue-700 ring-blue-200",
+  },
+  PUT: {
+    label: "PUT",
+    cls: "bg-amber-50 text-amber-700 ring-amber-200",
+  },
+  PATCH: {
+    label: "PATCH",
+    cls: "bg-violet-50 text-violet-700 ring-violet-200",
+  },
+  DELETE: {
+    label: "DELETE",
+    cls: "bg-red-50 text-red-700 ring-red-200",
+  },
+};
+
+export function ApiMethodBadge({ method }: { method: ApiHttpMethod }) {
+  return (
+    <Pill className={cn("font-mono", API_METHOD_LABELS[method].cls)}>
+      {API_METHOD_LABELS[method].label}
+    </Pill>
+  );
+}
+
+export function ApiAuthBadge({
+  required,
+}: {
+  required: boolean;
+}) {
+  return required ? (
+    <Pill className="bg-amber-50 text-amber-700 ring-amber-200">
+      Auth required
+    </Pill>
+  ) : (
+    <Pill className="bg-zinc-50 text-zinc-500 ring-zinc-200">Public</Pill>
+  );
+}
+
+export function ApiStatusCodeBadge({
+  statusCode,
+}: {
+  statusCode: number;
+}) {
+  let cls = "bg-zinc-50 text-zinc-700 ring-zinc-200";
+  if (statusCode >= 200 && statusCode < 300) {
+    cls = "bg-emerald-50 text-emerald-700 ring-emerald-200";
+  } else if (statusCode >= 300 && statusCode < 400) {
+    cls = "bg-amber-50 text-amber-700 ring-amber-200";
+  } else if (statusCode >= 400 && statusCode < 500) {
+    cls = "bg-red-50 text-red-700 ring-red-200";
+  } else if (statusCode >= 500) {
+    cls = "bg-rose-50 text-rose-700 ring-rose-200";
+  }
+  return (
+    <Pill className={cn("font-mono", cls)}>{statusCode}</Pill>
+  );
+}
+
+const API_ENTITY_ROLE_LABELS: Record<
+  ApiEndpointEntityRole,
+  { label: string; cls: string }
+> = {
+  primary_resource: {
+    label: "Primary",
+    cls: "bg-blue-50 text-blue-700 ring-blue-200",
+  },
+  request_resource: {
+    label: "Request",
+    cls: "bg-violet-50 text-violet-700 ring-violet-200",
+  },
+  response_resource: {
+    label: "Response",
+    cls: "bg-emerald-50 text-emerald-700 ring-emerald-200",
+  },
+  related_resource: {
+    label: "Related",
+    cls: "bg-zinc-50 text-zinc-500 ring-zinc-200",
+  },
+};
+
+export function ApiEntityRoleBadge({
+  role,
+}: {
+  role: ApiEndpointEntityRole;
+}) {
+  return (
+    <Pill className={API_ENTITY_ROLE_LABELS[role].cls}>
+      {API_ENTITY_ROLE_LABELS[role].label}
+    </Pill>
+  );
+}
+
+export function ApiRequiredBadge({
+  required,
+}: {
+  required: boolean;
+}) {
+  return required ? (
+    <Pill className="bg-blue-50 text-blue-700 ring-blue-200">Required</Pill>
+  ) : (
+    <Pill className="bg-zinc-50 text-zinc-500 ring-zinc-200">Optional</Pill>
+  );
 }

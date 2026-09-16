@@ -223,6 +223,127 @@ export type ArchitectureComponentDependency = {
   updated_at: string;
 };
 
+export const API_HTTP_METHODS = [
+  "GET",
+  "POST",
+  "PUT",
+  "PATCH",
+  "DELETE",
+] as const;
+export type ApiHttpMethod = (typeof API_HTTP_METHODS)[number];
+
+export const API_PARAMETER_LOCATIONS = ["path", "query", "header", "cookie"] as const;
+export type ApiParameterLocation = (typeof API_PARAMETER_LOCATIONS)[number];
+
+export const API_PARAMETER_DATA_TYPES = [
+  "string",
+  "integer",
+  "number",
+  "boolean",
+  "uuid",
+  "date",
+  "datetime",
+] as const;
+export type ApiParameterDataType = (typeof API_PARAMETER_DATA_TYPES)[number];
+
+export const API_ENDPOINT_ENTITY_ROLES = [
+  "primary_resource",
+  "request_resource",
+  "response_resource",
+  "related_resource",
+] as const;
+export type ApiEndpointEntityRole = (typeof API_ENDPOINT_ENTITY_ROLES)[number];
+
+export type ApiGroup = {
+  id: string;
+  project_id: string;
+  name: string;
+  description: string | null;
+  prefix: string | null;
+  position: number;
+  created_at: string;
+  updated_at: string;
+};
+
+export type ApiEndpoint = {
+  id: string;
+  project_id: string;
+  group_id: string | null;
+  name: string;
+  method: ApiHttpMethod;
+  path: string;
+  summary: string | null;
+  description: string | null;
+  authentication_required: boolean;
+  position: number;
+  created_at: string;
+  updated_at: string;
+};
+
+export type ApiParameter = {
+  id: string;
+  endpoint_id: string;
+  name: string;
+  location: ApiParameterLocation;
+  data_type: ApiParameterDataType;
+  required: boolean;
+  description: string | null;
+  example: string | null;
+  position: number;
+  created_at: string;
+  updated_at: string;
+};
+
+export type ApiRequestBody = {
+  id: string;
+  endpoint_id: string;
+  content_type: string;
+  description: string | null;
+  schema_definition: Json | null;
+  example: Json | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type ApiResponse = {
+  id: string;
+  endpoint_id: string;
+  status_code: number;
+  description: string | null;
+  content_type: string | null;
+  schema_definition: Json | null;
+  example: Json | null;
+  position: number;
+  created_at: string;
+  updated_at: string;
+};
+
+export type ApiError = {
+  id: string;
+  endpoint_id: string;
+  code: string;
+  message: string;
+  description: string | null;
+  http_status: number | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type ApiEndpointEntity = {
+  id: string;
+  endpoint_id: string;
+  entity_id: string;
+  role: ApiEndpointEntityRole;
+  created_at: string;
+};
+
+export type ApiEndpointRequirement = {
+  id: string;
+  endpoint_id: string;
+  requirement_id: string;
+  created_at: string;
+};
+
 type Tables = {
   profiles: {
     Row: Profile;
@@ -501,6 +622,202 @@ type Tables = {
       description?: string | null;
       created_at?: string;
       updated_at?: string;
+    };
+    Relationships: [];
+  };
+  api_groups: {
+    Row: ApiGroup;
+    Insert: {
+      id?: string;
+      project_id: string;
+      name: string;
+      description?: string | null;
+      prefix?: string | null;
+      position?: number;
+      created_at?: string;
+      updated_at?: string;
+    };
+    Update: {
+      id?: string;
+      project_id?: string;
+      name?: string;
+      description?: string | null;
+      prefix?: string | null;
+      position?: number;
+      created_at?: string;
+      updated_at?: string;
+    };
+    Relationships: [];
+  };
+  api_endpoints: {
+    Row: ApiEndpoint;
+    Insert: {
+      id?: string;
+      project_id: string;
+      group_id?: string | null;
+      name: string;
+      method: ApiHttpMethod;
+      path: string;
+      summary?: string | null;
+      description?: string | null;
+      authentication_required?: boolean;
+      position?: number;
+      created_at?: string;
+      updated_at?: string;
+    };
+    Update: {
+      id?: string;
+      project_id?: string;
+      group_id?: string | null;
+      name?: string;
+      method?: ApiHttpMethod;
+      path?: string;
+      summary?: string | null;
+      description?: string | null;
+      authentication_required?: boolean;
+      position?: number;
+      created_at?: string;
+      updated_at?: string;
+    };
+    Relationships: [];
+  };
+  api_parameters: {
+    Row: ApiParameter;
+    Insert: {
+      id?: string;
+      endpoint_id: string;
+      name: string;
+      location: ApiParameterLocation;
+      data_type: ApiParameterDataType;
+      required?: boolean;
+      description?: string | null;
+      example?: string | null;
+      position?: number;
+      created_at?: string;
+      updated_at?: string;
+    };
+    Update: {
+      id?: string;
+      endpoint_id?: string;
+      name?: string;
+      location?: ApiParameterLocation;
+      data_type?: ApiParameterDataType;
+      required?: boolean;
+      description?: string | null;
+      example?: string | null;
+      position?: number;
+      created_at?: string;
+      updated_at?: string;
+    };
+    Relationships: [];
+  };
+  api_request_bodies: {
+    Row: ApiRequestBody;
+    Insert: {
+      id?: string;
+      endpoint_id: string;
+      content_type: string;
+      description?: string | null;
+      schema_definition?: Json | null;
+      example?: Json | null;
+      created_at?: string;
+      updated_at?: string;
+    };
+    Update: {
+      id?: string;
+      endpoint_id?: string;
+      content_type?: string;
+      description?: string | null;
+      schema_definition?: Json | null;
+      example?: Json | null;
+      created_at?: string;
+      updated_at?: string;
+    };
+    Relationships: [];
+  };
+  api_responses: {
+    Row: ApiResponse;
+    Insert: {
+      id?: string;
+      endpoint_id: string;
+      status_code: number;
+      description?: string | null;
+      content_type?: string | null;
+      schema_definition?: Json | null;
+      example?: Json | null;
+      position?: number;
+      created_at?: string;
+      updated_at?: string;
+    };
+    Update: {
+      id?: string;
+      endpoint_id?: string;
+      status_code?: number;
+      description?: string | null;
+      content_type?: string | null;
+      schema_definition?: Json | null;
+      example?: Json | null;
+      position?: number;
+      created_at?: string;
+      updated_at?: string;
+    };
+    Relationships: [];
+  };
+  api_errors: {
+    Row: ApiError;
+    Insert: {
+      id?: string;
+      endpoint_id: string;
+      code: string;
+      message: string;
+      description?: string | null;
+      http_status?: number | null;
+      created_at?: string;
+      updated_at?: string;
+    };
+    Update: {
+      id?: string;
+      endpoint_id?: string;
+      code?: string;
+      message?: string;
+      description?: string | null;
+      http_status?: number | null;
+      created_at?: string;
+      updated_at?: string;
+    };
+    Relationships: [];
+  };
+  api_endpoint_entities: {
+    Row: ApiEndpointEntity;
+    Insert: {
+      id?: string;
+      endpoint_id: string;
+      entity_id: string;
+      role: ApiEndpointEntityRole;
+      created_at?: string;
+    };
+    Update: {
+      id?: string;
+      endpoint_id?: string;
+      entity_id?: string;
+      role?: ApiEndpointEntityRole;
+      created_at?: string;
+    };
+    Relationships: [];
+  };
+  api_endpoint_requirements: {
+    Row: ApiEndpointRequirement;
+    Insert: {
+      id?: string;
+      endpoint_id: string;
+      requirement_id: string;
+      created_at?: string;
+    };
+    Update: {
+      id?: string;
+      endpoint_id?: string;
+      requirement_id?: string;
+      created_at?: string;
     };
     Relationships: [];
   };

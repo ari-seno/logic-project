@@ -27,6 +27,8 @@ import { countArchitectureComponentsByProject } from "@/lib/architecture/compone
 import { countArchitectureTechnologiesByProject } from "@/lib/architecture/technologies/queries";
 import { countArchitectureDecisionsByProject } from "@/lib/architecture/decisions/queries";
 import { countArchitectureComponentDependenciesByProject } from "@/lib/architecture/dependencies/queries";
+import { countApiGroupsByProject } from "@/lib/api/groups/queries";
+import { countApiEndpointsByProject } from "@/lib/api/endpoints/queries";
 
 export default async function ProjectOverviewPage({
   params,
@@ -50,6 +52,8 @@ export default async function ProjectOverviewPage({
     technologyCount,
     archDecisionCount,
     dependencyCount,
+    apiGroupCount,
+    apiEndpointCount,
     recentRequirements,
     recentDecisions,
   ] = await Promise.all([
@@ -62,6 +66,8 @@ export default async function ProjectOverviewPage({
     countArchitectureTechnologiesByProject(project.id),
     countArchitectureDecisionsByProject(project.id),
     countArchitectureComponentDependenciesByProject(project.id),
+    countApiGroupsByProject(project.id),
+    countApiEndpointsByProject(project.id),
     listRequirements({ projectId: project.id, limit: 5 }),
     listDecisions({ projectId: project.id, limit: 5 }),
   ]);
@@ -125,6 +131,8 @@ export default async function ProjectOverviewPage({
             <Stat label="Technologies" value={technologyCount} />
             <Stat label="Arch decisions" value={archDecisionCount} />
             <Stat label="Dependencies" value={dependencyCount} />
+            <Stat label="API groups" value={apiGroupCount} />
+            <Stat label="API endpoints" value={apiEndpointCount} />
           </div>
           <div className="mt-5 border-t border-[var(--border)] pt-4 text-xs text-[var(--muted-foreground)]">
             <p>

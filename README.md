@@ -2,7 +2,7 @@
 
 > An AI Project Planner that structures requirements, decisions, architecture, tasks, and agent prompts. You make the calls; the tool keeps things organized.
 
-This repository contains **Part 1: Foundation & Authentication**, **Part 2: Requirements & Decisions**, **Part 3: Domain & ERD**, and **Part 4: Architecture Foundation** — a Next.js 16 app backed by Supabase Auth and Postgres, with row-level security enforced on every table.
+This repository contains **Part 1: Foundation & Authentication**, **Part 2: Requirements & Decisions**, **Part 3: Domain & ERD**, **Part 4: Architecture Foundation**, and **Part 5: API Design Foundation** — a Next.js 16 app backed by Supabase Auth and Postgres, with row-level security enforced on every table.
 
 ## Stack
 
@@ -31,7 +31,7 @@ app/                         Next.js App Router
     projects/[id]/domains/[domainId]/entities/        new / [entityId] / [entityId]/edit
     projects/[id]/domains/relationships/               new / [relId] / [relId]/edit
     projects/[id]/architecture/      overview + components/technologies/decisions/dependencies CRUD
-  api/                       (none yet)
+    projects/[id]/api/           overview + groups + endpoints CRUD + sub-resources + traceability
   globals.css                Tailwind v4 theme tokens
   page.tsx                   landing
   proxy.ts -> lib/supabase/middleware.ts
@@ -49,6 +49,9 @@ components/
   relationships/             relationship-form
   architecture/              component-form, technology-form,
                              decision-form, dependency-form
+  api/                       group-form, endpoint-form, parameter-form,
+                             request-body-form, response-form, error-form,
+                             traceability-forms
 lib/
   auth/actions.ts            signIn / signUp / signOut server actions
   projects/queries.ts        listProjects, getProject
@@ -63,6 +66,8 @@ lib/
   relationships/             queries, actions (assertProjectAndSharedEntities)
   architecture/              components/, technologies/, decisions/, dependencies/
                              (queries + actions each)
+  api/                       groups/ (queries + actions) + endpoints/
+                             (queries + actions + sub-actions + traceability-actions)
   supabase/                  client, server, middleware, types, path helpers
   validation/                zod schemas + action state types
   utils.ts                   cn, formatDate, formatDateTime
@@ -73,6 +78,7 @@ supabase/
     20250916180000_part2_requirements_decisions.sql   requirements + decisions + RLS + triggers
     20250916190000_part3_domain_erd.sql         domains + entities + attributes + relationships + RLS + triggers
     20250916200000_part4_architecture.sql       components + technologies + arch decisions + dependencies + RLS + triggers
+    20250916210000_part5_api_design.sql         api_groups + api_endpoints + parameters + request_bodies + responses + errors + traceability
 tests/
   *.test.ts                  Vitest unit tests (auth, project, utils,
                              middleware, requirement, decision, domain,
@@ -174,7 +180,9 @@ walkthrough of the user flows and the security boundaries they verify.
   - `profiles`, `projects` rows are scoped to `owner_id = auth.uid()` (Part 1).
   - `requirements`, `decisions`, `domains`, `entities`, `entity_attributes`,
     `entity_relationships`, `architecture_components`, `architecture_technologies`,
-    `architecture_decisions`, and `architecture_component_dependencies` rows are
+    `architecture_decisions`, `architecture_component_dependencies`, `api_groups`,
+    `api_endpoints`, `api_parameters`, `api_request_bodies`, `api_responses`,
+    `api_errors`, `api_endpoint_entities`, and `api_endpoint_requirements` rows are
     scoped through their parent project:
     `EXISTS (SELECT 1 FROM projects p WHERE p.id = <table>.project_id AND p.owner_id = auth.uid())`.
     This enforces "user owns parent project" without weakening Part 1 RLS.
@@ -362,6 +370,96 @@ All four FKs cascade on project/component deletion. The `share_project` trigger 
 - No architecture-level diagram visualization (boxes + arrows) — only the dependency list.
 - No markdown rendering for descriptions.
 
+## Part 5 — API Design Foundation
+
+Part 5 introduces structured modeling of the user's planned application API. **This is a design / planning module** — Logic Project does not generate or run real endpoints for the user's project. Everything in Part 5 exists to capture, organize, and trace the planned contract.
+
+### Concepts
+
+| Concept | Belongs to | Has |
+| --- | --- | --- |
+| Group | Project | name, prefix, description |
+| Endpoint | Project (optionally in a Group) | method, path, name, summary, description, authentication_required |
+| Parameter | Endpoint | name, location, data_type, required, description, example |
+| Request body | Endpoint | content_type, description, schema (JSON), example (JSON) |
+| Response | Endpoint | status_code, description, content_type, schema (JSON), example (JSON) |
+| Error | Endpoint | code, message, http_status, description |
+| Endpoint ↔ Entity | (cross-module link) | role (`primary_resource` / `request_resource` / `response_resource` / `related_resource`) |
+| Endpoint ↔ Requirement | (cross-module link) | the requirement this endpoint implements |
+
+### Enum values
+
+| Type | Values |
+| --- | --- |
+| HTTP method | `GET`, `POST`, `PUT`, `PATCH`, `DELETE` |
+| Parameter location | `path`, `query`, `header`, `cookie` |
+| Parameter data type | `string`, `integer`, `number`, `boolean`, `uuid`, `date`, `datetime` |
+| Endpoint-entity role | `primary_resource`, `request_resource`, `response_resource`, `related_resource` |
+
+### Database tables
+
+| Table | Notes | RLS |
+| --- | --- | --- |
+| `api_groups` | UNIQUE `(project_id, name)` | enabled |
+| `api_endpoints` | UNIQUE `(project_id, method, path)`; FK to `api_groups.id ON DELETE SET NULL` | enabled |
+| `api_parameters` | FK to `api_endpoints ON DELETE CASCADE` | enabled |
+| `api_request_bodies` | 1:1 with endpoint (UNIQUE `endpoint_id`), JSONB payload for schema/example | enabled |
+| `api_responses` | Multiple per endpoint, ordered by `status_code` | enabled |
+| `api_errors` | Per endpoint, code + message + optional `http_status` | enabled |
+| `api_endpoint_entities` | UNIQUE `(endpoint_id, entity_id, role)`; application enforces same-project | enabled |
+| `api_endpoint_requirements` | UNIQUE `(endpoint_id, requirement_id)`; application enforces same-project | enabled |
+
+All FKs cascade on project/endpoint deletion as appropriate. Every parent table has a `set_updated_at` trigger.
+
+### Design vs. implementation
+
+Part 5 is strictly a design tool. It does not generate routes, controllers, schemas, or tests for the user's planned application. Future parts (Tasks, Agent Prompt) can read the modeled contract as input.
+
+### Available routes
+
+| Route | Purpose |
+| --- | --- |
+| `/projects/[id]/api` | Overview with groups, endpoints (method/path/name/auth), and contract preview |
+| `/projects/[id]/api/groups/new` | Create group |
+| `/projects/[id]/api/groups/[groupId]/edit` | Edit group |
+| `/projects/[id]/api/endpoints/new` | Create endpoint |
+| `/projects/[id]/api/endpoints/[endpointId]/edit` | Edit endpoint |
+| `/projects/[id]/api/[endpointId]` | Detail with parameters, request body, responses, errors, traceability + contract sections |
+| `/projects/[id]/api/[endpointId]/responses/[responseId]/edit` | Edit a response |
+| `/projects/[id]/api/[endpointId]/errors/[errorId]/edit` | Edit an error |
+
+### Contract preview
+
+The overview page renders a read-only contract preview generated from the stored data:
+
+```
+# API contract (preview)
+# 3 endpoints across 2 groups
+
+# Group: Authentication  (/api/auth)
+  POST   /api/login                         # Login (auth: required)
+
+# Ungrouped
+  GET    /api/projects                      # List projects (auth: required)
+```
+
+The preview is derived — it never becomes a second source of truth. A full OpenAPI document generation is intentionally deferred; documenting the modeling produces the same outcomes with less coupling.
+
+### Traceability
+
+Each endpoint can link to:
+- One or more **Requirements** (one-direction: requirement implies an endpoint exists to fulfill it).
+- One or more **Domain Entities** with a role describing how the entity participates (`primary_resource`, `request_resource`, `response_resource`, `related_resource`).
+
+Both link types are surfaced on the endpoint detail page so future Tasks and Agent Prompts have an immediate map from "what must be built" → "where in the API" → "with what data".
+
+### Limitations
+
+- No OpenAPI 3.x document download yet (structured preview only).
+- No JSON Schema strict validation library; the `schema_definition` field is freeform JSON suitable for visual review.
+- Per-endpoint request body is one-per-endpoint; future versions may allow multiple alternative content-types.
+- API auth model in the preview only supports boolean `authentication_required`; granular roles (per-endpoint) live in the `errors` table.
+
 ## Roadmap
 
 | Part | Scope | Status |
@@ -370,7 +468,8 @@ All four FKs cascade on project/component deletion. The `share_project` trigger 
 | 2 | Requirements & Decisions | ✓ shipped |
 | 3 | Domain & ERD | ✓ shipped |
 | 4 | Architecture Foundation | ✓ shipped |
-| 5 | Tasks & Dependencies | planned |
-| 6 | Agent Prompt Generation | planned |
-| 7 | AI Assistance | planned |
-| 8 | Coding Agent Integration | planned |
+| 5 | API Design Foundation | ✓ shipped |
+| 6 | Tasks & Dependencies | planned |
+| 7 | Agent Prompt Generation | planned |
+| 8 | AI Assistance | planned |
+| 9 | Coding Agent Integration | planned |
