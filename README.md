@@ -134,7 +134,7 @@ backend-dependent tests skip themselves and the rest still run.
 
 ## CI/CD (GitHub Actions)
 
-Three workflows under `.github/workflows/` run automatically on every push to `main` and on pull requests:
+Three workflows under `.github/workflows/` run automatically on every push to `main` and on pull requests. Each is also exposed as `workflow_dispatch` so it can be re-triggered from the GitHub UI (Actions → workflow → Run workflow):
 
 | Workflow | Triggers | What it does |
 | --- | --- | --- |
