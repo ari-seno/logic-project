@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { ProjectTabs } from "@/components/projects/project-tabs";
+import { ErdDetails } from "@/components/erd/erd-details";
 import { ErdSourceButton } from "@/components/erd/erd-source-button";
 import { ErdViewToggle } from "@/components/erd/erd-view-toggle";
 import { ButtonLink } from "@/components/ui/button";
@@ -148,6 +149,24 @@ export default async function ProjectErdPage({
               />
               <ErdLegend />
             </section>
+          ) : null}
+
+          {view === "diagram" ? (
+            <ErdDetails
+              projectId={project.id}
+              domains={erd.domains}
+              entities={allEntities.map((e) => ({
+                id: e.id,
+                domainId: e.domain_id,
+                name: e.name,
+                description: e.description,
+                attributes: erd.attributesByEntity[e.id] ?? [],
+              }))}
+              relationships={erd.relationships}
+              entityById={new Map(
+                allEntities.map((e) => [e.id, { id: e.id, name: e.name }]),
+              )}
+            />
           ) : null}
 
           {view === "list"

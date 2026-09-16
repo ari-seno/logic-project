@@ -25,6 +25,7 @@ export type ErdAttribute = {
   data_type: string;
   is_primary_key: boolean | null;
   is_required: boolean | null;
+  default_value?: string | null;
   description?: string | null;
 };
 
