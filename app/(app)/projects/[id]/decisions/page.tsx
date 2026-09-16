@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { ProjectTabs } from "@/components/projects/project-tabs";
 import { DecisionStatusBadge } from "@/components/projects/badges";
 import { ButtonLink } from "@/components/ui/button";
+import { EmptyState, EmptyStateIcon } from "@/components/ui/empty-state";
 import { formatDate } from "@/lib/utils";
 import { getProject } from "@/lib/projects/queries";
 import { listDecisions } from "@/lib/decisions/queries";
@@ -47,17 +48,27 @@ export default async function DecisionsListPage({
       </div>
 
       {decisions.length === 0 ? (
-        <div className="card-glass p-12 text-center">
-          <h2 className="text-lg font-semibold">No decisions yet</h2>
-          <p className="mt-1 text-sm text-[var(--muted-foreground)]">
-            Record important project decisions and their rationale.
-          </p>
-          <div className="mt-4">
+        <EmptyState
+          icon={
+            <EmptyStateIcon>
+              <path d="M12 2v6" />
+              <path d="M12 16v6" />
+              <path d="m4.93 4.93 4.24 4.24" />
+              <path d="m14.83 14.83 4.24 4.24" />
+              <path d="M2 12h6" />
+              <path d="M16 12h6" />
+              <path d="m4.93 19.07 4.24-4.24" />
+              <path d="m14.83 9.17 4.24-4.24" />
+            </EmptyStateIcon>
+          }
+          title="No decisions yet"
+          description="Capture important project decisions and the rationale behind them. Future you will thank present you."
+          action={
             <ButtonLink href={`/projects/${project.id}/decisions/new`}>
-              Add Decision
+              Add decision
             </ButtonLink>
-          </div>
-        </div>
+          }
+        />
       ) : (
         <ul className="flex flex-col gap-3">
           {decisions.map((dec) => (

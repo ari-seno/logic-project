@@ -9,6 +9,7 @@ import {
   TaskTypeBadge,
 } from "@/components/projects/badges";
 import { ButtonLink } from "@/components/ui/button";
+import { EmptyState, EmptyStateIcon } from "@/components/ui/empty-state";
 import { formatDate } from "@/lib/utils";
 import { getProject } from "@/lib/projects/queries";
 import { listTasksByProject } from "@/lib/tasks/queries";
@@ -168,11 +169,20 @@ export default async function TasksListPage({
       </form>
 
       {sorted.length === 0 ? (
-        <div className="card-glass text-center">
-          <p className="text-sm text-[var(--muted-foreground)]">
-            No tasks match these filters.
-          </p>
-        </div>
+        <EmptyState
+          icon={
+            <EmptyStateIcon>
+              <path d="M3 6h18M3 12h18M3 18h12" />
+            </EmptyStateIcon>
+          }
+          title="No tasks match these filters"
+          description="Try clearing filters or creating a new task."
+          action={
+            <ButtonLink href={`/projects/${project.id}/tasks/new`}>
+              New task
+            </ButtonLink>
+          }
+        />
       ) : (
         <ul className="flex flex-col gap-2">
           {sorted.map((t) => {

@@ -8,6 +8,7 @@ import {
   TypeBadge,
 } from "@/components/projects/badges";
 import { ButtonLink } from "@/components/ui/button";
+import { EmptyState, EmptyStateIcon } from "@/components/ui/empty-state";
 import { formatDate } from "@/lib/utils";
 import { getProject } from "@/lib/projects/queries";
 import { listRequirements } from "@/lib/requirements/queries";
@@ -53,17 +54,22 @@ export default async function RequirementsListPage({
       </div>
 
       {requirements.length === 0 ? (
-        <div className="card-glass p-12 text-center">
-          <h2 className="text-lg font-semibold">No requirements yet</h2>
-          <p className="mt-1 text-sm text-[var(--muted-foreground)]">
-            Define what this project needs to accomplish.
-          </p>
-          <div className="mt-4">
+        <EmptyState
+          icon={
+            <EmptyStateIcon>
+              <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" />
+              <rect x="9" y="3" width="6" height="4" rx="1" />
+              <path d="M9 12h6M9 16h4" />
+            </EmptyStateIcon>
+          }
+          title="No requirements yet"
+          description="Define what this project needs to accomplish. Requirements guide every downstream decision."
+          action={
             <ButtonLink href={`/projects/${project.id}/requirements/new`}>
-              Add Requirement
+              Add requirement
             </ButtonLink>
-          </div>
-        </div>
+          }
+        />
       ) : (
         <ul className="flex flex-col gap-3">
           {requirements.map((req) => (
