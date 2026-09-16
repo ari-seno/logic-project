@@ -96,6 +96,34 @@ backend-dependent tests skip themselves and the rest still run.
 | `bun run db:push` | Apply migrations to the linked Supabase project |
 | `bun run db:reset` | Reset the local DB and re-apply migrations |
 
+## CI/CD (GitHub Actions)
+
+Three workflows under `.github/workflows/` run automatically on every push to `main` and on pull requests:
+
+| Workflow | Triggers | What it does |
+| --- | --- | --- |
+| `ci.yml` | push to main, PRs | `lint`, `typecheck`, `vitest`, `next build` (with placeholder env so the build does not depend on real Supabase secrets). Concurrency-cancelled on new pushes. |
+| `migrate.yml` | push to main | `supabase db push --project-ref $SUPABASE_PROJECT_REF` against production. Serialised, not cancelled. |
+| `deploy.yml` | push to main | `vercel link` → `vercel pull` → `vercel build --prod` → `vercel deploy --prebuilt --prod`. Drives production deploys from CI. |
+
+### Repository secrets required
+
+Configure these at https://github.com/ari-seno/logic-project/settings/secrets/actions:
+
+| Secret | Purpose |
+| --- | --- |
+| `SUPABASE_ACCESS_TOKEN` | Personal access token for the Supabase CLI; lets `migrate.yml` apply SQL to the linked project. |
+| `SUPABASE_PROJECT_REF` | Project reference slug, e.g. `svlzrzygnueyzzygqxqu`. |
+| `VERCEL_TOKEN` | Vercel account token (full-account scope) used by `deploy.yml`. |
+| `VERCEL_ORG_ID` | Vercel team/owner ID (visible via `vercel project ls`). |
+| `VERCEL_PROJECT_ID` | Vercel project ID (visible via `vercel inspect`). |
+
+### Why three workflows instead of one
+
+- **CI** runs on every PR too — fast feedback on changes that haven't merged yet.
+- **Migrate** is gated to `main` only and is non-cancellable, so a half-applied migration can't be left dangling.
+- **Deploy** is also gated to `main`. If you ever want to swap GitHub Actions for the Vercel GitHub App, delete `deploy.yml` and connect the repo from https://vercel.com/dashboard → Project → Settings → Git.
+
 ## Manual testing
 
 See **[docs/MANUAL_TESTING.md](docs/MANUAL_TESTING.md)** for a step-by-step
