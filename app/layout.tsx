@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     "Logic Project — an AI Project Planner. Capture requirements, decisions, architecture, tasks, and prompts; the user remains the decision maker.",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html
       lang="en"
