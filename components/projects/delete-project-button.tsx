@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 
 import { Button } from "@/components/ui/button";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 export function DeleteProjectButton({
   projectId,
@@ -11,16 +12,12 @@ export function DeleteProjectButton({
   projectId: string;
   projectName: string;
 }) {
-  const [confirming, setConfirming] = useState(false);
+  const [open, setOpen] = useState(false);
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
-  async function handleDelete() {
-    if (!confirming) {
-      setConfirming(true);
-      setError(null);
-      return;
-    }
+  async function handleConfirm() {
+    setError(null);
     const { deleteProject } = await import("@/lib/projects/actions");
     const fd = new FormData();
     fd.set("id", projectId);
@@ -28,49 +25,45 @@ export function DeleteProjectButton({
       const result = await deleteProject(fd);
       if (result && "error" in result && result.error) {
         setError(result.error);
-        setConfirming(false);
+        setOpen(false);
       }
     });
   }
 
   return (
-    <div className="flex flex-col items-end gap-2">
+    <>
+      <Button
+        type="button"
+        variant="danger"
+        size="sm"
+        onClick={() => setOpen(true)}
+        aria-label={`Delete project ${projectName}`}
+      >
+        Delete
+      </Button>
+
+      <ConfirmDialog
+        open={open}
+        onOpenChange={setOpen}
+        title={`Delete "${projectName}"?`}
+        description={
+          <>
+            This permanently removes the project and all its requirements,
+            decisions, domains, architecture, API design, UI design, and tasks.
+            This cannot be undone.
+          </>
+        }
+        confirmLabel="Delete project"
+        typeToConfirm={projectName}
+        pending={pending}
+        onConfirm={handleConfirm}
+      />
+
       {error ? (
-        <p className="text-xs text-red-600" role="alert">
+        <p className="mt-2 text-xs text-red-600" role="alert">
           {error}
         </p>
       ) : null}
-      <div className="flex gap-2">
-        {confirming ? (
-          <Button
-            type="button"
-            variant="secondary"
-            size="sm"
-            onClick={() => setConfirming(false)}
-            disabled={pending}
-          >
-            Cancel
-          </Button>
-        ) : null}
-        <Button
-          type="button"
-          variant="danger"
-          size="sm"
-          onClick={handleDelete}
-          disabled={pending}
-          aria-label={
-            confirming
-              ? `Confirm delete project ${projectName}`
-              : `Delete project ${projectName}`
-          }
-        >
-          {pending
-            ? "Deleting…"
-            : confirming
-              ? "Click again to confirm"
-              : "Delete"}
-        </Button>
-      </div>
-    </div>
+    </>
   );
 }
