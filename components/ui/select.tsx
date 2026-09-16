@@ -3,7 +3,7 @@ import { forwardRef, type SelectHTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
 
 const selectClasses =
-  "block w-full appearance-none rounded-md border border-[var(--input)] bg-white px-3 py-2 pr-9 text-sm text-[var(--foreground)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] disabled:cursor-not-allowed disabled:opacity-60";
+  "block w-full appearance-none rounded-lg border border-[var(--input)] bg-white px-3.5 py-2.5 pr-10 text-sm text-[var(--foreground)] shadow-sm transition-colors focus-visible:outline-none focus-visible:border-[var(--brand)] focus-visible:ring-2 focus-visible:ring-[var(--brand)]/20 disabled:cursor-not-allowed disabled:opacity-60";
 
 export type SelectProps = SelectHTMLAttributes<HTMLSelectElement>;
 
@@ -13,25 +13,19 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(function Select
 ) {
   return (
     <div className="relative">
-      <select
-        ref={ref}
-        className={cn(selectClasses, className)}
-        {...rest}
-      >
+      <select ref={ref} className={cn(selectClasses, className)} {...rest}>
         {children}
       </select>
       <svg
         aria-hidden="true"
         viewBox="0 0 20 20"
-        fill="none"
-        className="pointer-events-none absolute right-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500"
+        className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--muted-foreground)]"
+        fill="currentColor"
       >
         <path
-          d="M6 8l4 4 4-4"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
+          fillRule="evenodd"
+          d="M5.23 7.21a.75.75 0 011.06.02L10 11.06l3.71-3.83a.75.75 0 111.08 1.04l-4.25 4.39a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z"
+          clipRule="evenodd"
         />
       </svg>
     </div>

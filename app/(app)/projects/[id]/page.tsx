@@ -55,9 +55,7 @@ export default async function ProjectOverviewPage({
   ]);
 
   return (
-    <div className="flex flex-col gap-6">
-      <ProjectTabs projectId={project.id} active="overview" />
-
+    <div className="flex flex-col gap-8">
       <div>
         <Link
           href="/projects"
@@ -65,12 +63,12 @@ export default async function ProjectOverviewPage({
         >
           ← Back to projects
         </Link>
-        <div className="mt-2 flex items-start justify-between gap-4">
+        <div className="mt-3 flex items-start justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-semibold tracking-tight">
+            <h1 className="text-3xl font-semibold tracking-tight">
               {project.name}
             </h1>
-            <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-xs text-[var(--muted-foreground)]">
+            <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-[var(--muted-foreground)]">
               <span>Created {formatDateTime(project.created_at)}</span>
               <span>Updated {formatDateTime(project.updated_at)}</span>
             </div>
@@ -80,18 +78,21 @@ export default async function ProjectOverviewPage({
             projectName={project.name}
           />
         </div>
+        <div className="mt-4">
+          <ProjectTabs projectId={project.id} active="overview" />
+        </div>
       </div>
 
-      <section className="rounded-lg border border-[var(--border)] bg-white p-6">
+      <section className="card-glass p-6">
         <h2 className="text-sm font-semibold uppercase tracking-wide text-[var(--muted-foreground)]">
           Description
         </h2>
         {project.description ? (
-          <p className="mt-2 whitespace-pre-wrap text-sm leading-6">
+          <p className="mt-3 whitespace-pre-wrap text-sm leading-7">
             {project.description}
           </p>
         ) : (
-          <p className="mt-2 italic text-sm text-[var(--muted-foreground)]">
+          <p className="mt-3 italic text-sm text-[var(--muted-foreground)]">
             No description yet.
           </p>
         )}
@@ -101,51 +102,26 @@ export default async function ProjectOverviewPage({
         <h2 className="text-sm font-semibold uppercase tracking-wide text-[var(--muted-foreground)]">
           Project Context
         </h2>
-          <div className="mt-2 rounded-lg border border-[var(--border)] bg-white p-6">
-            <div className="grid grid-cols-2 gap-4 sm:max-w-md sm:grid-cols-3 lg:max-w-lg">
-              <div>
-                <p className="text-xs uppercase tracking-wide text-[var(--muted-foreground)]">
-                  Requirements
-                </p>
-                <p className="mt-1 text-2xl font-semibold">{requirementCount}</p>
-              </div>
-              <div>
-                <p className="text-xs uppercase tracking-wide text-[var(--muted-foreground)]">
-                  Decisions
-                </p>
-                <p className="mt-1 text-2xl font-semibold">{decisionCount}</p>
-              </div>
-              <div>
-                <p className="text-xs uppercase tracking-wide text-[var(--muted-foreground)]">
-                  Domains
-                </p>
-                <p className="mt-1 text-2xl font-semibold">{domainCount}</p>
-              </div>
-              <div>
-                <p className="text-xs uppercase tracking-wide text-[var(--muted-foreground)]">
-                  Entities
-                </p>
-                <p className="mt-1 text-2xl font-semibold">{entityCount}</p>
-              </div>
-              <div>
-                <p className="text-xs uppercase tracking-wide text-[var(--muted-foreground)]">
-                  Relationships
-                </p>
-                <p className="mt-1 text-2xl font-semibold">{relationshipCount}</p>
-              </div>
-            </div>
-            <div className="mt-4 border-t border-[var(--border)] pt-4 text-xs text-[var(--muted-foreground)]">
-              <p>
-                Last updated:{" "}
-                <span className="text-[var(--foreground)]">
-                  {formatDate(project.updated_at)}
-                </span>
-              </p>
-              <p className="mt-1 italic">
-                AI-assisted context generation is planned for a later part.
-              </p>
-            </div>
+        <div className="mt-3 card-glass p-6">
+          <div className="grid grid-cols-2 gap-4 sm:max-w-2xl sm:grid-cols-5">
+            <Stat label="Requirements" value={requirementCount} />
+            <Stat label="Decisions" value={decisionCount} />
+            <Stat label="Domains" value={domainCount} />
+            <Stat label="Entities" value={entityCount} />
+            <Stat label="Relationships" value={relationshipCount} />
           </div>
+          <div className="mt-5 border-t border-[var(--border)] pt-4 text-xs text-[var(--muted-foreground)]">
+            <p>
+              Last updated:{" "}
+              <span className="text-[var(--foreground)]">
+                {formatDate(project.updated_at)}
+              </span>
+            </p>
+            <p className="mt-1 italic">
+              AI-assisted context generation is planned for a later part.
+            </p>
+          </div>
+        </div>
       </section>
 
       <section className="grid grid-cols-1 gap-6 lg:grid-cols-2">
@@ -162,7 +138,7 @@ export default async function ProjectOverviewPage({
             </Link>
           </header>
           {recentRequirements.length === 0 ? (
-            <div className="rounded-lg border border-dashed border-[var(--border)] bg-white p-6 text-center">
+            <div className="card-glass p-8 text-center">
               <p className="text-sm text-[var(--muted-foreground)]">
                 No requirements yet.
               </p>
@@ -180,11 +156,11 @@ export default async function ProjectOverviewPage({
               {recentRequirements.map((req) => (
                 <li
                   key={req.id}
-                  className="rounded-lg border border-[var(--border)] bg-white p-4"
+                  className="card-glass p-4 transition-shadow hover:shadow-md"
                 >
                   <Link
                     href={`/projects/${project.id}/requirements/${req.id}`}
-                    className="flex flex-col gap-2 hover:underline"
+                    className="flex flex-col gap-2"
                   >
                     <span className="font-medium">{req.title}</span>
                     <div className="flex flex-wrap gap-1.5">
@@ -215,7 +191,7 @@ export default async function ProjectOverviewPage({
             </Link>
           </header>
           {recentDecisions.length === 0 ? (
-            <div className="rounded-lg border border-dashed border-[var(--border)] bg-white p-6 text-center">
+            <div className="card-glass p-8 text-center">
               <p className="text-sm text-[var(--muted-foreground)]">
                 No decisions yet.
               </p>
@@ -233,11 +209,11 @@ export default async function ProjectOverviewPage({
               {recentDecisions.map((dec) => (
                 <li
                   key={dec.id}
-                  className="rounded-lg border border-[var(--border)] bg-white p-4"
+                  className="card-glass p-4 transition-shadow hover:shadow-md"
                 >
                   <Link
                     href={`/projects/${project.id}/decisions/${dec.id}`}
-                    className="flex flex-col gap-2 hover:underline"
+                    className="flex flex-col gap-2"
                   >
                     <span className="font-medium">{dec.title}</span>
                     <div className="flex flex-wrap gap-1.5">
@@ -253,6 +229,17 @@ export default async function ProjectOverviewPage({
           )}
         </div>
       </section>
+    </div>
+  );
+}
+
+function Stat({ label, value }: { label: string; value: number }) {
+  return (
+    <div>
+      <p className="text-xs uppercase tracking-wide text-[var(--muted-foreground)]">
+        {label}
+      </p>
+      <p className="mt-1 text-2xl font-semibold tracking-tight">{value}</p>
     </div>
   );
 }

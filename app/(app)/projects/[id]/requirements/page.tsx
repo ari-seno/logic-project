@@ -27,8 +27,6 @@ export default async function RequirementsListPage({
 
   return (
     <div className="flex flex-col gap-6">
-      <ProjectTabs projectId={project.id} active="requirements" />
-
       <div>
         <Link
           href={`/projects/${project.id}`}
@@ -36,9 +34,9 @@ export default async function RequirementsListPage({
         >
           ← Back to overview
         </Link>
-        <div className="mt-2 flex items-start justify-between gap-4">
+        <div className="mt-3 flex items-start justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-semibold tracking-tight">
+            <h1 className="text-3xl font-semibold tracking-tight">
               Requirements
             </h1>
             <p className="mt-1 text-sm text-[var(--muted-foreground)]">
@@ -49,10 +47,13 @@ export default async function RequirementsListPage({
             New requirement
           </ButtonLink>
         </div>
+        <div className="mt-4">
+          <ProjectTabs projectId={project.id} active="requirements" />
+        </div>
       </div>
 
       {requirements.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-[var(--border)] bg-white p-12 text-center">
+        <div className="card-glass p-12 text-center">
           <h2 className="text-lg font-semibold">No requirements yet</h2>
           <p className="mt-1 text-sm text-[var(--muted-foreground)]">
             Define what this project needs to accomplish.
@@ -68,14 +69,16 @@ export default async function RequirementsListPage({
           {requirements.map((req) => (
             <li
               key={req.id}
-              className="rounded-lg border border-[var(--border)] bg-white p-5"
+              className="card-glass p-5 transition-shadow hover:shadow-md"
             >
               <Link
                 href={`/projects/${project.id}/requirements/${req.id}`}
-                className="flex flex-col gap-3 hover:underline"
+                className="flex flex-col gap-3"
               >
                 <div className="flex items-start justify-between gap-4">
-                  <span className="text-base font-semibold">{req.title}</span>
+                  <span className="text-base font-semibold tracking-tight">
+                    {req.title}
+                  </span>
                   <div className="flex shrink-0 flex-wrap justify-end gap-1.5">
                     <TypeBadge type={req.type} />
                     <RequirementStatusBadge status={req.status} />
@@ -83,7 +86,7 @@ export default async function RequirementsListPage({
                   </div>
                 </div>
                 {req.description ? (
-                  <p className="line-clamp-3 text-sm text-[var(--muted-foreground)]">
+                  <p className="line-clamp-3 text-sm text-[var(--muted-foreground)] leading-relaxed">
                     {req.description}
                   </p>
                 ) : (

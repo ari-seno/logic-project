@@ -33,7 +33,7 @@ export function ProjectTabs({
   return (
     <nav
       aria-label="Project sections"
-      className="flex gap-1 border-b border-[var(--border)]"
+      className="inline-flex flex-wrap gap-1 rounded-xl border border-[var(--border)] bg-[var(--muted)] p-1"
     >
       {tabs.map((tab) => {
         const isActive = tab.key === active;
@@ -43,10 +43,10 @@ export function ProjectTabs({
             href={tab.href}
             aria-current={isActive ? "page" : undefined}
             className={cn(
-              "border-b-2 px-3 py-2 text-sm font-medium transition-colors",
+              "rounded-lg px-3.5 py-1.5 text-sm font-medium transition-all",
               isActive
-                ? "border-[var(--brand)] text-[var(--brand)]"
-                : "border-transparent text-[var(--muted-foreground)] hover:text-[var(--foreground)]",
+                ? "bg-white text-[var(--brand)] shadow-sm"
+                : "text-[var(--muted-foreground)] hover:text-[var(--foreground)]",
             )}
           >
             {tab.label}

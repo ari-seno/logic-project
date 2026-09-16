@@ -6,9 +6,9 @@ type AlertVariant = "error" | "info" | "success";
 
 const variants: Record<AlertVariant, string> = {
   error:
-    "border-red-300 bg-red-50 text-red-800",
-  info: "border-blue-300 bg-blue-50 text-blue-800",
-  success: "border-green-300 bg-green-50 text-green-800",
+    "border-red-200 bg-red-50/80 text-red-800 backdrop-blur",
+  info: "border-indigo-200 bg-indigo-50/80 text-indigo-800 backdrop-blur",
+  success: "border-emerald-200 bg-emerald-50/80 text-emerald-800 backdrop-blur",
 };
 
 export function Alert({
@@ -24,7 +24,7 @@ export function Alert({
     <div
       role={variant === "error" ? "alert" : "status"}
       className={cn(
-        "rounded-md border px-3 py-2 text-sm",
+        "rounded-lg border px-4 py-2.5 text-sm leading-relaxed",
         variants[variant],
         className,
       )}
@@ -37,7 +37,7 @@ export function Alert({
 export function FieldError({ messages }: { messages?: string[] }) {
   if (!messages?.length) return null;
   return (
-    <p className="mt-1 text-xs text-red-600" role="alert">
+    <p className="mt-1.5 text-xs text-red-600" role="alert">
       {messages.join(". ")}
     </p>
   );

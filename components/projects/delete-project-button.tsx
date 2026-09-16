@@ -2,7 +2,6 @@
 
 import { useState, useTransition } from "react";
 
-import { deleteProject } from "@/lib/projects/actions";
 import { Button } from "@/components/ui/button";
 
 export function DeleteProjectButton({
@@ -13,18 +12,20 @@ export function DeleteProjectButton({
   projectName: string;
 }) {
   const [confirming, setConfirming] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
 
-  function handleDelete() {
+  async function handleDelete() {
     if (!confirming) {
       setConfirming(true);
+      setError(null);
       return;
     }
-    const formData = new FormData();
-    formData.set("id", projectId);
+    const { deleteProject } = await import("@/lib/projects/actions");
+    const fd = new FormData();
+    fd.set("id", projectId);
     startTransition(async () => {
-      const result = await deleteProject(formData);
+      const result = await deleteProject(fd);
       if (result && "error" in result && result.error) {
         setError(result.error);
         setConfirming(false);
@@ -34,7 +35,11 @@ export function DeleteProjectButton({
 
   return (
     <div className="flex flex-col items-end gap-2">
-      {error ? <p className="text-xs text-red-600">{error}</p> : null}
+      {error ? (
+        <p className="text-xs text-red-600" role="alert">
+          {error}
+        </p>
+      ) : null}
       <div className="flex gap-2">
         {confirming ? (
           <Button
@@ -55,8 +60,8 @@ export function DeleteProjectButton({
           disabled={pending}
           aria-label={
             confirming
-              ? `Confirm delete ${projectName}`
-              : `Delete ${projectName}`
+              ? `Confirm delete project ${projectName}`
+              : `Delete project ${projectName}`
           }
         >
           {pending

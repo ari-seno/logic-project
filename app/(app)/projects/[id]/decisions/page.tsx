@@ -23,8 +23,6 @@ export default async function DecisionsListPage({
 
   return (
     <div className="flex flex-col gap-6">
-      <ProjectTabs projectId={project.id} active="decisions" />
-
       <div>
         <Link
           href={`/projects/${project.id}`}
@@ -32,9 +30,9 @@ export default async function DecisionsListPage({
         >
           ← Back to overview
         </Link>
-        <div className="mt-2 flex items-start justify-between gap-4">
+        <div className="mt-3 flex items-start justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-semibold tracking-tight">Decisions</h1>
+            <h1 className="text-3xl font-semibold tracking-tight">Decisions</h1>
             <p className="mt-1 text-sm text-[var(--muted-foreground)]">
               {project.name}
             </p>
@@ -43,10 +41,13 @@ export default async function DecisionsListPage({
             New decision
           </ButtonLink>
         </div>
+        <div className="mt-4">
+          <ProjectTabs projectId={project.id} active="decisions" />
+        </div>
       </div>
 
       {decisions.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-[var(--border)] bg-white p-12 text-center">
+        <div className="card-glass p-12 text-center">
           <h2 className="text-lg font-semibold">No decisions yet</h2>
           <p className="mt-1 text-sm text-[var(--muted-foreground)]">
             Record important project decisions and their rationale.
@@ -62,18 +63,22 @@ export default async function DecisionsListPage({
           {decisions.map((dec) => (
             <li
               key={dec.id}
-              className="rounded-lg border border-[var(--border)] bg-white p-5"
+              className="card-glass p-5 transition-shadow hover:shadow-md"
             >
               <Link
                 href={`/projects/${project.id}/decisions/${dec.id}`}
-                className="flex flex-col gap-3 hover:underline"
+                className="flex flex-col gap-3"
               >
                 <div className="flex items-start justify-between gap-4">
-                  <span className="text-base font-semibold">{dec.title}</span>
-                  <DecisionStatusBadge status={dec.status} />
+                  <span className="text-base font-semibold tracking-tight">
+                    {dec.title}
+                  </span>
+                  <div className="flex shrink-0 flex-wrap justify-end gap-1.5">
+                    <DecisionStatusBadge status={dec.status} />
+                  </div>
                 </div>
                 {dec.decision ? (
-                  <p className="line-clamp-3 text-sm text-[var(--muted-foreground)]">
+                  <p className="line-clamp-2 text-sm text-[var(--muted-foreground)] leading-relaxed">
                     {dec.decision}
                   </p>
                 ) : null}

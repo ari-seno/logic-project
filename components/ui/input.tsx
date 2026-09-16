@@ -3,7 +3,7 @@ import { forwardRef, type InputHTMLAttributes, type TextareaHTMLAttributes } fro
 import { cn } from "@/lib/utils";
 
 const inputClasses =
-  "block w-full rounded-md border border-[var(--input)] bg-white px-3 py-2 text-sm text-[var(--foreground)] placeholder:text-zinc-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] disabled:cursor-not-allowed disabled:opacity-60";
+  "block w-full rounded-lg border border-[var(--input)] bg-white px-3.5 py-2.5 text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] shadow-sm transition-colors focus-visible:outline-none focus-visible:border-[var(--brand)] focus-visible:ring-2 focus-visible:ring-[var(--brand)]/20 disabled:cursor-not-allowed disabled:opacity-60";
 
 export type InputProps = InputHTMLAttributes<HTMLInputElement>;
 
@@ -22,7 +22,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
       <textarea
         ref={ref}
         rows={rows}
-        className={cn(inputClasses, "resize-y", className)}
+        className={cn(inputClasses, "resize-y leading-relaxed", className)}
         {...rest}
       />
     );

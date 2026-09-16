@@ -11,19 +11,23 @@ export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
 };
 
 const base =
-  "inline-flex items-center justify-center gap-2 rounded-md font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--ring)] disabled:opacity-60 disabled:pointer-events-none";
+  "inline-flex items-center justify-center gap-2 rounded-lg font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--ring)] disabled:opacity-60 disabled:pointer-events-none";
 
 const variants: Record<ButtonVariant, string> = {
-  primary: "bg-[var(--brand)] text-[var(--brand-foreground)] hover:bg-blue-700",
-  secondary: "bg-[var(--muted)] text-[var(--foreground)] hover:bg-zinc-200",
-  ghost: "bg-transparent text-[var(--foreground)] hover:bg-[var(--muted)]",
-  danger: "bg-[var(--danger)] text-[var(--danger-foreground)] hover:bg-red-700",
+  primary:
+    "bg-gradient-to-br from-[var(--brand)] to-[var(--brand-accent)] text-[var(--brand-foreground)] shadow-sm hover:shadow-md hover:brightness-110 active:brightness-95",
+  secondary:
+    "bg-white text-[var(--foreground)] border border-[var(--border)] hover:bg-[var(--muted)] hover:border-[var(--muted-foreground)]/20",
+  ghost:
+    "bg-transparent text-[var(--foreground)] hover:bg-[var(--muted)]",
+  danger:
+    "bg-[var(--danger)] text-[var(--danger-foreground)] shadow-sm hover:brightness-110",
 };
 
 const sizes: Record<ButtonSize, string> = {
-  sm: "h-8 px-3 text-sm",
+  sm: "h-9 px-3.5 text-sm",
   md: "h-10 px-4 text-sm",
-  lg: "h-11 px-6 text-base",
+  lg: "h-12 px-6 text-base",
 };
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(

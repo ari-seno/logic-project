@@ -25,8 +25,6 @@ export default async function ProjectErdPage({
 
   return (
     <div className="flex flex-col gap-6">
-      <ProjectTabs projectId={project.id} active="domain" />
-
       <div>
         <Link
           href={`/projects/${project.id}/domains`}
@@ -34,9 +32,9 @@ export default async function ProjectErdPage({
         >
           ← Back to domains
         </Link>
-        <div className="mt-2 flex items-start justify-between gap-4">
+        <div className="mt-3 flex items-start justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-semibold tracking-tight">ERD</h1>
+            <h1 className="text-3xl font-semibold tracking-tight">ERD</h1>
             <p className="mt-1 text-sm text-[var(--muted-foreground)]">
               {project.name}
             </p>
@@ -50,10 +48,13 @@ export default async function ProjectErdPage({
             </ButtonLink>
           ) : null}
         </div>
+        <div className="mt-4">
+          <ProjectTabs projectId={project.id} active="domain" />
+        </div>
       </div>
 
       {erd.domains.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-[var(--border)] bg-white p-12 text-center">
+        <div className="card-glass p-12 text-center">
           <h2 className="text-lg font-semibold">No domains yet</h2>
           <p className="mt-1 text-sm text-[var(--muted-foreground)]">
             Add a domain and entity first; the ERD is generated from them.
@@ -69,13 +70,12 @@ export default async function ProjectErdPage({
           {erd.domains.map((domain) => {
             const entities = erd.entitiesByDomain[domain.id] ?? [];
             return (
-              <section
-                key={domain.id}
-                className="rounded-lg border border-[var(--border)] bg-white p-5"
-              >
-                <header className="mb-3 flex items-center justify-between">
+              <section key={domain.id} className="card-glass p-6">
+                <header className="mb-4 flex items-center justify-between">
                   <div>
-                    <h2 className="text-base font-semibold">{domain.name}</h2>
+                    <h2 className="text-base font-semibold tracking-tight">
+                      {domain.name}
+                    </h2>
                     {domain.description ? (
                       <p className="text-xs text-[var(--muted-foreground)]">
                         {domain.description}
@@ -96,16 +96,29 @@ export default async function ProjectErdPage({
                         <Link
                           key={entity.id}
                           href={`/projects/${project.id}/domains/${domain.id}/entities/${entity.id}`}
-                          className="block rounded-md border border-[var(--border)] bg-[var(--muted)] p-3 hover:border-[var(--brand)]"
+                          className="block rounded-xl border border-[var(--border)] bg-white/60 p-4 transition-all hover:border-[var(--brand)] hover:shadow-md"
                         >
-                          <p className="text-sm font-semibold">{entity.name}</p>
+                          <p className="text-sm font-semibold tracking-tight">
+                            {entity.name}
+                          </p>
                           {attrs.length > 0 ? (
-                            <ul className="mt-2 space-y-0.5 font-mono text-xs text-[var(--muted-foreground)]">
+                            <ul className="mt-3 space-y-1 font-mono text-[11px] text-[var(--muted-foreground)]">
                               {attrs.map((a) => (
-                                <li key={a.id}>
-                                  {a.is_primary_key ? "PK " : ""}
-                                  {a.name} : {a.data_type}
-                                  {a.is_required ? "*" : ""}
+                                <li
+                                  key={a.id}
+                                  className="flex items-center gap-2"
+                                >
+                                  <span className="w-3 shrink-0 text-center text-[10px] text-[var(--brand)]">
+                                    {a.is_primary_key ? "PK" : ""}
+                                  </span>
+                                  <span className="flex-1 truncate">
+                                    {a.name}
+                                    <span className="text-[var(--muted-foreground)]/60">
+                                      {" "}
+                                      : {a.data_type}
+                                      {a.is_required ? "*" : ""}
+                                    </span>
+                                  </span>
                                 </li>
                               ))}
                             </ul>
@@ -124,8 +137,10 @@ export default async function ProjectErdPage({
           })}
 
           {erd.relationships.length > 0 ? (
-            <section className="rounded-lg border border-[var(--border)] bg-white p-5">
-              <h2 className="mb-3 text-base font-semibold">Relationships</h2>
+            <section className="card-glass p-6">
+              <h2 className="mb-3 text-base font-semibold tracking-tight">
+                Relationships
+              </h2>
               <ul className="flex flex-col gap-2 text-sm">
                 {erd.relationships.map((rel) => {
                   const source = entityById.get(rel.source_entity_id);
@@ -133,7 +148,7 @@ export default async function ProjectErdPage({
                   return (
                     <li
                       key={rel.id}
-                      className="flex items-center gap-3 rounded-md border border-[var(--border)] bg-[var(--muted)] px-3 py-2"
+                      className="flex flex-wrap items-center gap-3 rounded-lg border border-[var(--border)] bg-white/60 px-4 py-2.5"
                     >
                       <Link
                         href={`/projects/${project.id}/domains/relationships/${rel.id}`}

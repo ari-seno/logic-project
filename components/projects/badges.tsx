@@ -2,91 +2,135 @@ import { cn } from "@/lib/utils";
 import type {
   DecisionStatus,
   EntityDataType,
-  RelationshipType,
   RequirementPriority,
   RequirementStatus,
   RequirementType,
+  RelationshipType,
 } from "@/lib/supabase/types";
 
-const typeClasses: Record<RequirementType, string> = {
-  functional: "bg-blue-50 text-blue-800 border-blue-200",
-  non_functional: "bg-purple-50 text-purple-800 border-purple-200",
-};
-
-const requirementStatusClasses: Record<RequirementStatus, string> = {
-  draft: "bg-zinc-100 text-zinc-800 border-zinc-200",
-  approved: "bg-green-50 text-green-800 border-green-200",
-  rejected: "bg-red-50 text-red-800 border-red-200",
-  implemented: "bg-indigo-50 text-indigo-800 border-indigo-200",
-};
-
-const decisionStatusClasses: Record<DecisionStatus, string> = {
-  proposed: "bg-amber-50 text-amber-800 border-amber-200",
-  accepted: "bg-green-50 text-green-800 border-green-200",
-  superseded: "bg-zinc-100 text-zinc-700 border-zinc-200",
-};
-
-const priorityClasses: Record<RequirementPriority, string> = {
-  low: "bg-zinc-50 text-zinc-700 border-zinc-200",
-  medium: "bg-blue-50 text-blue-700 border-blue-200",
-  high: "bg-orange-50 text-orange-800 border-orange-200",
-  critical: "bg-red-50 text-red-800 border-red-200",
-};
-
-const dataTypeClasses: Record<EntityDataType, string> = {
-  uuid: "bg-indigo-50 text-indigo-700 border-indigo-200",
-  string: "bg-blue-50 text-blue-700 border-blue-200",
-  text: "bg-sky-50 text-sky-700 border-sky-200",
-  integer: "bg-emerald-50 text-emerald-700 border-emerald-200",
-  decimal: "bg-teal-50 text-teal-700 border-teal-200",
-  boolean: "bg-amber-50 text-amber-700 border-amber-200",
-  date: "bg-rose-50 text-rose-700 border-rose-200",
-  datetime: "bg-pink-50 text-pink-700 border-pink-200",
-  json: "bg-violet-50 text-violet-700 border-violet-200",
-};
-
-const relationshipTypeClasses: Record<RelationshipType, string> = {
-  one_to_one: "bg-blue-50 text-blue-800 border-blue-200",
-  one_to_many: "bg-emerald-50 text-emerald-800 border-emerald-200",
-  many_to_one: "bg-amber-50 text-amber-800 border-amber-200",
-  many_to_many: "bg-violet-50 text-violet-800 border-violet-200",
-};
-
-const base =
-  "inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium capitalize";
+function Pill({
+  className,
+  children,
+}: {
+  className?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset",
+        className,
+      )}
+    >
+      {children}
+    </span>
+  );
+}
 
 export function TypeBadge({ type }: { type: RequirementType }) {
-  return <span className={cn(base, typeClasses[type])}>{type.replace("_", " ")}</span>;
+  const map: Record<RequirementType, { label: string; cls: string }> = {
+    functional: {
+      label: "Functional",
+      cls: "bg-blue-50 text-blue-700 ring-blue-200",
+    },
+    non_functional: {
+      label: "Non-functional",
+      cls: "bg-violet-50 text-violet-700 ring-violet-200",
+    },
+  };
+  return <Pill className={map[type].cls}>{map[type].label}</Pill>;
 }
 
 export function RequirementStatusBadge({ status }: { status: RequirementStatus }) {
-  return (
-    <span className={cn(base, requirementStatusClasses[status])}>{status}</span>
-  );
-}
-
-export function DecisionStatusBadge({ status }: { status: DecisionStatus }) {
-  return (
-    <span className={cn(base, decisionStatusClasses[status])}>{status}</span>
-  );
+  const map: Record<RequirementStatus, { label: string; cls: string }> = {
+    draft: {
+      label: "Draft",
+      cls: "bg-zinc-50 text-zinc-700 ring-zinc-200",
+    },
+    approved: {
+      label: "Approved",
+      cls: "bg-emerald-50 text-emerald-700 ring-emerald-200",
+    },
+    rejected: {
+      label: "Rejected",
+      cls: "bg-red-50 text-red-700 ring-red-200",
+    },
+    implemented: {
+      label: "Implemented",
+      cls: "bg-indigo-50 text-indigo-700 ring-indigo-200",
+    },
+  };
+  return <Pill className={map[status].cls}>{map[status].label}</Pill>;
 }
 
 export function PriorityBadge({ priority }: { priority: RequirementPriority }) {
-  return (
-    <span className={cn(base, priorityClasses[priority])}>{priority}</span>
-  );
+  const map: Record<RequirementPriority, { label: string; cls: string }> = {
+    low: {
+      label: "Low",
+      cls: "bg-slate-50 text-slate-700 ring-slate-200",
+    },
+    medium: {
+      label: "Medium",
+      cls: "bg-amber-50 text-amber-700 ring-amber-200",
+    },
+    high: {
+      label: "High",
+      cls: "bg-orange-50 text-orange-700 ring-orange-200",
+    },
+    critical: {
+      label: "Critical",
+      cls: "bg-rose-50 text-rose-700 ring-rose-200",
+    },
+  };
+  return <Pill className={map[priority].cls}>{map[priority].label}</Pill>;
+}
+
+export function DecisionStatusBadge({ status }: { status: DecisionStatus }) {
+  const map: Record<DecisionStatus, { label: string; cls: string }> = {
+    proposed: {
+      label: "Proposed",
+      cls: "bg-blue-50 text-blue-700 ring-blue-200",
+    },
+    accepted: {
+      label: "Accepted",
+      cls: "bg-emerald-50 text-emerald-700 ring-emerald-200",
+    },
+    superseded: {
+      label: "Superseded",
+      cls: "bg-zinc-50 text-zinc-500 ring-zinc-200",
+    },
+  };
+  return <Pill className={map[status].cls}>{map[status].label}</Pill>;
 }
 
 export function DataTypeBadge({ dataType }: { dataType: EntityDataType }) {
-  return (
-    <span className={cn(base, dataTypeClasses[dataType])}>{dataType}</span>
-  );
+  const cls =
+    "bg-slate-50 text-slate-700 ring-slate-200 font-mono text-[11px] lowercase";
+  return <Pill className={cls}>{dataType}</Pill>;
 }
 
-export function RelationshipTypeBadge({ type }: { type: RelationshipType }) {
-  return (
-    <span className={cn(base, relationshipTypeClasses[type])}>
-      {type.replace(/_/g, " → ")}
-    </span>
-  );
+export function RelationshipTypeBadge({
+  type,
+}: {
+  type: RelationshipType;
+}) {
+  const map: Record<RelationshipType, { label: string; cls: string }> = {
+    one_to_one: {
+      label: "1 → 1",
+      cls: "bg-violet-50 text-violet-700 ring-violet-200",
+    },
+    one_to_many: {
+      label: "1 → N",
+      cls: "bg-indigo-50 text-indigo-700 ring-indigo-200",
+    },
+    many_to_one: {
+      label: "N → 1",
+      cls: "bg-indigo-50 text-indigo-700 ring-indigo-200",
+    },
+    many_to_many: {
+      label: "N → N",
+      cls: "bg-blue-50 text-blue-700 ring-blue-200",
+    },
+  };
+  return <Pill className={map[type].cls}>{map[type].label}</Pill>;
 }

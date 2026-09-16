@@ -31,8 +31,6 @@ export default async function DomainsListPage({
 
   return (
     <div className="flex flex-col gap-6">
-      <ProjectTabs projectId={project.id} active="domain" />
-
       <div>
         <Link
           href={`/projects/${project.id}`}
@@ -40,9 +38,9 @@ export default async function DomainsListPage({
         >
           ← Back to overview
         </Link>
-        <div className="mt-2 flex items-start justify-between gap-4">
+        <div className="mt-3 flex items-start justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-semibold tracking-tight">Domains</h1>
+            <h1 className="text-3xl font-semibold tracking-tight">Domains</h1>
             <p className="mt-1 text-sm text-[var(--muted-foreground)]">
               {project.name}
             </p>
@@ -51,10 +49,13 @@ export default async function DomainsListPage({
             New domain
           </ButtonLink>
         </div>
+        <div className="mt-4">
+          <ProjectTabs projectId={project.id} active="domain" />
+        </div>
       </div>
 
       {domains.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-[var(--border)] bg-white p-12 text-center">
+        <div className="card-glass p-12 text-center">
           <h2 className="text-lg font-semibold">No domains yet</h2>
           <p className="mt-1 text-sm text-[var(--muted-foreground)]">
             Organize the project into meaningful business domains.
@@ -72,15 +73,17 @@ export default async function DomainsListPage({
             return (
               <li
                 key={domain.id}
-                className="rounded-lg border border-[var(--border)] bg-white p-5"
+                className="card-glass p-5 transition-shadow hover:shadow-md"
               >
                 <Link
                   href={`/projects/${project.id}/domains/${domain.id}`}
-                  className="flex flex-col gap-2 hover:underline"
+                  className="flex flex-col gap-2"
                 >
-                  <span className="text-base font-semibold">{domain.name}</span>
+                  <span className="text-base font-semibold tracking-tight">
+                    {domain.name}
+                  </span>
                   {domain.description ? (
-                    <p className="line-clamp-3 text-sm text-[var(--muted-foreground)]">
+                    <p className="line-clamp-3 text-sm text-[var(--muted-foreground)] leading-relaxed">
                       {domain.description}
                     </p>
                   ) : (

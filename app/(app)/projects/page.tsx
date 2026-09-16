@@ -12,7 +12,7 @@ export default async function ProjectsPage() {
     <div className="flex flex-col gap-6">
       <div className="flex items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Projects</h1>
+          <h1 className="text-3xl font-semibold tracking-tight">Projects</h1>
           <p className="mt-1 text-sm text-[var(--muted-foreground)]">
             Manage and open your projects.
           </p>
@@ -21,7 +21,7 @@ export default async function ProjectsPage() {
       </div>
 
       {projects.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-[var(--border)] bg-white p-12 text-center">
+        <div className="card-glass p-12 text-center">
           <h2 className="text-lg font-semibold">No projects yet</h2>
           <p className="mt-1 text-sm text-[var(--muted-foreground)]">
             Create your first project to start organizing your work.
@@ -31,29 +31,29 @@ export default async function ProjectsPage() {
           </div>
         </div>
       ) : (
-        <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {projects.map((project) => (
             <li
               key={project.id}
-              className="flex flex-col gap-3 rounded-lg border border-[var(--border)] bg-white p-5"
+              className="card-glass flex flex-col gap-4 p-6 transition-shadow hover:shadow-lg"
             >
-              <div>
-                <Link
-                  href={`/projects/${project.id}`}
-                  className="text-base font-semibold hover:underline"
-                >
+              <Link
+                href={`/projects/${project.id}`}
+                className="flex flex-col gap-2"
+              >
+                <span className="text-base font-semibold tracking-tight">
                   {project.name}
-                </Link>
+                </span>
                 {project.description ? (
-                  <p className="mt-1 line-clamp-3 text-sm text-[var(--muted-foreground)]">
+                  <p className="line-clamp-3 text-sm text-[var(--muted-foreground)]">
                     {project.description}
                   </p>
                 ) : (
-                  <p className="mt-1 text-sm italic text-[var(--muted-foreground)]">
+                  <p className="italic text-sm text-[var(--muted-foreground)]">
                     No description
                   </p>
                 )}
-              </div>
+              </Link>
               <div className="mt-auto flex items-center justify-between gap-3 border-t border-[var(--border)] pt-3 text-xs text-[var(--muted-foreground)]">
                 <div className="flex flex-col">
                   <span>Created {formatDate(project.created_at)}</span>

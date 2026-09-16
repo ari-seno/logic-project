@@ -81,7 +81,7 @@ export default async function DomainDetailPage({
         </header>
 
         {entities.length === 0 ? (
-          <div className="rounded-lg border border-dashed border-[var(--border)] bg-white p-8 text-center">
+          <div className="card-glass p-8 text-center">
             <p className="text-sm text-[var(--muted-foreground)]">
               No entities in this domain yet.
             </p>
@@ -99,15 +99,17 @@ export default async function DomainDetailPage({
             {entities.map((entity) => (
               <li
                 key={entity.id}
-                className="rounded-lg border border-[var(--border)] bg-white p-4"
+                className="card-glass p-4 transition-shadow hover:shadow-md"
               >
                 <Link
                   href={`/projects/${project.id}/domains/${domain.id}/entities/${entity.id}`}
-                  className="flex flex-col gap-1 hover:underline"
+                  className="flex flex-col gap-1"
                 >
-                  <span className="text-base font-semibold">{entity.name}</span>
+                  <span className="text-base font-semibold tracking-tight">
+                    {entity.name}
+                  </span>
                   {entity.description ? (
-                    <p className="line-clamp-2 text-sm text-[var(--muted-foreground)]">
+                    <p className="line-clamp-2 text-sm text-[var(--muted-foreground)] leading-relaxed">
                       {entity.description}
                     </p>
                   ) : null}
