@@ -52,3 +52,6 @@ next-env.d.ts
 /supabase/.temp
 /supabase/.branches
 /supabase/.env
+# Playwright browser tour artifacts
+.playwright-mcp/
+tour-*.png
