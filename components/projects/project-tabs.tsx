@@ -2,7 +2,7 @@ import Link from "next/link";
 
 import { cn } from "@/lib/utils";
 
-type TabKey = "overview" | "requirements" | "decisions" | "domain";
+type TabKey = "overview" | "requirements" | "decisions" | "domain" | "architecture";
 
 export function ProjectTabs({
   projectId,
@@ -27,6 +27,11 @@ export function ProjectTabs({
       key: "domain",
       label: "Domain",
       href: `/projects/${projectId}/domains`,
+    },
+    {
+      key: "architecture",
+      label: "Architecture",
+      href: `/projects/${projectId}/architecture`,
     },
   ];
 

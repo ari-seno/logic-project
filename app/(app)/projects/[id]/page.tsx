@@ -23,6 +23,10 @@ import {
 import { countDomains } from "@/lib/domains/queries";
 import { countEntitiesByProject } from "@/lib/entities/queries";
 import { countRelationshipsByProject } from "@/lib/relationships/queries";
+import { countArchitectureComponentsByProject } from "@/lib/architecture/components/queries";
+import { countArchitectureTechnologiesByProject } from "@/lib/architecture/technologies/queries";
+import { countArchitectureDecisionsByProject } from "@/lib/architecture/decisions/queries";
+import { countArchitectureComponentDependenciesByProject } from "@/lib/architecture/dependencies/queries";
 
 export default async function ProjectOverviewPage({
   params,
@@ -42,6 +46,10 @@ export default async function ProjectOverviewPage({
     domainCount,
     entityCount,
     relationshipCount,
+    componentCount,
+    technologyCount,
+    archDecisionCount,
+    dependencyCount,
     recentRequirements,
     recentDecisions,
   ] = await Promise.all([
@@ -50,6 +58,10 @@ export default async function ProjectOverviewPage({
     countDomains(project.id),
     countEntitiesByProject(project.id),
     countRelationshipsByProject(project.id),
+    countArchitectureComponentsByProject(project.id),
+    countArchitectureTechnologiesByProject(project.id),
+    countArchitectureDecisionsByProject(project.id),
+    countArchitectureComponentDependenciesByProject(project.id),
     listRequirements({ projectId: project.id, limit: 5 }),
     listDecisions({ projectId: project.id, limit: 5 }),
   ]);
@@ -109,6 +121,10 @@ export default async function ProjectOverviewPage({
             <Stat label="Domains" value={domainCount} />
             <Stat label="Entities" value={entityCount} />
             <Stat label="Relationships" value={relationshipCount} />
+            <Stat label="Components" value={componentCount} />
+            <Stat label="Technologies" value={technologyCount} />
+            <Stat label="Arch decisions" value={archDecisionCount} />
+            <Stat label="Dependencies" value={dependencyCount} />
           </div>
           <div className="mt-5 border-t border-[var(--border)] pt-4 text-xs text-[var(--muted-foreground)]">
             <p>

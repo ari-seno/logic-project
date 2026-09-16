@@ -2,7 +2,7 @@
 
 > An AI Project Planner that structures requirements, decisions, architecture, tasks, and agent prompts. You make the calls; the tool keeps things organized.
 
-This repository contains **Part 1: Foundation & Authentication**, **Part 2: Requirements & Decisions**, and **Part 3: Domain & ERD** — a Next.js 16 app backed by Supabase Auth and Postgres, with row-level security enforced on every table.
+This repository contains **Part 1: Foundation & Authentication**, **Part 2: Requirements & Decisions**, **Part 3: Domain & ERD**, and **Part 4: Architecture Foundation** — a Next.js 16 app backed by Supabase Auth and Postgres, with row-level security enforced on every table.
 
 ## Stack
 
@@ -30,18 +30,25 @@ app/                         Next.js App Router
     projects/[id]/domains/        list / new / [domainId] / [domainId]/edit / erd
     projects/[id]/domains/[domainId]/entities/        new / [entityId] / [entityId]/edit
     projects/[id]/domains/relationships/               new / [relId] / [relId]/edit
+    projects/[id]/architecture/      overview + components/technologies/decisions/dependencies CRUD
   api/                       (none yet)
   globals.css                Tailwind v4 theme tokens
   page.tsx                   landing
   proxy.ts -> lib/supabase/middleware.ts
 components/
   ui/                        Button, ButtonLink, Input, Textarea, Label,
-                             Alert, FieldError, Select, DeleteEntityButton
+                             Alert, FieldError, Select, DeleteEntityButton,
+                             PositionStepper
   auth/                      login-form, register-form, logout-button
   projects/                  project-form, delete-project-button,
                              project-tabs, project-header, badges
   requirements/              requirement-form
   decisions/                 decision-form
+  domains/                   domain-form
+  entities/                  entity-form, attribute-form
+  relationships/             relationship-form
+  architecture/              component-form, technology-form,
+                             decision-form, dependency-form
 lib/
   auth/actions.ts            signIn / signUp / signOut server actions
   projects/queries.ts        listProjects, getProject
@@ -50,6 +57,12 @@ lib/
   requirements/actions.ts    createRequirement, updateRequirement, deleteRequirement
   decisions/queries.ts       listDecisions, countDecisions, getDecision
   decisions/actions.ts       createDecision, updateDecision, deleteDecision
+  domains/                   queries, actions, erd loader
+  entities/                  queries, actions
+  attributes/                queries, actions (incl. reorder)
+  relationships/             queries, actions (assertProjectAndSharedEntities)
+  architecture/              components/, technologies/, decisions/, dependencies/
+                             (queries + actions each)
   supabase/                  client, server, middleware, types, path helpers
   validation/                zod schemas + action state types
   utils.ts                   cn, formatDate, formatDateTime
@@ -58,11 +71,16 @@ supabase/
   migrations/
     20250916120000_init_schema.sql              profiles + projects + RLS + triggers
     20250916180000_part2_requirements_decisions.sql   requirements + decisions + RLS + triggers
+    20250916190000_part3_domain_erd.sql         domains + entities + attributes + relationships + RLS + triggers
+    20250916200000_part4_architecture.sql       components + technologies + arch decisions + dependencies + RLS + triggers
 tests/
   *.test.ts                  Vitest unit tests (auth, project, utils,
-                             middleware, requirement, decision validation)
+                             middleware, requirement, decision, domain,
+                             entity, attribute, relationship, architecture-*
+                             validation)
   e2e/                       Playwright specs (auth, protected, projects,
-                             requirements, decisions, cross-user)
+                             requirements, decisions, domain, cross-user,
+                             architecture)
 docs/
   MANUAL_TESTING.md          manual test walkthrough (Part 1)
   superpowers/plans/         implementation plans
@@ -154,7 +172,10 @@ walkthrough of the user flows and the security boundaries they verify.
   session on every request to `/dashboard` or `/projects`.
 - **Authorization**:
   - `profiles`, `projects` rows are scoped to `owner_id = auth.uid()` (Part 1).
-  - `requirements`, `decisions` rows are scoped through their parent project:
+  - `requirements`, `decisions`, `domains`, `entities`, `entity_attributes`,
+    `entity_relationships`, `architecture_components`, `architecture_technologies`,
+    `architecture_decisions`, and `architecture_component_dependencies` rows are
+    scoped through their parent project:
     `EXISTS (SELECT 1 FROM projects p WHERE p.id = <table>.project_id AND p.owner_id = auth.uid())`.
     This enforces "user owns parent project" without weakening Part 1 RLS.
   - RLS policies are checked at the database, not in application code.
@@ -282,6 +303,65 @@ Same RLS pattern as Part 2: each child row's policy gates on `EXISTS (SELECT 1 F
 - Primary-key uniqueness within an entity is enforced at the application layer, not the database.
 - No markdown rendering for descriptions.
 
+## Part 4 — Architecture Foundation
+
+Part 4 introduces a structured system-architecture capture. Each project owns **components**, **technologies**, **architecture decisions**, and component-to-component **dependencies**.
+
+### Concepts
+
+| Concept | Belongs to | Fields |
+| --- | --- | --- |
+| Component | Project | name, type, description, position (implicit) |
+| Technology | Project | name, category, description |
+| Architecture decision | Project | title, status (`proposed`/`accepted`/`superseded`), context, decision, rationale |
+| Component dependency | Project | source component, target component, description |
+
+### Enum values
+
+| Type | Values |
+| --- | --- |
+| Component type | `frontend`, `backend`, `database`, `authentication`, `storage`, `external_service`, `infrastructure`, `worker`, `queue`, `cache`, `other` |
+| Technology category | `language`, `framework`, `database`, `authentication`, `hosting`, `infrastructure`, `testing`, `package`, `external_service`, `other` |
+| Decision status | `proposed`, `accepted`, `superseded` |
+
+### Database tables
+
+| Table | Indexes / constraints | RLS |
+| --- | --- | --- |
+| `architecture_components` | `(project_id)`, `(updated_at)`; CHECK on `type` | enabled |
+| `architecture_technologies` | `(project_id)`, `(updated_at)`; CHECK on `category` | enabled |
+| `architecture_decisions` | `(project_id)`, `(updated_at)`; CHECK on `status` | enabled |
+| `architecture_component_dependencies` | `(project_id)`, `(source_component_id)`, `(target_component_id)`; UNIQUE `(source_component_id, target_component_id)`; `share_project` trigger | enabled |
+
+All four FKs cascade on project/component deletion. The `share_project` trigger ensures source and target components always belong to the dependency's own `project_id`.
+
+### Available routes
+
+| Route | Purpose |
+| --- | --- |
+| `/projects/[id]/architecture` | Overview — components, technologies, recent decisions, dependencies |
+| `/projects/[id]/architecture/components` | List components |
+| `/projects/[id]/architecture/components/new` | Create component |
+| `/projects/[id]/architecture/components/[componentId]` | Detail + edit/delete |
+| `/projects/[id]/architecture/components/[componentId]/edit` | Edit form |
+| `/projects/[id]/architecture/technologies` | List technologies |
+| `/projects/[id]/architecture/technologies/new` | Create technology |
+| `/projects/[id]/architecture/technologies/[technologyId]` | Detail + edit/delete |
+| `/projects/[id]/architecture/technologies/[technologyId]/edit` | Edit form |
+| `/projects/[id]/architecture/decisions` | List decisions |
+| `/projects/[id]/architecture/decisions/new` | Create decision |
+| `/projects/[id]/architecture/decisions/[decisionId]` | Detail + edit/delete |
+| `/projects/[id]/architecture/decisions/[decisionId]/edit` | Edit form |
+| `/projects/[id]/architecture/dependencies/new` | Create dependency (requires ≥ 2 components) |
+| `/projects/[id]/architecture/dependencies/[dependencyId]` | Detail + edit/delete |
+| `/projects/[id]/architecture/dependencies/[dependencyId]/edit` | Edit form |
+
+### Limitations
+
+- No component-to-architecture-decision linking yet (planned for a later part).
+- No architecture-level diagram visualization (boxes + arrows) — only the dependency list.
+- No markdown rendering for descriptions.
+
 ## Roadmap
 
 | Part | Scope | Status |
@@ -289,7 +369,7 @@ Same RLS pattern as Part 2: each child row's policy gates on `EXISTS (SELECT 1 F
 | 1 | Foundation, auth, projects CRUD | ✓ shipped |
 | 2 | Requirements & Decisions | ✓ shipped |
 | 3 | Domain & ERD | ✓ shipped |
-| 4 | Architecture / API / UI | planned |
+| 4 | Architecture Foundation | ✓ shipped |
 | 5 | Tasks & Dependencies | planned |
 | 6 | Agent Prompt Generation | planned |
 | 7 | AI Assistance | planned |
