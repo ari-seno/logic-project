@@ -18,9 +18,9 @@ import {
 } from "@/lib/api/endpoints/queries";
 import { ApiGroupActions } from "@/components/api/group-actions";
 import { ApiEndpointActions } from "@/components/api/endpoint-actions";
-import { CopyButton } from "@/components/ui/copy-button";
+import { JsonBlock } from "@/components/ui/json-block";
 import { loadProjectApiContract } from "@/lib/api/endpoints/queries";
-import { serializeApiContract } from "@/lib/export/api";
+import { jsonFilename, prepareJsonBlock } from "@/lib/export/api";
 
 export default async function ApiOverviewPage({
   params,
@@ -37,7 +37,8 @@ export default async function ApiOverviewPage({
     loadProjectApiContract(project.id),
   ]);
 
-  const jsonStructure = serializeApiContract(contract);
+  const jsonStructure = prepareJsonBlock(contract);
+  const filename = jsonFilename(project.name);
 
   const groupNameById = new Map<string, string>(
     groups.map((g) => [g.id, g.name]),
@@ -139,20 +140,20 @@ export default async function ApiOverviewPage({
       </section>
 
       <section className="card-glass">
-        <header className="mb-3 flex items-center justify-between gap-3">
-          <div>
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-[var(--muted-foreground)]">
-              JSON structure
-            </h2>
-            <p className="mt-1 text-xs text-[var(--muted-foreground)]">
-              Auto-generated JSON view of the entire API contract.
-            </p>
-          </div>
-          <CopyButton value={jsonStructure} />
+        <header className="mb-3">
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-[var(--muted-foreground)]">
+            JSON structure
+          </h2>
+          <p className="mt-1 text-xs text-[var(--muted-foreground)]">
+            Auto-generated JSON view of the entire API contract.
+          </p>
         </header>
-        <pre className="max-h-[480px] overflow-auto rounded-md border border-[var(--border)] bg-white/70 p-4 font-mono text-[11px] leading-relaxed text-[var(--foreground)]">
-          <code>{jsonStructure}</code>
-        </pre>
+        <JsonBlock
+          json={jsonStructure.json}
+          filename={filename}
+          summary={jsonStructure.summary}
+          truncated={jsonStructure.truncated}
+        />
       </section>
 
       <section className="card-glass">

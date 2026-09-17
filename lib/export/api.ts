@@ -166,3 +166,62 @@ endpoint_id: ep.id,
 export function serializeApiContract(contract: ProjectApiContract): string {
   return JSON.stringify(apiContractToJson(contract), null, 2);
 }
+
+export const MAX_JSON_CHARS = 200_000;
+
+export interface ContractSummary {
+  chars: number;
+  lines: number;
+  endpoints: number;
+  groups: number;
+  updatedAt: string | null;
+}
+
+export function summarizeApiContract(
+  contract: ProjectApiContract,
+): ContractSummary {
+  const json = serializeApiContract(contract);
+  let mostRecent: string | null = null;
+  const bump = (value: string | null | undefined) => {
+    if (!value) return;
+    if (mostRecent === null || value > mostRecent) mostRecent = value;
+  };
+  for (const group of contract.groups) bump(group.updated_at);
+  for (const ep of contract.endpoints) bump(ep.updated_at);
+  for (const p of contract.parameters) bump(p.updated_at);
+  for (const r of contract.responses) bump(r.updated_at);
+  for (const e of contract.errors) bump(e.created_at);
+  for (const b of contract.requestBodies) bump(b.created_at);
+
+  return {
+    chars: json.length,
+    lines: json.split("\n").length,
+    endpoints: contract.endpoints.length,
+    groups: contract.groups.length,
+    updatedAt: mostRecent,
+  };
+}
+
+export interface JsonBlock {
+  json: string;
+  truncated: boolean;
+  summary: ContractSummary;
+}
+
+export function prepareJsonBlock(contract: ProjectApiContract): JsonBlock {
+  const json = serializeApiContract(contract);
+  const summary = summarizeApiContract(contract);
+  if (json.length <= MAX_JSON_CHARS) {
+    return { json, truncated: false, summary };
+  }
+  const truncated = `${json.slice(0, MAX_JSON_CHARS)}\n  // ... output truncated (download full JSON for the rest)`;
+  return { json: truncated, truncated: true, summary };
+}
+
+export function jsonFilename(projectName: string): string {
+  const slug = projectName
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+  return `${slug || "api"}.api.json`;
+}

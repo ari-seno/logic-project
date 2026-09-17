@@ -2,7 +2,11 @@ import { describe, expect, it } from "vitest";
 
 import {
   apiContractToJson,
+  jsonFilename,
+  MAX_JSON_CHARS,
+  prepareJsonBlock,
   serializeApiContract,
+  summarizeApiContract,
 } from "@/lib/export/api";
 import type { ProjectApiContract } from "@/lib/api/endpoints/queries";
 
@@ -225,5 +229,80 @@ describe("apiContractToJson", () => {
     expect(s).toMatch(/^{/);
     expect(s).toContain('"openapi": "3.0.3"');
     expect(s).toContain('"paths": []');
+  });
+
+  it("summarizeApiContract counts endpoints, groups, lines and chars", () => {
+    const summary = summarizeApiContract(
+      makeContract({
+        groups: [
+          {
+            id: "g1",
+            project_id: "p",
+            name: "Auth",
+            description: null,
+            prefix: "/api/auth",
+            position: 0,
+            created_at: "2026-01-01T00:00:00Z",
+            updated_at: "2026-02-02T00:00:00Z",
+          },
+        ],
+        endpoints: [
+          {
+            id: "e1",
+            project_id: "p",
+            group_id: "g1",
+            name: "Login",
+            method: "POST",
+            path: "/login",
+            summary: null,
+            description: null,
+            authentication_required: false,
+            position: 0,
+            created_at: "2026-01-01T00:00:00Z",
+            updated_at: "2026-03-03T00:00:00Z",
+          },
+        ],
+      }),
+    );
+    expect(summary.endpoints).toBe(1);
+    expect(summary.groups).toBe(1);
+    expect(summary.chars).toBeGreaterThan(0);
+    expect(summary.lines).toBeGreaterThan(0);
+    expect(summary.updatedAt).toBe("2026-03-03T00:00:00Z");
+  });
+
+  it("prepareJsonBlock returns uncapped block when within limit", () => {
+    const block = prepareJsonBlock(makeContract());
+    expect(block.truncated).toBe(false);
+    expect(block.json).toBe(serializeApiContract(makeContract()));
+  });
+
+  it("prepareJsonBlock truncates when output exceeds MAX_JSON_CHARS", async () => {
+    const huge: ProjectApiContract["endpoints"] = Array.from({ length: 5000 }, (_, i) => ({
+      id: `e${i}`,
+      project_id: "p",
+      group_id: null,
+      name: `Endpoint ${i} ${"x".repeat(80)}`,
+      method: "GET" as const,
+      path: `/${"y".repeat(60)}`,
+      summary: null,
+      description: null,
+      authentication_required: false,
+      position: i,
+      created_at: "2026-01-01T00:00:00Z",
+      updated_at: "2026-01-01T00:00:00Z",
+    }));
+    const block = prepareJsonBlock(makeContract({ endpoints: huge }));
+    expect(block.json.length).toBeLessThanOrEqual(MAX_JSON_CHARS + 100);
+    expect(block.json).toContain("output truncated");
+    expect(block.truncated).toBe(true);
+  });
+
+  it("jsonFilename slugifies the project name", () => {
+    expect(jsonFilename("Library Management System")).toBe(
+      "library-management-system.api.json",
+    );
+    expect(jsonFilename("Book / ISBN 2025!")).toBe("book-isbn-2025.api.json");
+    expect(jsonFilename("!!!")).toBe("api.api.json");
   });
 });
