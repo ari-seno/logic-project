@@ -75,9 +75,13 @@ export async function aiSuggestRequirements(
       system,
       user,
       parse: (text) => {
-        const parsed = aiRequirementsResponseSchema.safeParse(
-          JSON.parse(text),
-        );
+        let raw: unknown;
+        try {
+          raw = JSON.parse(text);
+        } catch {
+          return { ok: false } as const;
+        }
+        const parsed = aiRequirementsResponseSchema.safeParse(raw);
         return parsed.success
           ? ({ ok: true, value: parsed.data as unknown } as const)
           : ({ ok: false } as const);
