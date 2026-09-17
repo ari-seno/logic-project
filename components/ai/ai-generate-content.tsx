@@ -77,7 +77,11 @@ export function AiGenerateContent({
     startTransition(async () => {
       const result = await aiSuggestRequirements({ projectId, prompt });
       if (!result.ok) {
-        setError(ERROR_COPY[result.code]);
+        setError(
+          result.message
+            ? `${ERROR_COPY[result.code]} (${result.message})`
+            : ERROR_COPY[result.code],
+        );
         return;
       }
       setSuggestion({
