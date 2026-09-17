@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
@@ -44,6 +44,18 @@ export function CredentialsSection({
   const [credentials, setCredentials] = useState<CredentialRow[]>(
     initialCredentials,
   );
+  useEffect(() => {
+    /* Sync credentials that arrived from the server after router.refresh().
+     * Local optimistic updates (test/delete/enable) are preserved — we only
+     * append new rows we haven't seen yet. Same pattern as credential-form. */
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setCredentials((prev) => {
+      const known = new Set(prev.map((c) => c.id));
+      const additions = initialCredentials.filter((c) => !known.has(c.id));
+      if (additions.length === 0) return prev;
+      return [...prev, ...additions];
+    });
+  }, [initialCredentials]);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<EditableDraft | null>(null);
   const [error, setError] = useState<string | null>(null);
