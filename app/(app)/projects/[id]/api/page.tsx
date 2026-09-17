@@ -18,6 +18,9 @@ import {
 } from "@/lib/api/endpoints/queries";
 import { ApiGroupActions } from "@/components/api/group-actions";
 import { ApiEndpointActions } from "@/components/api/endpoint-actions";
+import { CopyButton } from "@/components/ui/copy-button";
+import { loadProjectApiContract } from "@/lib/api/endpoints/queries";
+import { serializeApiContract } from "@/lib/export/api";
 
 export default async function ApiOverviewPage({
   params,
@@ -28,10 +31,13 @@ export default async function ApiOverviewPage({
   const project = await getProject(id);
   if (!project) notFound();
 
-  const [groups, endpoints] = await Promise.all([
+  const [groups, endpoints, contract] = await Promise.all([
     listApiGroupsWithEndpointCount({ projectId: project.id }),
     listApiEndpointsByProjectWithGroupName({ projectId: project.id }),
+    loadProjectApiContract(project.id),
   ]);
+
+  const jsonStructure = serializeApiContract(contract);
 
   const groupNameById = new Map<string, string>(
     groups.map((g) => [g.id, g.name]),
@@ -130,6 +136,23 @@ export default async function ApiOverviewPage({
             ))}
           </ul>
         )}
+      </section>
+
+      <section className="card-glass">
+        <header className="mb-3 flex items-center justify-between gap-3">
+          <div>
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-[var(--muted-foreground)]">
+              JSON structure
+            </h2>
+            <p className="mt-1 text-xs text-[var(--muted-foreground)]">
+              Auto-generated JSON view of the entire API contract.
+            </p>
+          </div>
+          <CopyButton value={jsonStructure} />
+        </header>
+        <pre className="max-h-[480px] overflow-auto rounded-md border border-[var(--border)] bg-white/70 p-4 font-mono text-[11px] leading-relaxed text-[var(--foreground)]">
+          <code>{jsonStructure}</code>
+        </pre>
       </section>
 
       <section className="card-glass">
