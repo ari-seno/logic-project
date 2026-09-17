@@ -39,7 +39,7 @@ create policy ai_usage_owner_select on public.ai_usage
   for select using (
     exists (
       select 1 from public.projects p
-      where p.id = ai_usage.project_id and p.user_id = auth.uid()
+      where p.id = ai_usage.project_id and p.owner_id = auth.uid()
     )
     or auth.uid() = ai_usage.user_id
   );
@@ -81,7 +81,7 @@ create policy ai_suggestions_owner_select on public.ai_suggestions
   for select using (
     exists (
       select 1 from public.projects p
-      where p.id = ai_suggestions.project_id and p.user_id = auth.uid()
+      where p.id = ai_suggestions.project_id and p.owner_id = auth.uid()
     )
   );
 
@@ -90,12 +90,12 @@ create policy ai_suggestions_owner_update on public.ai_suggestions
   for update using (
     exists (
       select 1 from public.projects p
-      where p.id = ai_suggestions.project_id and p.user_id = auth.uid()
+      where p.id = ai_suggestions.project_id and p.owner_id = auth.uid()
     )
   )
   with check (
     exists (
       select 1 from public.projects p
-      where p.id = ai_suggestions.project_id and p.user_id = auth.uid()
+      where p.id = ai_suggestions.project_id and p.owner_id = auth.uid()
     )
   );
