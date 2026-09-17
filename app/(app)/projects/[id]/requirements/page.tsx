@@ -7,11 +7,14 @@ import {
   RequirementStatusBadge,
   TypeBadge,
 } from "@/components/projects/badges";
+import { AiPromptInput } from "@/components/ai/ai-prompt-input";
+import { SetupRequiredCta } from "@/components/ai/setup-required-cta";
 import { ButtonLink } from "@/components/ui/button";
 import { EmptyState, EmptyStateIcon } from "@/components/ui/empty-state";
 import { formatDate } from "@/lib/utils";
 import { getProject } from "@/lib/projects/queries";
 import { listRequirements } from "@/lib/requirements/queries";
+import { getProjectCredentialAction } from "@/lib/ai/credentials-actions";
 
 export default async function RequirementsListPage({
   params,
@@ -25,6 +28,11 @@ export default async function RequirementsListPage({
   }
 
   const requirements = await listRequirements({ projectId: project.id });
+  const credentialResult = await getProjectCredentialAction(project.id);
+  const credential =
+    credentialResult.ok && credentialResult.credential
+      ? credentialResult.credential
+      : null;
 
   return (
     <div className="flex flex-col gap-6">
@@ -52,6 +60,22 @@ export default async function RequirementsListPage({
           <ProjectTabs projectId={project.id} active="requirements" />
         </div>
       </div>
+
+      <section className="card-glass">
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-[var(--muted-foreground)]">
+          AI assist
+        </h2>
+        <p className="mt-1 text-xs text-[var(--muted-foreground)]">
+          Generate a first draft of requirements from a prompt.
+        </p>
+        <div className="mt-3">
+          {credential ? (
+            <AiPromptInput projectId={project.id} credential={credential} />
+          ) : (
+            <SetupRequiredCta projectId={project.id} />
+          )}
+        </div>
+      </section>
 
       {requirements.length === 0 ? (
         <EmptyState

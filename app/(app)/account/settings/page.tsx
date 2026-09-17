@@ -2,6 +2,8 @@ import Link from "next/link";
 import { Alert } from "@/components/ui/alert";
 import { ProfileForm } from "@/components/account/profile-form";
 import { getCurrentProfile } from "@/lib/profile/queries";
+import { CredentialsSection } from "@/components/account/settings/ai/credentials-section";
+import { listMyCredentialsAction } from "@/lib/ai/credentials-actions";
 
 export default async function AccountSettingsPage({
   searchParams,
@@ -10,6 +12,7 @@ export default async function AccountSettingsPage({
 }) {
   const sp = await searchParams;
   const profile = await getCurrentProfile();
+  const credentials = await listMyCredentialsAction();
 
   if (!profile) {
     return (
@@ -64,6 +67,8 @@ export default async function AccountSettingsPage({
           current session.
         </p>
       </section>
+
+      <CredentialsSection initialCredentials={credentials.ok ? credentials.credentials : []} />
     </div>
   );
 }

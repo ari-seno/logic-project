@@ -11,6 +11,7 @@ export type Project = {
   owner_id: string;
   name: string;
   description: string | null;
+  ai_credential_id: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -663,6 +664,75 @@ export type TaskUiScreenLink = {
   created_at: string;
 };
 
+// ---------------------------------------------------------------------------
+// AI credentials / audit
+// ---------------------------------------------------------------------------
+export const AI_PROVIDERS = ["ollama"] as const;
+export type AiProvider = (typeof AI_PROVIDERS)[number];
+
+export const AI_TEST_STATUSES = [
+  "ok",
+  "unreachable",
+  "auth_failed",
+  "model_missing",
+  "invalid_request",
+] as const;
+export type AiTestStatus = (typeof AI_TEST_STATUSES)[number];
+
+export const AI_SUGGESTION_STATUSES = [
+  "pending",
+  "applied",
+  "rejected",
+] as const;
+export type AiSuggestionStatus = (typeof AI_SUGGESTION_STATUSES)[number];
+
+export type UserAiCredential = {
+  id: string;
+  user_id: string;
+  label: string;
+  provider: AiProvider;
+  base_url: string;
+  api_key_encrypted: string;
+  model: string;
+  enabled: boolean;
+  last_tested_at: string | null;
+  last_test_status: AiTestStatus | null;
+  last_test_message: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type AiUsage = {
+  id: string;
+  user_id: string;
+  project_id: string | null;
+  provider: string;
+  model: string;
+  stage: string;
+  prompt_tokens: number | null;
+  completion_tokens: number | null;
+  duration_ms: number | null;
+  ok: boolean;
+  error_code: string | null;
+  error_message: string | null;
+  created_at: string;
+};
+
+export type AiSuggestion = {
+  id: string;
+  user_id: string;
+  project_id: string;
+  stage: string;
+  provider: string;
+  model: string;
+  prompt_user: string;
+  payload: Json;
+  status: AiSuggestionStatus;
+  applied_indices: number[];
+  applied_at: string | null;
+  created_at: string;
+};
+
 type Tables = {
   profiles: {
     Row: Profile;
@@ -689,6 +759,7 @@ type Tables = {
       owner_id: string;
       name: string;
       description?: string | null;
+      ai_credential_id?: string | null;
       created_at?: string;
       updated_at?: string;
     };
@@ -697,6 +768,7 @@ type Tables = {
       owner_id?: string;
       name?: string;
       description?: string | null;
+      ai_credential_id?: string | null;
       created_at?: string;
       updated_at?: string;
     };
@@ -1574,6 +1646,92 @@ type Tables = {
       id?: string;
       task_id?: string;
       screen_id?: string;
+      created_at?: string;
+    };
+    Relationships: [];
+  };
+  user_ai_credentials: {
+    Row: UserAiCredential;
+    Insert: {
+      id?: string;
+      user_id: string;
+      label: string;
+      provider?: AiProvider;
+      base_url: string;
+      api_key_encrypted: string;
+      model: string;
+      enabled?: boolean;
+      last_tested_at?: string | null;
+      last_test_status?: AiTestStatus | null;
+      last_test_message?: string | null;
+      created_at?: string;
+      updated_at?: string;
+    };
+    Update: {
+      id?: string;
+      user_id?: string;
+      label?: string;
+      provider?: AiProvider;
+      base_url?: string;
+      api_key_encrypted?: string;
+      model?: string;
+      enabled?: boolean;
+      last_tested_at?: string | null;
+      last_test_status?: AiTestStatus | null;
+      last_test_message?: string | null;
+      created_at?: string;
+      updated_at?: string;
+    };
+    Relationships: [];
+  };
+  ai_usage: {
+    Row: AiUsage;
+    Insert: {
+      id?: string;
+      user_id: string;
+      project_id?: string | null;
+      provider: string;
+      model: string;
+      stage: string;
+      prompt_tokens?: number | null;
+      completion_tokens?: number | null;
+      duration_ms?: number | null;
+      ok?: boolean;
+      error_code?: string | null;
+      error_message?: string | null;
+      created_at?: string;
+    };
+    Update: Record<string, never>;
+    Relationships: [];
+  };
+  ai_suggestions: {
+    Row: AiSuggestion;
+    Insert: {
+      id?: string;
+      user_id: string;
+      project_id: string;
+      stage: string;
+      provider: string;
+      model: string;
+      prompt_user: string;
+      payload: Json;
+      status?: AiSuggestionStatus;
+      applied_indices?: number[];
+      applied_at?: string | null;
+      created_at?: string;
+    };
+    Update: {
+      id?: string;
+      user_id?: string;
+      project_id?: string;
+      stage?: string;
+      provider?: string;
+      model?: string;
+      prompt_user?: string;
+      payload?: Json;
+      status?: AiSuggestionStatus;
+      applied_indices?: number[];
+      applied_at?: string | null;
       created_at?: string;
     };
     Relationships: [];

@@ -33,6 +33,8 @@ import { countApiEndpointsByProject } from "@/lib/api/endpoints/queries";
 import { countUiScreensByProject } from "@/lib/ui/screens/queries";
 import { countUiComponentsByProject } from "@/lib/ui/components/queries";
 import { countTasksByStatus } from "@/lib/tasks/queries";
+import { AiCredentialPicker } from "@/components/projects/ai-credential-picker";
+import { getProjectCredentialAction } from "@/lib/ai/credentials-actions";
 
 export default async function ProjectOverviewPage({
   params,
@@ -66,6 +68,7 @@ export default async function ProjectOverviewPage({
     taskCounts,
     recentRequirements,
     recentDecisions,
+    credentialResult,
   ] = await Promise.all([
     countRequirements(project.id),
     countDecisions(project.id),
@@ -83,7 +86,12 @@ export default async function ProjectOverviewPage({
     countTasksByStatus(project.id),
     listRequirements({ projectId: project.id, limit: 5 }),
     listDecisions({ projectId: project.id, limit: 5 }),
+    getProjectCredentialAction(project.id),
   ]);
+
+  const aiCredentialSummary = credentialResult.ok
+    ? credentialResult.credential
+    : null;
 
   return (
     <div className="flex flex-col gap-8">
@@ -105,6 +113,10 @@ export default async function ProjectOverviewPage({
             </div>
           </div>
           <div className="flex shrink-0 flex-wrap items-center gap-2">
+            <AiCredentialPicker
+              projectId={project.id}
+              currentLabel={aiCredentialSummary?.label ?? null}
+            />
             <ButtonLink
               href={`/projects/${project.id}/edit`}
               variant="secondary"
