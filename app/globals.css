@@ -110,13 +110,16 @@ button:disabled {
 }
 
 /* Glass card */
-.card-glass {
-  background: var(--glass-bg);
-  -webkit-backdrop-filter: saturate(180%) blur(16px);
-  backdrop-filter: saturate(180%) blur(16px);
-  border: 1px solid var(--glass-border);
-  box-shadow: var(--glass-shadow);
-  border-radius: var(--radius-lg);
+@layer components {
+  .card-glass {
+    background: var(--glass-bg);
+    -webkit-backdrop-filter: saturate(180%) blur(16px);
+    backdrop-filter: saturate(180%) blur(16px);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+  }
 }
 
 /* Gradient border */
