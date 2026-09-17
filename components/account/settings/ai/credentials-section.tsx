@@ -158,21 +158,12 @@ export function CredentialsSection({
   }
 
   return (
-    <section className="card-glass">
-      <header className="flex items-start justify-between gap-3">
-        <div>
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-[var(--muted-foreground)]">
-            AI credentials
-          </h2>
-          <p className="mt-1 text-xs text-[var(--muted-foreground)]">
-            Manage Ollama API keys for generating requirements on each project.
-            API keys are stored encrypted (AES-256-GCM).
-          </p>
-        </div>
+    <div>
+      <div className="flex justify-end">
         <Button variant="secondary" size="sm" onClick={add}>
-          Add credential
+          {credentials.length === 0 ? "Add credential" : "Add another"}
         </Button>
-      </header>
+      </div>
 
       {credentials.length === 0 ? (
         <div className="mt-4">
@@ -301,6 +292,6 @@ export function CredentialsSection({
           if (confirmingDeleteId) void handleDeleteConfirmed(confirmingDeleteId);
         }}
       />
-    </section>
+    </div>
   );
 }

@@ -7,8 +7,7 @@ import {
   RequirementStatusBadge,
   TypeBadge,
 } from "@/components/projects/badges";
-import { AiPromptInput } from "@/components/ai/ai-prompt-input";
-import { SetupRequiredCta } from "@/components/ai/setup-required-cta";
+import { AiGeneratePanel } from "@/components/ai/ai-generate-panel";
 import { ButtonLink } from "@/components/ui/button";
 import { EmptyState, EmptyStateIcon } from "@/components/ui/empty-state";
 import { formatDate } from "@/lib/utils";
@@ -52,30 +51,17 @@ export default async function RequirementsListPage({
               {project.name}
             </p>
           </div>
-          <ButtonLink href={`/projects/${project.id}/requirements/new`}>
-            New requirement
-          </ButtonLink>
+          <div className="flex flex-wrap items-center gap-2">
+            <AiGeneratePanel projectId={project.id} credential={credential} />
+            <ButtonLink href={`/projects/${project.id}/requirements/new`}>
+              New requirement
+            </ButtonLink>
+          </div>
         </div>
         <div className="mt-4">
           <ProjectTabs projectId={project.id} active="requirements" />
         </div>
       </div>
-
-      <section className="card-glass">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-[var(--muted-foreground)]">
-          AI assist
-        </h2>
-        <p className="mt-1 text-xs text-[var(--muted-foreground)]">
-          Generate a first draft of requirements from a prompt.
-        </p>
-        <div className="mt-3">
-          {credential ? (
-            <AiPromptInput projectId={project.id} credential={credential} />
-          ) : (
-            <SetupRequiredCta projectId={project.id} />
-          )}
-        </div>
-      </section>
 
       {requirements.length === 0 ? (
         <EmptyState
@@ -89,9 +75,15 @@ export default async function RequirementsListPage({
           title="No requirements yet"
           description="Define what this project needs to accomplish. Requirements guide every downstream decision."
           action={
-            <ButtonLink href={`/projects/${project.id}/requirements/new`}>
-              Add requirement
-            </ButtonLink>
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              <AiGeneratePanel
+                projectId={project.id}
+                credential={credential}
+              />
+              <ButtonLink href={`/projects/${project.id}/requirements/new`}>
+                Add requirement
+              </ButtonLink>
+            </div>
           }
         />
       ) : (

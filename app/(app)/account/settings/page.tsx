@@ -24,6 +24,8 @@ export default async function AccountSettingsPage({
     );
   }
 
+  const credCount = credentials.ok ? credentials.credentials.length : 0;
+
   return (
     <div className="flex flex-col gap-6">
       <div>
@@ -34,10 +36,10 @@ export default async function AccountSettingsPage({
           ← Back to account
         </Link>
         <h1 className="mt-2 text-2xl font-semibold tracking-tight">
-          Account settings
+          Settings
         </h1>
         <p className="mt-1 text-sm text-[var(--muted-foreground)]">
-          Update your profile display name.
+          Profile and AI integrations for your account.
         </p>
       </div>
 
@@ -46,29 +48,55 @@ export default async function AccountSettingsPage({
       ) : null}
 
       <section className="card-glass">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-[var(--muted-foreground)]">
-          Profile
-        </h2>
-        <div className="mt-4">
+        <header className="flex items-start justify-between gap-4">
+          <div>
+            <h2 className="text-base font-semibold tracking-tight">
+              Profile
+            </h2>
+            <p className="mt-1 text-xs text-[var(--muted-foreground)]">
+              Your display name appears across projects.
+            </p>
+          </div>
+        </header>
+        <div className="mt-5">
           <ProfileForm
             email={profile.email}
             display_name={profile.display_name}
           />
         </div>
-      </section>
-
-      <section className="card-glass">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-[var(--muted-foreground)]">
-          Account security
-        </h2>
-        <p className="mt-3 text-sm text-[var(--muted-foreground)]">
-          Password changes and sign-out controls are managed by your auth
-          provider. Use the sign-out button in the header to end your
-          current session.
+        <p className="mt-5 border-t border-[var(--border)] pt-4 text-xs text-[var(--muted-foreground)]">
+          Password and sign-out controls are managed by your auth provider.
+          Use the sign-out button in the header to end your current session.
         </p>
       </section>
 
-      <CredentialsSection initialCredentials={credentials.ok ? credentials.credentials : []} />
+      <section className="card-glass">
+        <header className="flex items-start justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2">
+              <h2 className="text-base font-semibold tracking-tight">
+                AI credentials
+              </h2>
+              {credCount > 0 ? (
+                <span className="rounded-full bg-[var(--brand)]/10 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-[var(--brand)]">
+                  {credCount} active
+                </span>
+              ) : null}
+            </div>
+            <p className="mt-1 text-xs text-[var(--muted-foreground)]">
+              Ollama API keys for generating requirements on each project.
+              Keys are stored encrypted (AES-256-GCM).
+            </p>
+          </div>
+        </header>
+        <div className="mt-5">
+          <CredentialsSection
+            initialCredentials={
+              credentials.ok ? credentials.credentials : []
+            }
+          />
+        </div>
+      </section>
     </div>
   );
 }
