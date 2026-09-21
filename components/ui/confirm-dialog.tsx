@@ -15,7 +15,7 @@ type ConfirmDialogProps = {
   confirmLabel?: string;
   cancelLabel?: string;
   confirmVariant?: "danger" | "primary";
-  typeToConfirm?: string;
+  typeToConfirm?: string | true;
   pending?: boolean;
   onConfirm: () => void;
 };
@@ -52,8 +52,10 @@ export function ConfirmDialog({
     onOpenChange(next);
   }
 
-  const requiresTyping = Boolean(typeToConfirm);
-  const canConfirm = !pending && (!requiresTyping || typed === typeToConfirm);
+  const requiresTyping = typeToConfirm !== undefined;
+  const requiredWord = typeToConfirm === true ? "confirm" : typeToConfirm;
+  const canConfirm =
+    !pending && (!requiresTyping || typed === requiredWord);
 
   return (
     <dialog
@@ -88,10 +90,10 @@ export function ConfirmDialog({
           </p>
         </div>
 
-        {typeToConfirm ? (
+        {requiresTyping ? (
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="confirm-typed">
-              Type <span className="font-mono">{typeToConfirm}</span> to
+              Type <span className="font-mono">{requiredWord}</span> to
               confirm
             </Label>
             <Input

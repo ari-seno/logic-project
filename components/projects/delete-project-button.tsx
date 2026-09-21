@@ -54,7 +54,7 @@ export function DeleteProjectButton({
           </>
         }
         confirmLabel="Delete project"
-        typeToConfirm={projectName}
+        typeToConfirm
         pending={pending}
         onConfirm={handleConfirm}
       />

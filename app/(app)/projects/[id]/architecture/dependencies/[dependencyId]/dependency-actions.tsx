@@ -19,7 +19,8 @@ export function ArchitectureComponentDependencyActions({
   return (
     <DeleteEntityButton
       action={handleDelete}
-      entityLabel="dependency"
+      entityLabel="this dependency"
+      description="This permanently removes the dependency edge between two architecture components."
       size="sm"
     />
   );

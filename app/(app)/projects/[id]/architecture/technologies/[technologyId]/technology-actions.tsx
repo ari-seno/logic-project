@@ -19,7 +19,8 @@ export function ArchitectureTechnologyActions({
   return (
     <DeleteEntityButton
       action={handleDelete}
-      entityLabel="technology"
+      entityLabel="this technology"
+      description="This permanently deletes the technology entry. Components that reference it will have their technology link cleared."
       size="sm"
     />
   );

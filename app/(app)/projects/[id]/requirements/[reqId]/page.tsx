@@ -82,7 +82,8 @@ export default async function RequirementDetailPage({
             </ButtonLink>
             <DeleteEntityButton
               action={handleDelete}
-              entityLabel={`requirement "${requirement.title}"`}
+              entityLabel={requirement.title}
+              description="This will permanently delete this requirement and unlink any tasks or trace links that reference it."
             />
           </div>
         </div>

@@ -19,7 +19,8 @@ export function ArchitectureComponentActions({
   return (
     <DeleteEntityButton
       action={handleDelete}
-      entityLabel="component"
+      entityLabel="this component"
+      description="This permanently deletes the architecture component and any incoming or outgoing dependency edges."
       size="sm"
     />
   );

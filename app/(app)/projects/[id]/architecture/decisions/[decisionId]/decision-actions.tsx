@@ -19,7 +19,8 @@ export function ArchitectureDecisionActions({
   return (
     <DeleteEntityButton
       action={handleDelete}
-      entityLabel="decision"
+      entityLabel="this architecture decision"
+      description="This permanently deletes the architecture decision record."
       size="sm"
     />
   );

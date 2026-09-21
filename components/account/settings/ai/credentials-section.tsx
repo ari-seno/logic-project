@@ -299,7 +299,7 @@ export function CredentialsSection({
         }}
         title="Delete this credential?"
         description="Projects using this credential will be unlinked immediately and shown a setup-required banner. This cannot be undone."
-        typeToConfirm={credentials.find((c) => c.id === confirmingDeleteId)?.label}
+        typeToConfirm
         onConfirm={() => {
           if (confirmingDeleteId) void handleDeleteConfirmed(confirmingDeleteId);
         }}

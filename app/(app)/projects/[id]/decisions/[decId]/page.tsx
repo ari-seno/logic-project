@@ -76,7 +76,8 @@ export default async function DecisionDetailPage({
             </ButtonLink>
             <DeleteEntityButton
               action={handleDelete}
-              entityLabel={`decision "${decision.title}"`}
+              entityLabel={decision.title}
+              description="This will permanently delete this decision and unlink any tasks or trace links that reference it."
             />
           </div>
         </div>

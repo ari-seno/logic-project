@@ -5,24 +5,16 @@ import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
-type ItemKind = "entity" | "attribute";
-
-const KIND_DESCRIPTION: Record<ItemKind, string> = {
-  entity:
-    "This removes the entity and its attributes. Relationships that reference it will also be removed.",
-  attribute: "This permanently removes this attribute from the entity.",
-};
-
 export function DeleteEntityButton({
   action,
   entityLabel,
-  itemKind = "entity",
+  description,
   size,
   extraFields,
 }: {
   action: (formData: FormData) => Promise<{ error?: string } | undefined>;
   entityLabel: string;
-  itemKind?: ItemKind;
+  description?: string;
   size?: "sm" | "md";
   extraFields?: Record<string, string>;
 }) {
@@ -62,10 +54,13 @@ export function DeleteEntityButton({
       <ConfirmDialog
         open={open}
         onOpenChange={setOpen}
-        title={`Delete ${entityLabel}?`}
-        description={KIND_DESCRIPTION[itemKind]}
-        confirmLabel={`Delete ${entityLabel}`}
-        typeToConfirm={entityLabel}
+        title={`Delete "${entityLabel}"?`}
+        description={
+          description ??
+          "This will be permanently deleted and cannot be undone."
+        }
+        confirmLabel="Delete"
+        typeToConfirm
         pending={pending}
         onConfirm={handleConfirm}
       />

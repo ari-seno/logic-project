@@ -19,7 +19,8 @@ export function RelationshipDetailActions({
   return (
     <DeleteEntityButton
       action={handleDelete}
-      entityLabel="relationship"
+      entityLabel="this relationship"
+      description="This permanently removes the relationship between the two entities."
       size="sm"
     />
   );

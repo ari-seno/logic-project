@@ -25,7 +25,7 @@ export function EntityDetailActions({
     <DeleteEntityButton
       action={handleDelete}
       entityLabel={entityName}
-      itemKind="entity"
+      description="This removes the entity and its attributes. Relationships that reference it will also be removed."
       size="sm"
     />
   );

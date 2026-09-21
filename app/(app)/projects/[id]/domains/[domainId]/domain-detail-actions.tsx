@@ -17,6 +17,11 @@ export function DomainDetailActions({
   }
 
   return (
-    <DeleteEntityButton action={handleDelete} entityLabel="domain" size="sm" />
+    <DeleteEntityButton
+      action={handleDelete}
+      entityLabel="this domain"
+      description="This permanently deletes the domain and all its entities, attributes, and relationships."
+      size="sm"
+    />
   );
 }

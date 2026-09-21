@@ -67,7 +67,7 @@ export function AttributeRow({
           <DeleteEntityButton
             action={handleAttributeDelete}
             entityLabel={attr.name}
-            itemKind="attribute"
+            description="This permanently removes this attribute from the entity."
             size="sm"
             extraFields={{ id: attr.id, entityId: attr.entity_id }}
           />
