@@ -1,5 +1,6 @@
 import { expect, test } from "./helpers/fixtures";
 import { signOut, signUp, uniqueEmail } from "./helpers/auth";
+import { confirmDeletion } from "./helpers/confirm-delete";
 
 async function createProject(
   page: import("@playwright/test").Page,
@@ -44,7 +45,7 @@ test.describe("Architecture", () => {
       await createComponent(page, projectId, `Web App ${Date.now()}`, "frontend");
       await page.goto(`/projects/${projectId}/architecture`);
       await expect(
-        page.getByRole("link", { name: /^Web App \d+$/ }).first(),
+        page.getByRole("link", { name: /^Web App \d+ Frontend$/ }).first(),
       ).toBeVisible();
     });
 
@@ -80,6 +81,9 @@ test.describe("Architecture", () => {
 
       await page.goto(`/projects/${projectId}/architecture/decisions/new`);
       await page.getByLabel("Title").fill(`Use Postgres ${Date.now()}`);
+      await page
+        .getByLabel("Decision")
+        .fill("Use Postgres as the primary datastore.");
       await page
         .getByRole("button", { name: /create decision/i })
         .click();
@@ -119,9 +123,11 @@ test.describe("Architecture", () => {
       const projectId = await createProject(page, `Del Comp ${Date.now()}`);
       const target = `Doomed Comp ${Date.now()}`;
       await createComponent(page, projectId, target, "frontend");
-      await page.getByRole("button", { name: /^delete$/i }).click();
-      await page.getByRole("button", { name: /click again to confirm/i }).click();
-      await expect(page).toHaveURL(/\/architecture\/components$/);
+      await page.getByRole("button", { name: "Delete this component" }).click();
+      await confirmDeletion(page);
+      await expect(page).toHaveURL(
+        new RegExp(`/projects/${projectId}/architecture$`),
+      );
       await page.goto(`/projects/${projectId}/architecture/components`);
       await expect(
         page.getByRole("link", { name: target }).first(),
@@ -158,7 +164,7 @@ test.describe("Architecture", () => {
       const targetVal = await page
         .getByLabel("Target component")
         .locator("option")
-        .nth(1)
+        .nth(2)
         .getAttribute("value");
       expect(sourceVal).not.toBeNull();
       expect(targetVal).not.toBeNull();

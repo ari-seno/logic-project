@@ -67,9 +67,7 @@ test.describe("Auth: forms", () => {
       await page.getByLabel("Confirm password").fill(TEST_PASSWORD);
       await page.getByRole("button", { name: /create account/i }).click();
       await expect(page).toHaveURL(/\/dashboard$/);
-      await expect(
-        page.getByRole("heading", { name: /welcome back/i }),
-      ).toBeVisible();
+      await expect(page.getByText(/welcome back/i)).toBeVisible();
     });
 
     test("sign in with bad credentials shows error", async ({

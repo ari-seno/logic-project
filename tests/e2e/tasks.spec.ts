@@ -1,5 +1,6 @@
 import { expect, test } from "./helpers/fixtures";
 import { signOut, signUp, uniqueEmail } from "./helpers/auth";
+import { confirmDeletion } from "./helpers/confirm-delete";
 
 async function createProject(
   page: import("@playwright/test").Page,
@@ -28,7 +29,7 @@ test.describe("Tasks", () => {
       await page.goto(`/projects/${projectId}/tasks`);
       await expect(page.getByRole("heading", { name: /^tasks$/i })).toBeVisible();
       await expect(
-        page.getByText(/no tasks match these filters\./i),
+        page.getByText(/no tasks match these filters/i),
       ).toBeVisible();
     });
 
@@ -58,7 +59,8 @@ test.describe("Tasks", () => {
 
       await page.getByRole("link", { name: /^edit$/i }).click();
       await expect(page).toHaveURL(/\/edit$/);
-      await page.getByLabel("Title").fill(`Build login v2 ${Date.now()}`);
+      const updatedTitle = `Build login v2 ${Date.now()}`;
+      await page.getByLabel("Title").fill(updatedTitle);
       await page.getByLabel("Priority").selectOption("critical");
       await page.getByRole("button", { name: /save changes/i }).click();
       await expect(page).toHaveURL(/\/tasks\/[0-9a-f-]{36}$/);
@@ -71,8 +73,10 @@ test.describe("Tasks", () => {
 
       // Delete via the detail page
       await page.locator("a", { hasText: "Build login v2" }).click();
-      await page.getByRole("button", { name: /^delete$/i }).click();
-      await page.getByRole("button", { name: /click again to confirm/i }).click();
+      await page
+        .getByRole("button", { name: "Delete task" })
+        .click();
+      await confirmDeletion(page);
       await expect(page).toHaveURL(
         new RegExp(`/projects/${projectId}/tasks$`),
       );

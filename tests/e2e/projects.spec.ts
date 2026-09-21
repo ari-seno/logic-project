@@ -1,5 +1,6 @@
 import { expect, test } from "./helpers/fixtures";
 import { signUp, uniqueEmail } from "./helpers/auth";
+import { confirmDeletion } from "./helpers/confirm-delete";
 
 test.describe("Project module", () => {
   test.describe("with backend", () => {
@@ -11,7 +12,7 @@ test.describe("Project module", () => {
       const email = uniqueEmail("dashboard");
       await signUp(page, email);
       await expect(page).toHaveURL(/\/dashboard$/);
-      await expect(page.getByText("0")).toBeVisible();
+      await expect(page.locator("p.text-4xl")).toHaveText("0");
       await expect(page.getByText(/you don't have any projects yet/i)).toBeVisible();
     });
 
@@ -65,10 +66,10 @@ test.describe("Project module", () => {
       await page.goto("/projects");
       await expect(page.getByRole("link", { name })).toBeVisible();
       const deleteButton = page.getByRole("button", {
-        name: `Delete ${name}`,
+        name: `Delete project ${name}`,
       });
       await deleteButton.click();
-      await page.getByRole("button", { name: /click again to confirm/i }).click();
+      await confirmDeletion(page, "Delete project");
       await expect(page.getByRole("link", { name })).toHaveCount(0);
     });
 
@@ -79,13 +80,13 @@ test.describe("Project module", () => {
       test.skip(!backend.hasBackend, "Supabase backend not configured");
       const email = uniqueEmail("count");
       await signUp(page, email);
-      await expect(page.getByText("0")).toBeVisible();
+      await expect(page.locator("p.text-4xl")).toHaveText("0");
       await page.goto("/projects/new");
       await page.getByLabel("Name").fill(`A ${Date.now()}`);
       await page.getByRole("button", { name: /create project/i }).click();
       await expect(page).toHaveURL(/\/projects\/[0-9a-f-]{36}$/);
       await page.goto("/dashboard");
-      await expect(page.getByText("1")).toBeVisible();
+      await expect(page.locator("p.text-4xl")).toHaveText("1");
     });
   });
 });

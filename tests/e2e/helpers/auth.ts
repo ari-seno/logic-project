@@ -18,6 +18,7 @@ export async function signUp(
   await page.getByLabel("Password", { exact: true }).fill(password);
   await page.getByLabel("Confirm password").fill(password);
   await page.getByRole("button", { name: /create account/i }).click();
+  await page.waitForURL(/\/dashboard$/);
 }
 
 export async function signIn(
@@ -33,4 +34,5 @@ export async function signIn(
 
 export async function signOut(page: Page) {
   await page.getByRole("button", { name: /sign out/i }).click();
+  await page.waitForURL(/\/(login)?$/);
 }

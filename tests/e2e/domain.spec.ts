@@ -76,19 +76,26 @@ test.describe("Domain modeling", () => {
       await page.goto(`${projectUrl}/domains/new`);
       await page.getByLabel("Name").fill("Catalog");
       await page.getByRole("button", { name: /create domain/i }).click();
+      await expect(page).toHaveURL(/\/domains\/[0-9a-f-]{36}$/);
       const domainUrl = page.url();
       await page.goto(`${domainUrl}/entities/new`);
       await page.getByLabel("Name").fill("Product");
       await page.getByRole("button", { name: /create entity/i }).click();
-      const entityUrl = page.url();
-      void entityUrl;
+      await expect(page).toHaveURL(/\/entities\/[0-9a-f-]{36}$/);
 
-      await page.getByRole("button", { name: /add attribute/i }).click();
-      await page.getByLabel("Name").fill("price");
-      await page.getByLabel("Data type").selectOption("decimal");
-      await page.getByRole("button", { name: /save/i }).click();
-      await expect(page.getByText("price")).toBeVisible();
-      await expect(page.getByText("decimal")).toBeVisible();
+      await page.getByRole("button", { name: "Add attribute" }).click();
+      const attributeForm = page.locator("form");
+      await attributeForm.getByLabel("Name").fill("price");
+      await attributeForm.getByLabel("Data type").selectOption("decimal");
+      await attributeForm
+        .getByRole("button", { name: "Add attribute" })
+        .click();
+      await expect(
+        page.getByRole("cell", { name: "price", exact: true }),
+      ).toBeVisible();
+      await expect(
+        page.getByRole("cell", { name: "decimal", exact: true }),
+      ).toBeVisible();
     });
 
     test("ERD page renders entities and relationships", async ({
@@ -102,17 +109,22 @@ test.describe("Domain modeling", () => {
       await page.goto(`${projectUrl}/domains/new`);
       await page.getByLabel("Name").fill("Sales");
       await page.getByRole("button", { name: /create domain/i }).click();
+      await expect(page).toHaveURL(/\/domains\/[0-9a-f-]{36}$/);
       const domainUrl = page.url();
       await page.goto(`${domainUrl}/entities/new`);
       await page.getByLabel("Name").fill("Customer");
       await page.getByRole("button", { name: /create entity/i }).click();
+      await expect(page).toHaveURL(/\/entities\/[0-9a-f-]{36}$/);
       await page.goto(`${domainUrl}/entities/new`);
       await page.getByLabel("Name").fill("Order");
       await page.getByRole("button", { name: /create entity/i }).click();
+      await expect(page).toHaveURL(/\/entities\/[0-9a-f-]{36}$/);
 
       await page.goto(`${projectUrl}/domains/erd`);
-      await expect(page.getByText("Customer")).toBeVisible();
-      await expect(page.getByText("Order")).toBeVisible();
+      await expect(
+        page.getByRole("link", { name: "Customer" }),
+      ).toBeVisible();
+      await expect(page.getByRole("link", { name: "Order" })).toBeVisible();
     });
 
     test("cross-user cannot access another user's domain", async ({
@@ -157,11 +169,13 @@ test.describe("Domain modeling", () => {
       await page.goto(`${aliceProjectUrl}/domains/new`);
       await page.getByLabel("Name").fill("Catalog");
       await page.getByRole("button", { name: /create domain/i }).click();
+      await expect(page).toHaveURL(/\/domains\/[0-9a-f-]{36}$/);
       const aliceDomainUrl = page.url();
       await page.goto(`${aliceDomainUrl}/entities/new`);
       await page.getByLabel("Name").fill("AliceProduct");
       await page.getByRole("button", { name: /create entity/i }).click();
       await page.getByRole("button", { name: /sign out/i }).click();
+      await expect(page).toHaveURL(/\/$/);
 
       const bobEmail = uniqueEmail("bob-rel");
       await signUp(page, bobEmail);
@@ -172,10 +186,12 @@ test.describe("Domain modeling", () => {
       await page.goto(`${bobProjectUrl}/domains/new`);
       await page.getByLabel("Name").fill("Bob Catalog");
       await page.getByRole("button", { name: /create domain/i }).click();
+      await expect(page).toHaveURL(/\/domains\/[0-9a-f-]{36}$/);
       const bobDomainUrl = page.url();
       await page.goto(`${bobDomainUrl}/entities/new`);
       await page.getByLabel("Name").fill("BobProduct");
       await page.getByRole("button", { name: /create entity/i }).click();
+      await expect(page).toHaveURL(/\/entities\/[0-9a-f-]{36}$/);
 
       const bobEntitiesPage = await context.newPage();
       await bobEntitiesPage.goto(

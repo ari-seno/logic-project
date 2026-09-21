@@ -1,5 +1,6 @@
 import { expect, test } from "./helpers/fixtures";
 import { signOut, signUp, uniqueEmail } from "./helpers/auth";
+import { confirmDeletion } from "./helpers/confirm-delete";
 
 async function createProject(
   page: import("@playwright/test").Page,
@@ -102,11 +103,11 @@ test.describe("Decisions", () => {
       await page.getByLabel("Decision").fill("Pick something");
       await page.getByRole("button", { name: /create decision/i }).click();
       await expect(page).toHaveURL(/\/decisions\/[0-9a-f-]{36}$/);
-      await page.goto(`/projects/${projectId}/decisions`);
-      await expect(page.getByRole("link", { name: title })).toBeVisible();
-      const card = page.locator("li", { hasText: title });
-      await card.getByRole("button", { name: /^delete$/i }).click();
-      await page.getByRole("button", { name: /click again to confirm/i }).click();
+      await page.getByRole("button", { name: `Delete ${title}` }).click();
+      await confirmDeletion(page);
+      await expect(page).toHaveURL(
+        new RegExp(`/projects/${projectId}/decisions$`),
+      );
       await expect(page.getByRole("link", { name: title })).toHaveCount(0);
     });
 

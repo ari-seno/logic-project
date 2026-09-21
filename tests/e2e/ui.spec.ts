@@ -51,7 +51,7 @@ test.describe("UI design", () => {
       await page
         .getByRole("button", { name: /create component/i })
         .click();
-      await expect(page).toHaveURL(/\/ui\/components$/);
+      await expect(page).toHaveURL(/\/ui$/);
 
       // Create screen
       await page.goto(`/projects/${projectId}/ui/screens/new`);
@@ -88,21 +88,31 @@ test.describe("UI design", () => {
       await page.getByRole("button", { name: /create screen/i }).click();
       await expect(page).toHaveURL(/\/ui\/screens\/[0-9a-f-]{36}$/);
 
+      const stateForm = page
+        .locator("section")
+        .filter({ has: page.getByRole("heading", { name: "Add state" }) })
+        .locator("form");
       await page
         .getByRole("heading", { name: "Add state" })
         .scrollIntoViewIfNeeded();
-      await page.locator("#name").first().fill("Loading");
-      await page.locator("#state_type").first().selectOption("loading");
-      await page.getByRole("button", { name: /add state/i }).click();
-      await expect(page.getByText("Loading").first()).toBeVisible();
+      await stateForm.getByLabel("Name").fill("Loading");
+      await stateForm.getByLabel("State type").selectOption("loading");
+      await stateForm.getByRole("button", { name: "Add state" }).click();
+      await expect(page.getByText("Loading", { exact: true }).first()).toBeVisible();
 
+      const interactionForm = page
+        .locator("section")
+        .filter({ has: page.getByRole("heading", { name: "Add interaction" }) })
+        .locator("form");
       await page
         .getByRole("heading", { name: "Add interaction" })
         .scrollIntoViewIfNeeded();
-      await page.locator("#name").first().fill("Reload");
-      await page.locator("#trigger").first().fill("Click refresh");
-      await page.locator("#action").first().fill("GET /api/items");
-      await page.getByRole("button", { name: /add interaction/i }).click();
+      await interactionForm.getByLabel("Name").fill("Reload");
+      await interactionForm.getByLabel("Trigger").fill("Click refresh");
+      await interactionForm.getByLabel("Action").fill("GET /api/items");
+      await interactionForm
+        .getByRole("button", { name: "Add interaction" })
+        .click();
       await expect(page.getByText("Click refresh").first()).toBeVisible();
     });
 

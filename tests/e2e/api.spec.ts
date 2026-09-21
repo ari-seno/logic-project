@@ -79,7 +79,7 @@ test.describe("API design", () => {
         page.getByRole("heading", { name: /parameters/i }),
       ).toBeVisible();
       await expect(
-        page.getByRole("heading", { name: /request body/i }),
+        page.getByRole("heading", { name: "Request body", exact: true }),
       ).toBeVisible();
       await expect(
         page.getByRole("heading", { name: /responses/i }),
