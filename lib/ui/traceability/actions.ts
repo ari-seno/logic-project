@@ -97,7 +97,7 @@ export async function attachEndpointToInteraction(formData: FormData) {
     return { error: error.message } as const;
   }
 
-  revalidatePath(`/projects/${ownership.projectId}/ui/${ownership.screenId}`);
+  revalidatePath(`/projects/${ownership.projectId}/ui/screens/${ownership.screenId}`);
   return { ok: true } as const;
 }
 
@@ -119,7 +119,7 @@ export async function detachEndpointFromInteraction(formData: FormData) {
     .eq("interaction_id", interactionId);
   if (error) return { error: error.message } as const;
 
-  revalidatePath(`/projects/${ownership.projectId}/ui/${ownership.screenId}`);
+  revalidatePath(`/projects/${ownership.projectId}/ui/screens/${ownership.screenId}`);
   return { ok: true } as const;
 }
 
@@ -145,8 +145,8 @@ export async function attachRequirementToScreen(formData: FormData) {
     return { error: error.message } as const;
   }
 
-  revalidatePath(`/projects/${ownership.projectId}/ui/${screenId}`);
-  redirect(`/projects/${ownership.projectId}/ui/${screenId}`);
+  revalidatePath(`/projects/${ownership.projectId}/ui/screens/${screenId}`);
+  redirect(`/projects/${ownership.projectId}/ui/screens/${screenId}`);
 }
 
 export async function detachRequirementFromScreen(formData: FormData) {
@@ -167,8 +167,8 @@ export async function detachRequirementFromScreen(formData: FormData) {
     .eq("screen_id", screenId);
   if (error) return { error: error.message } as const;
 
-  revalidatePath(`/projects/${ownership.projectId}/ui/${screenId}`);
-  redirect(`/projects/${ownership.projectId}/ui/${screenId}`);
+  revalidatePath(`/projects/${ownership.projectId}/ui/screens/${screenId}`);
+  redirect(`/projects/${ownership.projectId}/ui/screens/${screenId}`);
 }
 
 // UI Screen ↔ Domain Entity
@@ -203,8 +203,8 @@ export async function attachEntityToScreen(formData: FormData) {
     return { error: error.message } as const;
   }
 
-  revalidatePath(`/projects/${ownership.projectId}/ui/${screenId}`);
-  redirect(`/projects/${ownership.projectId}/ui/${screenId}`);
+  revalidatePath(`/projects/${ownership.projectId}/ui/screens/${screenId}`);
+  redirect(`/projects/${ownership.projectId}/ui/screens/${screenId}`);
 }
 
 export async function detachEntityFromScreen(formData: FormData) {
@@ -225,6 +225,6 @@ export async function detachEntityFromScreen(formData: FormData) {
     .eq("screen_id", screenId);
   if (error) return { error: error.message } as const;
 
-  revalidatePath(`/projects/${ownership.projectId}/ui/${screenId}`);
-  redirect(`/projects/${ownership.projectId}/ui/${screenId}`);
+  revalidatePath(`/projects/${ownership.projectId}/ui/screens/${screenId}`);
+  redirect(`/projects/${ownership.projectId}/ui/screens/${screenId}`);
 }

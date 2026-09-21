@@ -118,8 +118,8 @@ export async function addScreenComponent(
     });
   if (error) return { error: error.message };
 
-  revalidatePath(`/projects/${ownership.projectId}/ui/${screenId}`);
-  redirect(`/projects/${ownership.projectId}/ui/${screenId}`);
+  revalidatePath(`/projects/${ownership.projectId}/ui/screens/${screenId}`);
+  redirect(`/projects/${ownership.projectId}/ui/screens/${screenId}`);
 }
 
 export async function updateScreenComponent(
@@ -182,8 +182,8 @@ export async function updateScreenComponent(
 
   if (error) return { error: error.message };
 
-  revalidatePath(`/projects/${ownership.projectId}/ui/${screenId}`);
-  redirect(`/projects/${ownership.projectId}/ui/${screenId}`);
+  revalidatePath(`/projects/${ownership.projectId}/ui/screens/${screenId}`);
+  redirect(`/projects/${ownership.projectId}/ui/screens/${screenId}`);
 }
 
 export async function removeScreenComponent(formData: FormData) {
@@ -203,6 +203,6 @@ export async function removeScreenComponent(formData: FormData) {
     .eq("screen_id", screenId);
   if (error) return { error: error.message } as const;
 
-  revalidatePath(`/projects/${ownership.projectId}/ui/${screenId}`);
-  redirect(`/projects/${ownership.projectId}/ui/${screenId}`);
+  revalidatePath(`/projects/${ownership.projectId}/ui/screens/${screenId}`);
+  redirect(`/projects/${ownership.projectId}/ui/screens/${screenId}`);
 }

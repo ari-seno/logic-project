@@ -84,7 +84,7 @@ export async function createUiScreen(
   if (error || !data) return { error: error?.message ?? "Failed to create screen." };
 
   revalidatePath(`/projects/${projectId}/ui`);
-  redirect(`/projects/${projectId}/ui`);
+  redirect(`/projects/${projectId}/ui/screens/${data.id}`);
 }
 
 export async function updateUiScreen(
@@ -129,7 +129,7 @@ export async function updateUiScreen(
 
   if (error) return { error: error.message };
   revalidatePath(`/projects/${projectId}/ui`);
-  revalidatePath(`/projects/${projectId}/ui/${id}`);
+  revalidatePath(`/projects/${projectId}/ui/screens/${id}`);
   redirect(`/projects/${projectId}/ui`);
 }
 

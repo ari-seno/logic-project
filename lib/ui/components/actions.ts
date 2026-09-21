@@ -115,7 +115,7 @@ export async function updateUiComponent(
 
   if (error) return { error: error.message };
   revalidatePath(`/projects/${projectId}/ui`);
-  redirect(`/projects/${projectId}/ui/components`);
+  redirect(`/projects/${projectId}/ui`);
 }
 
 export async function deleteUiComponent(formData: FormData) {
@@ -136,5 +136,5 @@ export async function deleteUiComponent(formData: FormData) {
   if (error) return { error: error.message } as const;
 
   revalidatePath(`/projects/${projectId}/ui`);
-  redirect(`/projects/${projectId}/ui/components`);
+  redirect(`/projects/${projectId}/ui`);
 }

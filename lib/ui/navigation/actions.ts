@@ -156,7 +156,7 @@ export async function updateUiNavigationItem(
   if (error) return { error: error.message };
 
   revalidatePath(`/projects/${ownership.projectId}/ui`);
-  redirect(`/projects/${ownership.projectId}/ui/navigation`);
+  redirect(`/projects/${ownership.projectId}/ui`);
 }
 
 export async function deleteUiNavigationItem(formData: FormData) {
@@ -170,7 +170,7 @@ export async function deleteUiNavigationItem(formData: FormData) {
   if (error) return { error: error.message } as const;
 
   revalidatePath(`/projects/${ownership.projectId}/ui`);
-  redirect(`/projects/${ownership.projectId}/ui/navigation`);
+  redirect(`/projects/${ownership.projectId}/ui`);
 }
 
 export async function attachScreenToNavigation(formData: FormData) {

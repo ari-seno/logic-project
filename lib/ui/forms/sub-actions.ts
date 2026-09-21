@@ -93,8 +93,8 @@ export async function createUiForm(
   });
   if (error) return { error: error.message };
 
-  revalidatePath(`/projects/${ownership.projectId}/ui/${screenId}`);
-  redirect(`/projects/${ownership.projectId}/ui/${screenId}`);
+  revalidatePath(`/projects/${ownership.projectId}/ui/screens/${screenId}`);
+  redirect(`/projects/${ownership.projectId}/ui/screens/${screenId}`);
 }
 
 export async function updateUiForm(
@@ -126,8 +126,8 @@ export async function updateUiForm(
   }).eq("id", id);
   if (error) return { error: error.message };
 
-  revalidatePath(`/projects/${ownership.projectId}/ui/${ownership.screenId}`);
-  redirect(`/projects/${ownership.projectId}/ui/${ownership.screenId}`);
+  revalidatePath(`/projects/${ownership.projectId}/ui/screens/${ownership.screenId}`);
+  redirect(`/projects/${ownership.projectId}/ui/screens/${ownership.screenId}`);
 }
 
 export async function deleteUiForm(formData: FormData) {
@@ -140,8 +140,8 @@ export async function deleteUiForm(formData: FormData) {
   const { error } = await supabase.from("ui_forms").delete().eq("id", id);
   if (error) return { error: error.message } as const;
 
-  revalidatePath(`/projects/${ownership.projectId}/ui/${ownership.screenId}`);
-  redirect(`/projects/${ownership.projectId}/ui/${ownership.screenId}`);
+  revalidatePath(`/projects/${ownership.projectId}/ui/screens/${ownership.screenId}`);
+  redirect(`/projects/${ownership.projectId}/ui/screens/${ownership.screenId}`);
 }
 
 // ============================================================================
@@ -197,8 +197,8 @@ export async function createUiFormField(
   });
   if (error) return { error: error.message };
 
-  revalidatePath(`/projects/${ownership.projectId}/ui/${ownership.screenId}`);
-  redirect(`/projects/${ownership.projectId}/ui/${ownership.screenId}`);
+  revalidatePath(`/projects/${ownership.projectId}/ui/screens/${ownership.screenId}`);
+  redirect(`/projects/${ownership.projectId}/ui/screens/${ownership.screenId}`);
 }
 
 export async function updateUiFormField(
@@ -237,8 +237,8 @@ export async function updateUiFormField(
   }).eq("id", id);
   if (error) return { error: error.message };
 
-  revalidatePath(`/projects/${ownership.projectId}/ui/${ownership.screenId}`);
-  redirect(`/projects/${ownership.projectId}/ui/${ownership.screenId}`);
+  revalidatePath(`/projects/${ownership.projectId}/ui/screens/${ownership.screenId}`);
+  redirect(`/projects/${ownership.projectId}/ui/screens/${ownership.screenId}`);
 }
 
 export async function deleteUiFormField(formData: FormData) {
@@ -251,8 +251,8 @@ export async function deleteUiFormField(formData: FormData) {
   const { error } = await supabase.from("ui_form_fields").delete().eq("id", id);
   if (error) return { error: error.message } as const;
 
-  revalidatePath(`/projects/${ownership.projectId}/ui/${ownership.screenId}`);
-  redirect(`/projects/${ownership.projectId}/ui/${ownership.screenId}`);
+  revalidatePath(`/projects/${ownership.projectId}/ui/screens/${ownership.screenId}`);
+  redirect(`/projects/${ownership.projectId}/ui/screens/${ownership.screenId}`);
 }
 
 // ============================================================================
@@ -291,8 +291,8 @@ export async function createUiState(
   });
   if (error) return { error: error.message };
 
-  revalidatePath(`/projects/${ownership.projectId}/ui/${screenId}`);
-  redirect(`/projects/${ownership.projectId}/ui/${screenId}`);
+  revalidatePath(`/projects/${ownership.projectId}/ui/screens/${screenId}`);
+  redirect(`/projects/${ownership.projectId}/ui/screens/${screenId}`);
 }
 
 export async function updateUiState(
@@ -334,8 +334,8 @@ export async function updateUiState(
   }).eq("id", id);
   if (error) return { error: error.message };
 
-  revalidatePath(`/projects/${ownership.projectId}/ui/${screenId}`);
-  redirect(`/projects/${ownership.projectId}/ui/${screenId}`);
+  revalidatePath(`/projects/${ownership.projectId}/ui/screens/${screenId}`);
+  redirect(`/projects/${ownership.projectId}/ui/screens/${screenId}`);
 }
 
 export async function deleteUiState(formData: FormData) {
@@ -354,8 +354,8 @@ export async function deleteUiState(formData: FormData) {
   const { error } = await supabase.from("ui_states").delete().eq("id", id);
   if (error) return { error: error.message } as const;
 
-  revalidatePath(`/projects/${ownership.projectId}/ui/${ownership.projectId ? existing.screen_id : existing.screen_id}`);
-  redirect(`/projects/${ownership.projectId}/ui/${existing.screen_id}`);
+  revalidatePath(`/projects/${ownership.projectId}/ui/screens/${ownership.projectId ? existing.screen_id : existing.screen_id}`);
+  redirect(`/projects/${ownership.projectId}/ui/screens/${existing.screen_id}`);
 }
 
 // ============================================================================
@@ -394,8 +394,8 @@ export async function createUiInteraction(
   });
   if (error) return { error: error.message };
 
-  revalidatePath(`/projects/${ownership.projectId}/ui/${screenId}`);
-  redirect(`/projects/${ownership.projectId}/ui/${screenId}`);
+  revalidatePath(`/projects/${ownership.projectId}/ui/screens/${screenId}`);
+  redirect(`/projects/${ownership.projectId}/ui/screens/${screenId}`);
 }
 
 export async function updateUiInteraction(
@@ -433,8 +433,8 @@ export async function updateUiInteraction(
   }).eq("id", id);
   if (error) return { error: error.message };
 
-  revalidatePath(`/projects/${ownership.projectId}/ui/${existing.screen_id}`);
-  redirect(`/projects/${ownership.projectId}/ui/${existing.screen_id}`);
+  revalidatePath(`/projects/${ownership.projectId}/ui/screens/${existing.screen_id}`);
+  redirect(`/projects/${ownership.projectId}/ui/screens/${existing.screen_id}`);
 }
 
 export async function deleteUiInteraction(formData: FormData) {
@@ -453,6 +453,6 @@ export async function deleteUiInteraction(formData: FormData) {
   const { error } = await supabase.from("ui_interactions").delete().eq("id", id);
   if (error) return { error: error.message } as const;
 
-  revalidatePath(`/projects/${ownership.projectId}/ui/${existing.screen_id}`);
-  redirect(`/projects/${ownership.projectId}/ui/${existing.screen_id}`);
+  revalidatePath(`/projects/${ownership.projectId}/ui/screens/${existing.screen_id}`);
+  redirect(`/projects/${ownership.projectId}/ui/screens/${existing.screen_id}`);
 }
