@@ -11,10 +11,12 @@ import {
 import { createClient } from "@/lib/supabase/server";
 import { getProject } from "@/lib/projects/queries";
 
-function emptyToNull(value: FormDataEntryValue | null): string | null {
-  if (typeof value !== "string") return null;
+function emptyToOptional(
+  value: FormDataEntryValue | null,
+): string | undefined {
+  if (typeof value !== "string") return undefined;
   const trimmed = value.trim();
-  return trimmed.length === 0 ? null : trimmed;
+  return trimmed.length === 0 ? undefined : trimmed;
 }
 
 async function assertOwnsProject(
@@ -33,9 +35,9 @@ export async function createArchitectureDecision(
 ): Promise<ArchitectureDecisionActionState> {
   const parsed = architectureDecisionInputSchema.safeParse({
     title: formData.get("title"),
-    context: emptyToNull(formData.get("context")),
-    decision: emptyToNull(formData.get("decision")),
-    rationale: emptyToNull(formData.get("rationale")),
+    context: emptyToOptional(formData.get("context")),
+    decision: emptyToOptional(formData.get("decision")),
+    rationale: emptyToOptional(formData.get("rationale")),
     status: formData.get("status"),
   });
   if (!parsed.success) {
@@ -86,9 +88,9 @@ export async function updateArchitectureDecision(
 ): Promise<ArchitectureDecisionActionState> {
   const parsed = architectureDecisionUpdateSchema.safeParse({
     title: formData.get("title"),
-    context: emptyToNull(formData.get("context")),
-    decision: emptyToNull(formData.get("decision")),
-    rationale: emptyToNull(formData.get("rationale")),
+    context: emptyToOptional(formData.get("context")),
+    decision: emptyToOptional(formData.get("decision")),
+    rationale: emptyToOptional(formData.get("rationale")),
     status: formData.get("status"),
   });
   if (!parsed.success) {

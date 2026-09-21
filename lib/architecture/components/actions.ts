@@ -14,10 +14,12 @@ import {
   nextArchitectureComponentPosition,
 } from "./queries";
 
-function emptyToNull(value: FormDataEntryValue | null): string | null {
-  if (typeof value !== "string") return null;
+function emptyToOptional(
+  value: FormDataEntryValue | null,
+): string | undefined {
+  if (typeof value !== "string") return undefined;
   const trimmed = value.trim();
-  return trimmed.length === 0 ? null : trimmed;
+  return trimmed.length === 0 ? undefined : trimmed;
 }
 
 async function assertOwnsProject(
@@ -36,7 +38,7 @@ export async function createArchitectureComponent(
 ): Promise<ArchitectureComponentActionState> {
   const parsed = architectureComponentInputSchema.safeParse({
     name: formData.get("name"),
-    description: emptyToNull(formData.get("description")),
+    description: emptyToOptional(formData.get("description")),
     type: formData.get("type"),
   });
   if (!parsed.success) {
@@ -88,7 +90,7 @@ export async function updateArchitectureComponent(
 ): Promise<ArchitectureComponentActionState> {
   const parsed = architectureComponentUpdateSchema.safeParse({
     name: formData.get("name"),
-    description: emptyToNull(formData.get("description")),
+    description: emptyToOptional(formData.get("description")),
     type: formData.get("type"),
   });
   if (!parsed.success) {

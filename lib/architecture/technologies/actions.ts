@@ -11,10 +11,12 @@ import {
 import { createClient } from "@/lib/supabase/server";
 import { getProject } from "@/lib/projects/queries";
 
-function emptyToNull(value: FormDataEntryValue | null): string | null {
-  if (typeof value !== "string") return null;
+function emptyToOptional(
+  value: FormDataEntryValue | null,
+): string | undefined {
+  if (typeof value !== "string") return undefined;
   const trimmed = value.trim();
-  return trimmed.length === 0 ? null : trimmed;
+  return trimmed.length === 0 ? undefined : trimmed;
 }
 
 async function assertOwnsProject(
@@ -33,7 +35,7 @@ export async function createArchitectureTechnology(
 ): Promise<ArchitectureTechnologyActionState> {
   const parsed = architectureTechnologyInputSchema.safeParse({
     name: formData.get("name"),
-    description: emptyToNull(formData.get("description")),
+    description: emptyToOptional(formData.get("description")),
     category: formData.get("category"),
   });
   if (!parsed.success) {
@@ -82,7 +84,7 @@ export async function updateArchitectureTechnology(
 ): Promise<ArchitectureTechnologyActionState> {
   const parsed = architectureTechnologyUpdateSchema.safeParse({
     name: formData.get("name"),
-    description: emptyToNull(formData.get("description")),
+    description: emptyToOptional(formData.get("description")),
     category: formData.get("category"),
   });
   if (!parsed.success) {

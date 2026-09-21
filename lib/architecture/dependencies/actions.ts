@@ -11,10 +11,12 @@ import {
 import { createClient } from "@/lib/supabase/server";
 import { getProject } from "@/lib/projects/queries";
 
-function emptyToNull(value: FormDataEntryValue | null): string | null {
-  if (typeof value !== "string") return null;
+function emptyToOptional(
+  value: FormDataEntryValue | null,
+): string | undefined {
+  if (typeof value !== "string") return undefined;
   const trimmed = value.trim();
-  return trimmed.length === 0 ? null : trimmed;
+  return trimmed.length === 0 ? undefined : trimmed;
 }
 
 async function assertProjectAndSharedComponents(
@@ -58,7 +60,7 @@ export async function createArchitectureComponentDependency(
   const parsed = architectureComponentDependencyInputSchema.safeParse({
     source_component_id: formData.get("source_component_id"),
     target_component_id: formData.get("target_component_id"),
-    description: emptyToNull(formData.get("description")),
+    description: emptyToOptional(formData.get("description")),
   });
   if (!parsed.success) {
     return {
@@ -111,7 +113,7 @@ export async function updateArchitectureComponentDependency(
   const parsed = architectureComponentDependencyUpdateSchema.safeParse({
     source_component_id: formData.get("source_component_id"),
     target_component_id: formData.get("target_component_id"),
-    description: emptyToNull(formData.get("description")),
+    description: emptyToOptional(formData.get("description")),
   });
   if (!parsed.success) {
     return {

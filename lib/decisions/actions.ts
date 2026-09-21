@@ -11,10 +11,12 @@ import {
 import { createClient } from "@/lib/supabase/server";
 import { getProject } from "@/lib/projects/queries";
 
-function emptyToNull(value: FormDataEntryValue | null): string | null {
-  if (typeof value !== "string") return null;
+function emptyToOptional(
+  value: FormDataEntryValue | null,
+): string | undefined {
+  if (typeof value !== "string") return undefined;
   const trimmed = value.trim();
-  return trimmed.length === 0 ? null : trimmed;
+  return trimmed.length === 0 ? undefined : trimmed;
 }
 
 async function assertOwnsProject(projectId: string): Promise<
@@ -34,9 +36,9 @@ export async function createDecision(
 ): Promise<DecisionActionState> {
   const parsed = decisionInputSchema.safeParse({
     title: formData.get("title"),
-    context: emptyToNull(formData.get("context")),
+    context: emptyToOptional(formData.get("context")),
     decision: formData.get("decision"),
-    rationale: emptyToNull(formData.get("rationale")),
+    rationale: emptyToOptional(formData.get("rationale")),
     status: formData.get("status"),
   });
 
@@ -94,9 +96,9 @@ export async function updateDecision(
 ): Promise<DecisionActionState> {
   const parsed = decisionUpdateSchema.safeParse({
     title: formData.get("title"),
-    context: emptyToNull(formData.get("context")),
+    context: emptyToOptional(formData.get("context")),
     decision: formData.get("decision"),
-    rationale: emptyToNull(formData.get("rationale")),
+    rationale: emptyToOptional(formData.get("rationale")),
     status: formData.get("status"),
   });
 

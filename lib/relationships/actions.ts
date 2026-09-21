@@ -11,10 +11,12 @@ import {
   type RelationshipActionState,
 } from "@/lib/validation/relationships";
 
-function emptyToNull(value: FormDataEntryValue | null): string | null {
-  if (typeof value !== "string") return null;
+function emptyToOptional(
+  value: FormDataEntryValue | null,
+): string | undefined {
+  if (typeof value !== "string") return undefined;
   const trimmed = value.trim();
-  return trimmed.length === 0 ? null : trimmed;
+  return trimmed.length === 0 ? undefined : trimmed;
 }
 
 async function assertProjectAndSharedEntities(
@@ -68,8 +70,8 @@ export async function createRelationship(
     source_entity_id: formData.get("source_entity_id"),
     target_entity_id: formData.get("target_entity_id"),
     relationship_type: formData.get("relationship_type"),
-    name: emptyToNull(formData.get("name")),
-    description: emptyToNull(formData.get("description")),
+    name: emptyToOptional(formData.get("name")),
+    description: emptyToOptional(formData.get("description")),
   });
 
   if (!parsed.success) {
@@ -132,8 +134,8 @@ export async function updateRelationship(
     source_entity_id: formData.get("source_entity_id"),
     target_entity_id: formData.get("target_entity_id"),
     relationship_type: formData.get("relationship_type"),
-    name: emptyToNull(formData.get("name")),
-    description: emptyToNull(formData.get("description")),
+    name: emptyToOptional(formData.get("name")),
+    description: emptyToOptional(formData.get("description")),
   });
 
   if (!parsed.success) {

@@ -11,10 +11,12 @@ import {
 import { createClient } from "@/lib/supabase/server";
 import { getProject } from "@/lib/projects/queries";
 
-function emptyToNull(value: FormDataEntryValue | null): string | null {
-  if (typeof value !== "string") return null;
+function emptyToOptional(
+  value: FormDataEntryValue | null,
+): string | undefined {
+  if (typeof value !== "string") return undefined;
   const trimmed = value.trim();
-  return trimmed.length === 0 ? null : trimmed;
+  return trimmed.length === 0 ? undefined : trimmed;
 }
 
 async function assertOwnsProject(projectId: string): Promise<
@@ -34,7 +36,7 @@ export async function createRequirement(
 ): Promise<RequirementActionState> {
   const parsed = requirementInputSchema.safeParse({
     title: formData.get("title"),
-    description: emptyToNull(formData.get("description")),
+    description: emptyToOptional(formData.get("description")),
     type: formData.get("type"),
     status: formData.get("status"),
     priority: formData.get("priority"),
@@ -96,7 +98,7 @@ export async function updateRequirement(
 ): Promise<RequirementActionState> {
   const parsed = requirementUpdateSchema.safeParse({
     title: formData.get("title"),
-    description: emptyToNull(formData.get("description")),
+    description: emptyToOptional(formData.get("description")),
     type: formData.get("type"),
     status: formData.get("status"),
     priority: formData.get("priority"),
