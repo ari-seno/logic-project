@@ -52,10 +52,14 @@ next-env.d.ts
 /supabase/.temp
 /supabase/.branches
 /supabase/.env
-# Playwright browser tour artifacts
-.playwright-mcp/
-tour-*.png
-audit-*.png
-erd-*.png
-flow-*.png
-live-*.png
+# Playwright MCP + browser capture artifacts (repo root only)
+/.playwright-mcp/
+/*.png
+/*.jpg
+/*.jpeg
+/*.webp
+/*-state.md
+/*-snapshot.md
+
+# knowledge graph output
+/graphify-out/
