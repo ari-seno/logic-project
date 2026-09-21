@@ -43,9 +43,9 @@ export function ApiResponseForm({
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="status_code">Status code</Label>
+          <Label htmlFor="response_status_code">Status code</Label>
           <Input
-            id="status_code"
+            id="response_status_code"
             name="status_code"
             type="number"
             min={100}
@@ -57,9 +57,9 @@ export function ApiResponseForm({
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="content_type">Content type</Label>
+          <Label htmlFor="response_content_type">Content type</Label>
           <Input
-            id="content_type"
+            id="response_content_type"
             name="content_type"
             placeholder="application/json"
             defaultValue={response?.content_type ?? "application/json"}
@@ -69,9 +69,9 @@ export function ApiResponseForm({
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="description">Description</Label>
+        <Label htmlFor="response_description">Description</Label>
         <Textarea
-          id="description"
+          id="response_description"
           name="description"
           rows={2}
           defaultValue={response?.description ?? ""}
@@ -80,9 +80,9 @@ export function ApiResponseForm({
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="schema_definition">Schema (JSON)</Label>
+        <Label htmlFor="response_schema_definition">Schema (JSON)</Label>
         <Textarea
-          id="schema_definition"
+          id="response_schema_definition"
           name="schema_definition"
           rows={5}
           defaultValue={schemaText}
@@ -92,9 +92,9 @@ export function ApiResponseForm({
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="example">Example (JSON)</Label>
+        <Label htmlFor="response_example">Example (JSON)</Label>
         <Textarea
-          id="example"
+          id="response_example"
           name="example"
           rows={5}
           defaultValue={exampleText}

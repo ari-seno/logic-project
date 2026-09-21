@@ -39,9 +39,9 @@ export function ApiRequestBodyForm({
       <input type="hidden" name="endpointId" value={endpointId} />
 
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="content_type">Content type</Label>
+        <Label htmlFor="request_body_content_type">Content type</Label>
         <Input
-          id="content_type"
+          id="request_body_content_type"
           name="content_type"
           required
           placeholder="application/json"
@@ -51,9 +51,9 @@ export function ApiRequestBodyForm({
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="description">Description</Label>
+        <Label htmlFor="request_body_description">Description</Label>
         <Textarea
-          id="description"
+          id="request_body_description"
           name="description"
           rows={2}
           defaultValue={body?.description ?? ""}
@@ -62,9 +62,9 @@ export function ApiRequestBodyForm({
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="schema_definition">Schema (JSON)</Label>
+        <Label htmlFor="request_body_schema_definition">Schema (JSON)</Label>
         <Textarea
-          id="schema_definition"
+          id="request_body_schema_definition"
           name="schema_definition"
           rows={5}
           placeholder='{"fields":[{"name":"email","type":"string","required":true}]}'
@@ -75,9 +75,9 @@ export function ApiRequestBodyForm({
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="example">Example (JSON)</Label>
+        <Label htmlFor="request_body_example">Example (JSON)</Label>
         <Textarea
-          id="example"
+          id="request_body_example"
           name="example"
           rows={5}
           placeholder='{"email":"alice@example.com"}'

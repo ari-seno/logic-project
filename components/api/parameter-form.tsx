@@ -38,9 +38,9 @@ export function ApiParameterForm({
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="name">Name</Label>
+          <Label htmlFor="parameter_name">Name</Label>
           <Input
-            id="name"
+            id="parameter_name"
             name="name"
             required
             defaultValue={parameter?.name ?? ""}
@@ -49,9 +49,9 @@ export function ApiParameterForm({
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="location">Location</Label>
+          <Label htmlFor="parameter_location">Location</Label>
           <Select
-            id="location"
+            id="parameter_location"
             name="location"
             defaultValue={parameter?.location ?? "query"}
           >
@@ -65,9 +65,9 @@ export function ApiParameterForm({
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="data_type">Type</Label>
+          <Label htmlFor="parameter_data_type">Type</Label>
           <Select
-            id="data_type"
+            id="parameter_data_type"
             name="data_type"
             defaultValue={parameter?.data_type ?? "string"}
           >
@@ -82,9 +82,9 @@ export function ApiParameterForm({
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="example">Example</Label>
+        <Label htmlFor="parameter_example">Example</Label>
         <Input
-          id="example"
+          id="parameter_example"
           name="example"
           defaultValue={parameter?.example ?? ""}
         />
@@ -92,9 +92,9 @@ export function ApiParameterForm({
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="description">Description</Label>
+        <Label htmlFor="parameter_description">Description</Label>
         <Textarea
-          id="description"
+          id="parameter_description"
           name="description"
           rows={3}
           defaultValue={parameter?.description ?? ""}

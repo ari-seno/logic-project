@@ -33,9 +33,9 @@ export function ApiErrorForm({
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="code">Code</Label>
+          <Label htmlFor="error_code">Code</Label>
           <Input
-            id="code"
+            id="error_code"
             name="code"
             required
             placeholder="VALIDATION_ERROR"
@@ -45,9 +45,9 @@ export function ApiErrorForm({
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="http_status">HTTP status</Label>
+          <Label htmlFor="error_http_status">HTTP status</Label>
           <Input
-            id="http_status"
+            id="error_http_status"
             name="http_status"
             type="number"
             min={100}
@@ -60,9 +60,9 @@ export function ApiErrorForm({
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="message">Message</Label>
+        <Label htmlFor="error_message">Message</Label>
         <Input
-          id="message"
+          id="error_message"
           name="message"
           required
           defaultValue={apiError?.message ?? ""}
@@ -71,9 +71,9 @@ export function ApiErrorForm({
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="description">Description</Label>
+        <Label htmlFor="error_description">Description</Label>
         <Textarea
-          id="description"
+          id="error_description"
           name="description"
           rows={3}
           defaultValue={apiError?.description ?? ""}
