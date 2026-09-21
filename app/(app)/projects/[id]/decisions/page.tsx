@@ -3,11 +3,13 @@ import { notFound } from "next/navigation";
 
 import { ProjectTabs } from "@/components/projects/project-tabs";
 import { DecisionStatusBadge } from "@/components/projects/badges";
+import { AiGeneratePanel } from "@/components/ai/ai-generate-panel";
 import { ButtonLink } from "@/components/ui/button";
 import { EmptyState, EmptyStateIcon } from "@/components/ui/empty-state";
 import { formatDate } from "@/lib/utils";
 import { getProject } from "@/lib/projects/queries";
 import { listDecisions } from "@/lib/decisions/queries";
+import { getProjectCredentialAction } from "@/lib/ai/credentials-actions";
 
 export default async function DecisionsListPage({
   params,
@@ -21,6 +23,11 @@ export default async function DecisionsListPage({
   }
 
   const decisions = await listDecisions({ projectId: project.id });
+  const credentialResult = await getProjectCredentialAction(project.id);
+  const credential =
+    credentialResult.ok && credentialResult.credential
+      ? credentialResult.credential
+      : null;
 
   return (
     <div className="flex flex-col gap-6">
@@ -38,9 +45,16 @@ export default async function DecisionsListPage({
               {project.name}
             </p>
           </div>
-          <ButtonLink href={`/projects/${project.id}/decisions/new`}>
-            New decision
-          </ButtonLink>
+          <div className="flex flex-wrap items-center gap-2">
+            <AiGeneratePanel
+              projectId={project.id}
+              stage="decisions"
+              credential={credential}
+            />
+            <ButtonLink href={`/projects/${project.id}/decisions/new`}>
+              New decision
+            </ButtonLink>
+          </div>
         </div>
         <div className="mt-4">
           <ProjectTabs projectId={project.id} active="decisions" />
@@ -64,9 +78,16 @@ export default async function DecisionsListPage({
           title="No decisions yet"
           description="Capture important project decisions and the rationale behind them. Future you will thank present you."
           action={
-            <ButtonLink href={`/projects/${project.id}/decisions/new`}>
-              Add decision
-            </ButtonLink>
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              <AiGeneratePanel
+                projectId={project.id}
+                stage="decisions"
+                credential={credential}
+              />
+              <ButtonLink href={`/projects/${project.id}/decisions/new`}>
+                Add decision
+              </ButtonLink>
+            </div>
           }
         />
       ) : (

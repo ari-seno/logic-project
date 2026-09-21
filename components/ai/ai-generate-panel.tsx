@@ -6,9 +6,12 @@ import { Button } from "@/components/ui/button";
 import { AiDrawer } from "@/components/ai/ai-drawer";
 import { SetupRequiredCta } from "@/components/ai/setup-required-cta";
 import { AiGenerateContent } from "@/components/ai/ai-generate-content";
+import { AI_STAGE_LABELS } from "@/components/ai/stage-labels";
+import type { AiStage } from "@/lib/ai/stages";
 
 export type AiGeneratePanelProps = {
   projectId: string;
+  stage: AiStage;
   credential: {
     id: string;
     label: string;
@@ -19,9 +22,11 @@ export type AiGeneratePanelProps = {
 
 export function AiGeneratePanel({
   projectId,
+  stage,
   credential,
 }: AiGeneratePanelProps) {
   const [open, setOpen] = useState(false);
+  const labels = AI_STAGE_LABELS[stage];
 
   return (
     <>
@@ -29,7 +34,7 @@ export function AiGeneratePanel({
         variant="secondary"
         size="sm"
         onClick={() => setOpen(true)}
-        aria-label="Open AI generate requirements drawer"
+        aria-label={`Open AI generate ${labels.plural} drawer`}
       >
         <span aria-hidden="true">✨</span>
         <span>Generate with AI</span>
@@ -38,22 +43,23 @@ export function AiGeneratePanel({
       <AiDrawer
         open={open}
         onClose={() => setOpen(false)}
-        title="Generate requirements"
+        title={labels.drawerTitle}
         subtitle={
           credential
             ? `Powered by ${credential.label} · ${credential.model}`
-            : "AI assist for first-draft requirements"
+            : labels.subtitleFallback
         }
       >
         {credential ? (
           <AiGenerateContent
             projectId={projectId}
+            stage={stage}
             credential={credential}
             onApplied={() => setOpen(false)}
           />
         ) : (
           <div className="flex flex-col gap-4">
-            <SetupRequiredCta projectId={projectId} />
+            <SetupRequiredCta projectId={projectId} stage={stage} />
             <button
               type="button"
               onClick={() => setOpen(false)}

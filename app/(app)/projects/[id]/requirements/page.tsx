@@ -52,7 +52,11 @@ export default async function RequirementsListPage({
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <AiGeneratePanel projectId={project.id} credential={credential} />
+            <AiGeneratePanel
+              projectId={project.id}
+              stage="requirements"
+              credential={credential}
+            />
             <ButtonLink href={`/projects/${project.id}/requirements/new`}>
               New requirement
             </ButtonLink>
@@ -78,6 +82,7 @@ export default async function RequirementsListPage({
             <div className="flex flex-wrap items-center justify-center gap-2">
               <AiGeneratePanel
                 projectId={project.id}
+                stage="requirements"
                 credential={credential}
               />
               <ButtonLink href={`/projects/${project.id}/requirements/new`}>

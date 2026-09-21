@@ -32,13 +32,26 @@ export const aiRequirementsResponseSchema = z.object({
   requirements: z.array(aiRequirementItemSchema).min(1).max(15),
 });
 
+export const aiDecisionItemSchema = z.object({
+  title: z.string().trim().min(3).max(120),
+  context: z.string().trim().max(5000),
+  decision: z.string().trim().min(1).max(2000),
+  rationale: z.string().trim().max(5000),
+});
+
+export const aiDecisionsResponseSchema = z.object({
+  decisions: z.array(aiDecisionItemSchema).min(1).max(15),
+});
+
 export type AiRequirementItem = z.infer<typeof aiRequirementItemSchema>;
 export type AiRequirementsResponse = z.infer<typeof aiRequirementsResponseSchema>;
+export type AiDecisionItem = z.infer<typeof aiDecisionItemSchema>;
+export type AiDecisionsResponse = z.infer<typeof aiDecisionsResponseSchema>;
 
-export type SuggestSuccess = {
+export type SuggestSuccess<TItem> = {
   ok: true;
   suggestionId: string;
-  requirements: AiRequirementItem[];
+  items: TItem[];
   model: string;
   provider: string;
   usage: {
@@ -62,4 +75,15 @@ export type SuggestFailure = {
   message: string;
 };
 
-export type SuggestResult = SuggestSuccess | SuggestFailure;
+export type SuggestResult<TItem> = SuggestSuccess<TItem> | SuggestFailure;
+
+export type AiApplyCreated = { index: number; id: string; title: string };
+export type AiApplySkipped = {
+  index: number;
+  title: string;
+  reason: "duplicate" | "invalid";
+};
+
+export type AiApplyResult =
+  | { ok: true; created: AiApplyCreated[]; skipped: AiApplySkipped[] }
+  | { ok: false; error: string };
