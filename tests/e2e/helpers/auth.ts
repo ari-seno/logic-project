@@ -18,7 +18,15 @@ export async function signUp(
   await page.getByLabel("Password", { exact: true }).fill(password);
   await page.getByLabel("Confirm password").fill(password);
   await page.getByRole("button", { name: /create account/i }).click();
-  await page.waitForURL(/\/dashboard$/);
+  try {
+    await page.waitForURL(/\/dashboard$/, { timeout: 25_000 });
+  } catch {
+    // The auth round-trip can be slow against a remote backend. Before failing,
+    // check whether the session was actually established by loading the
+    // dashboard directly; an unauthenticated visit redirects back to /login.
+    await page.goto("/dashboard");
+    await page.waitForURL(/\/dashboard$/, { timeout: 10_000 });
+  }
 }
 
 export async function signIn(

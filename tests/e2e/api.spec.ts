@@ -112,7 +112,7 @@ test.describe("API design", () => {
       await page.getByRole("button", { name: /add parameter/i }).click();
       await expect(page.getByText("id").first()).toBeVisible();
 
-      await page.locator("#status_code").fill("200");
+      await page.getByLabel("Status code").fill("200");
       await page.getByLabel("Content type").first().fill("application/json");
       await page.getByRole("button", { name: /add response/i }).click();
       await expect(page.getByText("200").first()).toBeVisible();
