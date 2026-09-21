@@ -14,6 +14,14 @@ export function formatDate(value: string | Date) {
   }).format(date);
 }
 
+export function slugify(value: string, fallback = "project") {
+  const slug = value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+  return slug || fallback;
+}
+
 export function formatDateTime(value: string | Date) {
   const date = typeof value === "string" ? new Date(value) : value;
   return new Intl.DateTimeFormat("en-US", {

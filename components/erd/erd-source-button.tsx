@@ -8,9 +8,13 @@ import { cn } from "@/lib/utils";
 export function ErdSourceButton({
   chart,
   className,
+  title = "Mermaid source",
+  description = "Copy this into a markdown file or any Mermaid renderer.",
 }: {
   chart: string;
   className?: string;
+  title?: string;
+  description?: string;
 }) {
   const dialogRef = useRef<HTMLDialogElement | null>(null);
   const [copied, setCopied] = useState(false);
@@ -74,10 +78,10 @@ export function ErdSourceButton({
                 id="erd-source-title"
                 className="text-lg font-semibold tracking-tight"
               >
-                Mermaid source
+                {title}
               </h2>
               <p className="mt-1 text-sm text-[var(--muted-foreground)]">
-                Copy this into a markdown file or any Mermaid renderer.
+                {description}
               </p>
             </div>
             <Button

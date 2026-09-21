@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { ProjectTabs } from "@/components/projects/project-tabs";
+import { ArchitectureSourceButton } from "@/components/erd/architecture-source-button";
 import {
   ArchitectureComponentTypeBadge,
   ArchitectureDecisionStatusBadge,
@@ -88,13 +89,18 @@ export default async function ArchitectureOverviewPage({
       <section className="card-glass">
         <header className="mb-3 flex items-end justify-between">
           <h2 className="text-lg font-semibold">Components</h2>
-          <ButtonLink
-            href={`/projects/${project.id}/architecture/components/new`}
-            size="sm"
-            variant="secondary"
-          >
-            New component
-          </ButtonLink>
+          <div className="flex shrink-0 gap-2">
+            {diagramChart ? (
+              <ArchitectureSourceButton chart={diagramChart} />
+            ) : null}
+            <ButtonLink
+              href={`/projects/${project.id}/architecture/components/new`}
+              size="sm"
+              variant="secondary"
+            >
+              New component
+            </ButtonLink>
+          </div>
         </header>
         {diagramChart ? (
           <div className="mb-4">

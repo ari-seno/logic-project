@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 
 import { Alert } from "@/components/ui/alert";
 import { DeleteProjectButton } from "@/components/projects/delete-project-button";
+import { ExportMenu } from "@/components/projects/export-menu";
+import { ProjectHealthCard } from "@/components/projects/project-health-card";
 import { ProjectTabs } from "@/components/projects/project-tabs";
 import {
   DecisionStatusBadge,
@@ -117,6 +119,7 @@ export default async function ProjectOverviewPage({
               projectId={project.id}
               currentLabel={aiCredentialSummary?.label ?? null}
             />
+            <ExportMenu projectId={project.id} />
             <ButtonLink
               href={`/projects/${project.id}/edit`}
               variant="secondary"
@@ -193,10 +196,8 @@ export default async function ProjectOverviewPage({
                 {formatDate(project.updated_at)}
               </span>
             </p>
-            <p className="mt-1 italic">
-              AI-assisted context generation is planned for a later part.
-            </p>
           </div>
+          <ProjectHealthCard projectId={project.id} />
         </div>
       </section>
 
