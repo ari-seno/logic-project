@@ -36,8 +36,8 @@ export function UiStateForm({
       {uiState ? <input type="hidden" name="id" value={uiState.id} /> : null}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="name">Name</Label>
-          <Input id="name" name="name" required defaultValue={uiState?.name ?? ""} />
+          <Label htmlFor="state_name">Name</Label>
+          <Input id="state_name" name="name" required defaultValue={uiState?.name ?? ""} />
         </div>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="state_type">State type</Label>
@@ -55,9 +55,9 @@ export function UiStateForm({
         </div>
       </div>
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="description">Description</Label>
+        <Label htmlFor="state_description">Description</Label>
         <Textarea
-          id="description"
+          id="state_description"
           name="description"
           rows={2}
           defaultValue={uiState?.description ?? ""}

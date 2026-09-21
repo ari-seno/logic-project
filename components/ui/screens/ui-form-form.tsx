@@ -32,8 +32,8 @@ export function UiFormForm({
       {form ? <input type="hidden" name="id" value={form.id} /> : null}
 
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="name">Form name</Label>
-        <Input id="name" name="name" required defaultValue={form?.name ?? ""} />
+        <Label htmlFor="form_name">Form name</Label>
+        <Input id="form_name" name="name" required defaultValue={form?.name ?? ""} />
         <FieldError messages={state?.fieldErrors?.name} />
       </div>
       <div className="flex flex-col gap-1.5">
@@ -55,9 +55,9 @@ export function UiFormForm({
         />
       </div>
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="description">Description</Label>
+        <Label htmlFor="form_description">Description</Label>
         <Textarea
-          id="description"
+          id="form_description"
           name="description"
           rows={2}
           defaultValue={form?.description ?? ""}

@@ -31,8 +31,8 @@ export function UiInteractionForm({
       <input type="hidden" name="screenId" value={screenId} />
       {interaction ? <input type="hidden" name="id" value={interaction.id} /> : null}
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="name">Name</Label>
-        <Input id="name" name="name" required defaultValue={interaction?.name ?? ""} />
+        <Label htmlFor="interaction_name">Name</Label>
+        <Input id="interaction_name" name="name" required defaultValue={interaction?.name ?? ""} />
       </div>
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="trigger">Trigger</Label>
@@ -43,9 +43,9 @@ export function UiInteractionForm({
         <Input id="action" name="action" required defaultValue={interaction?.action ?? ""} placeholder="POST /api/projects" />
       </div>
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="description">Description</Label>
+        <Label htmlFor="interaction_description">Description</Label>
         <Textarea
-          id="description"
+          id="interaction_description"
           name="description"
           rows={2}
           defaultValue={interaction?.description ?? ""}

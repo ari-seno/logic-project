@@ -86,8 +86,8 @@ export function AddScreenComponentForm({
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="description">Description</Label>
-        <Textarea id="description" name="description" rows={2} />
+        <Label htmlFor="placement_description">Description</Label>
+        <Textarea id="placement_description" name="description" rows={2} />
         <FieldError messages={state?.fieldErrors?.description} />
       </div>
 

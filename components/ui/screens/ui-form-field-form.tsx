@@ -37,8 +37,8 @@ export function UiFormFieldForm({
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="name">Name</Label>
-          <Input id="name" name="name" required defaultValue={field?.name ?? ""} />
+          <Label htmlFor="field_name">Name</Label>
+          <Input id="field_name" name="name" required defaultValue={field?.name ?? ""} />
         </div>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="label">Label</Label>
