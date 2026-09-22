@@ -12,6 +12,7 @@ import { listArchitectureComponentsByProject } from "@/lib/architecture/componen
 import { listArchitectureTechnologiesByProject } from "@/lib/architecture/technologies/queries";
 import { listArchitectureDecisionsByProject } from "@/lib/architecture/decisions/queries";
 import { listArchitectureComponentDependenciesByProject } from "@/lib/architecture/dependencies/queries";
+import { loadProjectApiContract } from "@/lib/api/endpoints/queries";
 import { requirementInputSchema } from "@/lib/validation/requirements";
 import { decisionInputSchema } from "@/lib/validation/decisions";
 import { domainInputSchema } from "@/lib/validation/domains";
@@ -23,6 +24,13 @@ import { architectureTechnologyInputSchema } from "@/lib/validation/architecture
 import { architectureDecisionInputSchema } from "@/lib/validation/architecture/decisions";
 import { architectureComponentDependencyInputSchema } from "@/lib/validation/architecture/dependencies";
 import type {
+  AiApiEndpointItem,
+  AiApiErrorItem,
+  AiApiGroupItem,
+  AiApiItem,
+  AiApiParameterItem,
+  AiApiRequestBodyItem,
+  AiApiResponseItem,
   AiArchitectureComponentItem,
   AiArchitectureDecisionItem,
   AiArchitectureDependencyItem,
@@ -35,9 +43,14 @@ import type {
   AiRequirementItem,
 } from "@/lib/ai/schema";
 import type {
+  ApiEndpointEntityRole,
+  ApiHttpMethod,
+  ApiParameterDataType,
+  ApiParameterLocation,
   ArchitectureComponentType,
   ArchitectureTechnologyCategory,
   EntityDataType,
+  Json,
   RelationshipType,
 } from "@/lib/supabase/types";
 
@@ -1150,6 +1163,751 @@ export async function applyArchitectureToProject(
     }
 
     dependencyKeys.add(key);
+  }
+
+  return out;
+}
+
+export type ApplyApiOptions = {
+  projectId: string;
+  userId: string;
+  items: AiApiItem[];
+  indices: number[];
+};
+
+export type ApiGroupRow = {
+  name: string;
+  prefix: string | null;
+  description: string | null;
+};
+
+export type ApiEndpointRow = {
+  name: string;
+  method: ApiHttpMethod;
+  path: string;
+  summary: string | null;
+  description: string | null;
+  authentication_required: boolean;
+  group_name: string;
+};
+
+export type ApiParameterRow = {
+  name: string;
+  location: ApiParameterLocation;
+  data_type: ApiParameterDataType;
+  required: boolean;
+  description: string | null;
+  example: string | null;
+};
+
+export type ApiRequestBodyRow = {
+  content_type: string;
+  description: string | null;
+  schema_definition: Json | null;
+  example: Json | null;
+};
+
+export type ApiResponseRow = {
+  status_code: number;
+  content_type: string | null;
+  description: string | null;
+  schema_definition: Json | null;
+  example: Json | null;
+};
+
+export type ApiErrorRow = {
+  code: string;
+  message: string;
+  http_status: number | null;
+  description: string | null;
+};
+
+export function buildApiGroupRow(item: AiApiGroupItem): ApiGroupRow | null {
+  const name = item.name.trim();
+  if (name.length < 1 || name.length > 200) return null;
+  const prefix = item.prefix.trim();
+  if (prefix.length > 200) return null;
+  const description = item.description.trim();
+  if (description.length > 5000) return null;
+  return {
+    name,
+    prefix: optionalText(prefix),
+    description: optionalText(description),
+  };
+}
+
+export function buildApiEndpointRow(
+  item: AiApiEndpointItem,
+): ApiEndpointRow | null {
+  const name = item.name.trim();
+  if (name.length < 1 || name.length > 200) return null;
+  const path = item.path.trim();
+  if (path.length < 1 || path.length > 500) return null;
+  if (!path.startsWith("/")) return null;
+  const summary = item.summary.trim();
+  if (summary.length > 500) return null;
+  const description = item.description.trim();
+  if (description.length > 5000) return null;
+  const groupName = item.group_name.trim();
+  if (groupName.length > 200) return null;
+  return {
+    name,
+    method: item.method,
+    path,
+    summary: optionalText(summary),
+    description: optionalText(description),
+    authentication_required: item.authentication_required,
+    group_name: groupName,
+  };
+}
+
+export function buildApiParameterRow(
+  item: AiApiParameterItem,
+): ApiParameterRow | null {
+  const name = item.name.trim();
+  if (name.length < 1 || name.length > 200) return null;
+  const description = item.description.trim();
+  if (description.length > 2000) return null;
+  const example = item.example.trim();
+  if (example.length > 1000) return null;
+  return {
+    name,
+    location: item.location,
+    data_type: item.data_type,
+    required: item.required,
+    description: optionalText(description),
+    example: optionalText(example),
+  };
+}
+
+export function buildApiRequestBodyRow(
+  item: AiApiRequestBodyItem,
+): ApiRequestBodyRow | null {
+  const contentType = item.content_type.trim();
+  if (contentType.length < 1 || contentType.length > 200) return null;
+  const description = item.description.trim();
+  if (description.length > 2000) return null;
+  return {
+    content_type: contentType,
+    description: optionalText(description),
+    schema_definition: toJson(item.schema),
+    example: toJson(item.example),
+  };
+}
+
+export function buildApiResponseRow(
+  item: AiApiResponseItem,
+): ApiResponseRow | null {
+  if (!Number.isInteger(item.status_code)) return null;
+  if (item.status_code < 100 || item.status_code > 599) return null;
+  const contentType = item.content_type.trim();
+  if (contentType.length > 200) return null;
+  const description = item.description.trim();
+  if (description.length > 2000) return null;
+  return {
+    status_code: item.status_code,
+    content_type: optionalText(contentType),
+    description: optionalText(description),
+    schema_definition: toJson(item.schema),
+    example: toJson(item.example),
+  };
+}
+
+export function buildApiErrorRow(item: AiApiErrorItem): ApiErrorRow | null {
+  const code = item.code.trim();
+  if (code.length < 1 || code.length > 100) return null;
+  const message = item.message.trim();
+  if (message.length < 1 || message.length > 500) return null;
+  const description = item.description.trim();
+  if (description.length > 2000) return null;
+  const httpStatus = item.http_status ?? null;
+  if (
+    httpStatus !== null &&
+    (!Number.isInteger(httpStatus) || httpStatus < 100 || httpStatus > 599)
+  ) {
+    return null;
+  }
+  return {
+    code,
+    message,
+    http_status: httpStatus,
+    description: optionalText(description),
+  };
+}
+
+export function apiEndpointDedupeKey(
+  method: ApiHttpMethod,
+  path: string,
+): string {
+  return `${method}|${path}`;
+}
+
+export function apiParameterDedupeKey(
+  endpointId: string,
+  location: ApiParameterLocation,
+  name: string,
+): string {
+  return `${endpointId}|${location}|${name.trim().toLowerCase()}`;
+}
+
+export function apiResponseDedupeKey(
+  endpointId: string,
+  statusCode: number,
+): string {
+  return `${endpointId}|${statusCode}`;
+}
+
+export function apiErrorDedupeKey(endpointId: string, code: string): string {
+  return `${endpointId}|${code.trim().toLowerCase()}`;
+}
+
+export function apiEntityLinkDedupeKey(
+  endpointId: string,
+  entityId: string,
+  role: ApiEndpointEntityRole,
+): string {
+  return `${endpointId}|${entityId}|${role}`;
+}
+
+export function apiRequirementLinkDedupeKey(
+  endpointId: string,
+  requirementId: string,
+): string {
+  return `${endpointId}|${requirementId}`;
+}
+
+function toJson(value: unknown): Json | null {
+  if (value === null || value === undefined) return null;
+  return value as Json;
+}
+
+function nextPositionByParent(
+  rows: Array<{ endpoint_id: string; position: number }>,
+): Map<string, number> {
+  const map = new Map<string, number>();
+  for (const row of rows) {
+    map.set(
+      row.endpoint_id,
+      Math.max(map.get(row.endpoint_id) ?? -1, row.position),
+    );
+  }
+  for (const [key, value] of map) {
+    map.set(key, value + 1);
+  }
+  return map;
+}
+
+export async function applyApiToProject(
+  options: ApplyApiOptions,
+): Promise<ApplySummary> {
+  const supabase = await createClient();
+  const out: ApplySummary = { created: [], skipped: [], failed: [] };
+
+  const chosen = [...new Set(options.indices)]
+    .filter((n) => Number.isInteger(n) && n >= 0 && n < options.items.length)
+    .sort((a, b) => a - b);
+
+  const [contract, entities, requirements] = await Promise.all([
+    loadProjectApiContract(options.projectId),
+    listEntitiesByProject(options.projectId),
+    listRequirements({ projectId: options.projectId }),
+  ]);
+
+  const groupIdByKey = new Map<string, string>();
+  let groupPosition =
+    contract.groups.reduce((max, group) => Math.max(max, group.position), -1) + 1;
+  for (const group of contract.groups) {
+    groupIdByKey.set(group.name.trim().toLowerCase(), group.id);
+  }
+
+  const endpointIdByKey = new Map<string, string>();
+  let endpointPosition =
+    contract.endpoints.reduce(
+      (max, endpoint) => Math.max(max, endpoint.position),
+      -1,
+    ) + 1;
+  for (const endpoint of contract.endpoints) {
+    endpointIdByKey.set(
+      apiEndpointDedupeKey(endpoint.method, endpoint.path),
+      endpoint.id,
+    );
+  }
+
+  const parameterKeys = new Set(
+    contract.parameters.map((parameter) =>
+      apiParameterDedupeKey(
+        parameter.endpoint_id,
+        parameter.location,
+        parameter.name,
+      ),
+    ),
+  );
+  const parameterPosition = nextPositionByParent(contract.parameters);
+
+  const requestBodyEndpointIds = new Set(
+    contract.requestBodies.map((body) => body.endpoint_id),
+  );
+
+  const responseKeys = new Set(
+    contract.responses.map((response) =>
+      apiResponseDedupeKey(response.endpoint_id, response.status_code),
+    ),
+  );
+  const responsePosition = nextPositionByParent(contract.responses);
+
+  const errorKeys = new Set(
+    contract.errors.map((error) =>
+      apiErrorDedupeKey(error.endpoint_id, error.code),
+    ),
+  );
+
+  const entityLinkKeys = new Set(
+    contract.endpointEntities.map((link) =>
+      apiEntityLinkDedupeKey(link.endpoint_id, link.entity_id, link.role),
+    ),
+  );
+  const requirementLinkKeys = new Set(
+    contract.endpointRequirements.map((link) =>
+      apiRequirementLinkDedupeKey(link.endpoint_id, link.requirement_id),
+    ),
+  );
+
+  const entityIdByName = new Map<string, string>();
+  for (const entity of entities) {
+    const key = entity.name.trim().toLowerCase();
+    if (!entityIdByName.has(key)) entityIdByName.set(key, entity.id);
+  }
+
+  const requirementIdByTitle = new Map<string, string>();
+  for (const requirement of requirements) {
+    const key = requirement.title.trim().toLowerCase();
+    if (!requirementIdByTitle.has(key)) {
+      requirementIdByTitle.set(key, requirement.id);
+    }
+  }
+
+  for (const index of chosen) {
+    const item = options.items[index];
+    if (!item) {
+      out.skipped.push({ kind: "skipped", index, title: "", reason: "invalid" });
+      continue;
+    }
+
+    if (item.kind === "group") {
+      const row = buildApiGroupRow(item);
+      if (!row) {
+        out.skipped.push({
+          kind: "skipped",
+          index,
+          title: item.name,
+          reason: "invalid",
+        });
+        continue;
+      }
+
+      const key = row.name.toLowerCase();
+      if (groupIdByKey.has(key)) {
+        out.skipped.push({
+          kind: "skipped",
+          index,
+          title: row.name,
+          reason: "duplicate",
+        });
+        continue;
+      }
+
+      const { data, error } = await supabase
+        .from("api_groups")
+        .insert({
+          project_id: options.projectId,
+          name: row.name,
+          prefix: row.prefix,
+          description: row.description,
+          position: groupPosition,
+        })
+        .select("id, name")
+        .single();
+
+      if (error || !data) {
+        out.failed.push({
+          kind: "failed",
+          index,
+          title: row.name,
+          error: error?.message ?? "Could not insert API group.",
+        });
+        continue;
+      }
+
+      groupIdByKey.set(key, data.id);
+      groupPosition += 1;
+      out.created.push({ kind: "created", index, id: data.id, title: data.name });
+      continue;
+    }
+
+    const label = `${item.method} ${item.path}`;
+    const row = buildApiEndpointRow(item);
+    if (!row) {
+      out.skipped.push({ kind: "skipped", index, title: label, reason: "invalid" });
+      continue;
+    }
+
+    const endpointKey = apiEndpointDedupeKey(row.method, row.path);
+    let endpointId = endpointIdByKey.get(endpointKey) ?? null;
+    let createdEndpoint = false;
+
+    if (!endpointId) {
+      let groupId: string | null = null;
+
+      if (row.group_name) {
+        const groupKey = row.group_name.toLowerCase();
+        groupId = groupIdByKey.get(groupKey) ?? null;
+
+        if (!groupId) {
+          const { data: group, error: groupError } = await supabase
+            .from("api_groups")
+            .insert({
+              project_id: options.projectId,
+              name: row.group_name,
+              position: groupPosition,
+            })
+            .select("id")
+            .single();
+
+          if (groupError || !group) {
+            out.failed.push({
+              kind: "failed",
+              index,
+              title: label,
+              error: groupError?.message ?? "Could not insert API group.",
+            });
+            continue;
+          }
+
+          groupId = group.id;
+          groupIdByKey.set(groupKey, group.id);
+          groupPosition += 1;
+        }
+      }
+
+      const { data, error } = await supabase
+        .from("api_endpoints")
+        .insert({
+          project_id: options.projectId,
+          group_id: groupId,
+          name: row.name,
+          method: row.method,
+          path: row.path,
+          summary: row.summary,
+          description: row.description,
+          authentication_required: row.authentication_required,
+          position: endpointPosition,
+        })
+        .select("id, path")
+        .single();
+
+      if (error || !data) {
+        out.failed.push({
+          kind: "failed",
+          index,
+          title: label,
+          error: error?.message ?? "Could not insert API endpoint.",
+        });
+        continue;
+      }
+
+      endpointId = data.id;
+      endpointIdByKey.set(endpointKey, data.id);
+      endpointPosition += 1;
+      createdEndpoint = true;
+    }
+
+    for (const parameterItem of item.parameters) {
+      const parameterLabel = `${label} → ${parameterItem.name}`;
+      const parameterRow = buildApiParameterRow(parameterItem);
+      if (!parameterRow) {
+        out.skipped.push({
+          kind: "skipped",
+          index,
+          title: parameterLabel,
+          reason: "invalid",
+        });
+        continue;
+      }
+
+      const key = apiParameterDedupeKey(
+        endpointId,
+        parameterRow.location,
+        parameterRow.name,
+      );
+      if (parameterKeys.has(key)) {
+        out.skipped.push({
+          kind: "skipped",
+          index,
+          title: parameterLabel,
+          reason: "duplicate",
+        });
+        continue;
+      }
+
+      const position = parameterPosition.get(endpointId) ?? 0;
+      const { error } = await supabase.from("api_parameters").insert({
+        endpoint_id: endpointId,
+        name: parameterRow.name,
+        location: parameterRow.location,
+        data_type: parameterRow.data_type,
+        required: parameterRow.required,
+        description: parameterRow.description,
+        example: parameterRow.example,
+        position,
+      });
+
+      if (error) {
+        out.failed.push({
+          kind: "failed",
+          index,
+          title: parameterLabel,
+          error: error.message,
+        });
+        continue;
+      }
+
+      parameterKeys.add(key);
+      parameterPosition.set(endpointId, position + 1);
+    }
+
+    if (item.request_body) {
+      const bodyLabel = `${label} → request body`;
+      const bodyRow = buildApiRequestBodyRow(item.request_body);
+
+      if (!bodyRow) {
+        out.skipped.push({
+          kind: "skipped",
+          index,
+          title: bodyLabel,
+          reason: "invalid",
+        });
+      } else if (requestBodyEndpointIds.has(endpointId)) {
+        out.skipped.push({
+          kind: "skipped",
+          index,
+          title: bodyLabel,
+          reason: "duplicate",
+        });
+      } else {
+        const { error } = await supabase.from("api_request_bodies").insert({
+          endpoint_id: endpointId,
+          content_type: bodyRow.content_type,
+          description: bodyRow.description,
+          schema_definition: bodyRow.schema_definition,
+          example: bodyRow.example,
+        });
+
+        if (error) {
+          out.failed.push({
+            kind: "failed",
+            index,
+            title: bodyLabel,
+            error: error.message,
+          });
+        } else {
+          requestBodyEndpointIds.add(endpointId);
+        }
+      }
+    }
+
+    for (const responseItem of item.responses) {
+      const responseLabel = `${label} → ${responseItem.status_code}`;
+      const responseRow = buildApiResponseRow(responseItem);
+      if (!responseRow) {
+        out.skipped.push({
+          kind: "skipped",
+          index,
+          title: responseLabel,
+          reason: "invalid",
+        });
+        continue;
+      }
+
+      const key = apiResponseDedupeKey(endpointId, responseRow.status_code);
+      if (responseKeys.has(key)) {
+        out.skipped.push({
+          kind: "skipped",
+          index,
+          title: responseLabel,
+          reason: "duplicate",
+        });
+        continue;
+      }
+
+      const position = responsePosition.get(endpointId) ?? 0;
+      const { error } = await supabase.from("api_responses").insert({
+        endpoint_id: endpointId,
+        status_code: responseRow.status_code,
+        content_type: responseRow.content_type,
+        description: responseRow.description,
+        schema_definition: responseRow.schema_definition,
+        example: responseRow.example,
+        position,
+      });
+
+      if (error) {
+        out.failed.push({
+          kind: "failed",
+          index,
+          title: responseLabel,
+          error: error.message,
+        });
+        continue;
+      }
+
+      responseKeys.add(key);
+      responsePosition.set(endpointId, position + 1);
+    }
+
+    for (const errorItem of item.errors) {
+      const errorLabel = `${label} → ${errorItem.code}`;
+      const errorRow = buildApiErrorRow(errorItem);
+      if (!errorRow) {
+        out.skipped.push({
+          kind: "skipped",
+          index,
+          title: errorLabel,
+          reason: "invalid",
+        });
+        continue;
+      }
+
+      const key = apiErrorDedupeKey(endpointId, errorRow.code);
+      if (errorKeys.has(key)) {
+        out.skipped.push({
+          kind: "skipped",
+          index,
+          title: errorLabel,
+          reason: "duplicate",
+        });
+        continue;
+      }
+
+      const { error } = await supabase.from("api_errors").insert({
+        endpoint_id: endpointId,
+        code: errorRow.code,
+        message: errorRow.message,
+        description: errorRow.description,
+        http_status: errorRow.http_status,
+      });
+
+      if (error) {
+        out.failed.push({
+          kind: "failed",
+          index,
+          title: errorLabel,
+          error: error.message,
+        });
+        continue;
+      }
+
+      errorKeys.add(key);
+    }
+
+    for (const link of item.entities) {
+      const linkLabel = `${label} → ${link.entity_name}`;
+      const entityId =
+        entityIdByName.get(link.entity_name.trim().toLowerCase()) ?? null;
+
+      if (!entityId) {
+        out.skipped.push({
+          kind: "skipped",
+          index,
+          title: linkLabel,
+          reason: "invalid",
+        });
+        continue;
+      }
+
+      const key = apiEntityLinkDedupeKey(endpointId, entityId, link.role);
+      if (entityLinkKeys.has(key)) {
+        out.skipped.push({
+          kind: "skipped",
+          index,
+          title: linkLabel,
+          reason: "duplicate",
+        });
+        continue;
+      }
+
+      const { error } = await supabase.from("api_endpoint_entities").insert({
+        endpoint_id: endpointId,
+        entity_id: entityId,
+        role: link.role,
+      });
+
+      if (error) {
+        out.failed.push({
+          kind: "failed",
+          index,
+          title: linkLabel,
+          error: error.message,
+        });
+        continue;
+      }
+
+      entityLinkKeys.add(key);
+    }
+
+    for (const requirementTitle of item.requirement_titles) {
+      const linkLabel = `${label} → ${requirementTitle}`;
+      const requirementId =
+        requirementIdByTitle.get(requirementTitle.trim().toLowerCase()) ?? null;
+
+      if (!requirementId) {
+        out.skipped.push({
+          kind: "skipped",
+          index,
+          title: linkLabel,
+          reason: "invalid",
+        });
+        continue;
+      }
+
+      const key = apiRequirementLinkDedupeKey(endpointId, requirementId);
+      if (requirementLinkKeys.has(key)) {
+        out.skipped.push({
+          kind: "skipped",
+          index,
+          title: linkLabel,
+          reason: "duplicate",
+        });
+        continue;
+      }
+
+      const { error } = await supabase.from("api_endpoint_requirements").insert({
+        endpoint_id: endpointId,
+        requirement_id: requirementId,
+      });
+
+      if (error) {
+        out.failed.push({
+          kind: "failed",
+          index,
+          title: linkLabel,
+          error: error.message,
+        });
+        continue;
+      }
+
+      requirementLinkKeys.add(key);
+    }
+
+    if (createdEndpoint) {
+      out.created.push({ kind: "created", index, id: endpointId, title: label });
+    } else {
+      out.skipped.push({
+        kind: "skipped",
+        index,
+        title: label,
+        reason: "duplicate",
+      });
+    }
   }
 
   return out;

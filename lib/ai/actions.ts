@@ -1,6 +1,7 @@
 "use server";
 
 import {
+  applyApiToProject,
   applyArchitectureToProject,
   applyDecisionsToProject,
   applyErdToProject,
@@ -24,11 +25,18 @@ import {
   buildArchitectureUserPrompt,
 } from "@/lib/ai/prompts/architecture";
 import {
+  buildApiSystemPrompt,
+  buildApiUserPrompt,
+} from "@/lib/ai/prompts/api";
+import {
+  aiApiResponseSchema,
   aiArchitectureResponseSchema,
   aiDecisionsResponseSchema,
   aiErdResponseSchema,
   aiRequirementsResponseSchema,
+  flattenApiResponse,
   flattenArchitectureResponse,
+  type AiApiItem,
   type AiApplyResult,
   type AiArchitectureItem,
   type AiDecisionItem,
@@ -48,6 +56,9 @@ const DOMAINS_SCHEMA_HINT =
 
 const ARCHITECTURE_SCHEMA_HINT =
   "Schema: { components: [ { name, type, description, depends_on: [ { target_component, description } ] } ], technologies: [ { name, category, description } ], decisions: [ { title, context, decision, rationale } ] }, up to 20 components, 20 technologies, 15 decisions.";
+
+const API_SCHEMA_HINT =
+  "Schema: { groups: [ { name, prefix, description } ], endpoints: [ { group_name, method, path, name, summary, description, authentication_required, parameters: [ { name, location, data_type, required, description, example } ], request_body: { content_type, description, schema, example } | null, responses: [ { status_code, content_type, description, schema, example } ], errors: [ { code, message, http_status, description } ], entities: [ { entity_name, role } ], requirement_titles: [ string ] } ] }, up to 20 groups, 25 endpoints.";
 
 export type SuggestRequirementsInput = {
   projectId: string;
@@ -227,5 +238,50 @@ export async function aiApplyArchitecture(
   return runAiApply<AiArchitectureItem>(input, {
     stage: "architecture",
     apply: applyArchitectureToProject,
+  });
+}
+
+export type SuggestApiInput = {
+  projectId: string;
+  prompt: string;
+};
+
+export type ApplyApiInput = {
+  suggestionId: string;
+  indices: number[];
+};
+
+export async function aiSuggestApi(
+  input: SuggestApiInput,
+): Promise<SuggestResult<AiApiItem>> {
+  return runAiSuggest<AiApiItem>(input, {
+    stage: "api",
+    buildSystemPrompt: buildApiSystemPrompt,
+    buildUserPrompt: (ctx, userPrompt) =>
+      buildApiUserPrompt({
+        projectName: ctx.projectName,
+        projectDescription: ctx.projectDescription,
+        requirementTitles: ctx.requirementTitles,
+        decisionTitles: ctx.decisionTitles,
+        domainNames: ctx.domainNames,
+        entityNames: ctx.entityNames,
+        existingGroupNames: ctx.apiGroupNames,
+        existingEndpointSummaries: ctx.apiEndpointSummaries,
+        userPrompt,
+      }),
+    parse: (text) => {
+      const raw = safeJsonParse(text);
+      if (raw === null) return null;
+      const parsed = aiApiResponseSchema.safeParse(raw);
+      return parsed.success ? flattenApiResponse(parsed.data) : null;
+    },
+    parseErrorMessage: API_SCHEMA_HINT,
+  });
+}
+
+export async function aiApplyApi(input: ApplyApiInput): Promise<AiApplyResult> {
+  return runAiApply<AiApiItem>(input, {
+    stage: "api",
+    apply: applyApiToProject,
   });
 }

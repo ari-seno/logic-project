@@ -65,4 +65,17 @@ export const AI_STAGE_LABELS: Record<AiStage, AiStageLabels> = {
     selectionNoun: "item",
     suggestionsHeading: "Suggested architecture",
   },
+  api: {
+    id: "api",
+    singular: "API item",
+    plural: "API",
+    drawerTitle: "Generate API design",
+    subtitleFallback: "AI assist for a first-draft API contract",
+    setupCopy:
+      "Add an Ollama credential in Settings, then choose it for this project before generating an API design.",
+    promptPlaceholder:
+      "e.g. REST endpoints for users, projects, and auth with pagination and error codes.",
+    selectionNoun: "item",
+    suggestionsHeading: "Suggested API design",
+  },
 };

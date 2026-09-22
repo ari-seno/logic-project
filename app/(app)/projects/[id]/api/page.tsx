@@ -9,6 +9,8 @@ import {
 import { ButtonLink } from "@/components/ui/button";
 import { formatDate } from "@/lib/utils";
 import { getProject } from "@/lib/projects/queries";
+import { getProjectCredentialAction } from "@/lib/ai/credentials-actions";
+import { AiGeneratePanel } from "@/components/ai/ai-generate-panel";
 import {
   listApiGroupsWithEndpointCount,
   type ApiGroupWithEndpointCount,
@@ -40,6 +42,12 @@ export default async function ApiOverviewPage({
   const jsonStructure = prepareJsonBlock(contract);
   const filename = jsonFilename(project.name);
 
+  const credentialResult = await getProjectCredentialAction(project.id);
+  const credential =
+    credentialResult.ok && credentialResult.credential
+      ? credentialResult.credential
+      : null;
+
   const groupNameById = new Map<string, string>(
     groups.map((g) => [g.id, g.name]),
   );
@@ -57,7 +65,12 @@ export default async function ApiOverviewPage({
             {project.name} · Design the contract of your future application.
           </p>
         </div>
-        <div className="flex shrink-0 gap-2">
+        <div className="flex shrink-0 flex-wrap items-center gap-2">
+          <AiGeneratePanel
+            projectId={project.id}
+            stage="api"
+            credential={credential}
+          />
           <ButtonLink
             href={`/projects/${project.id}/api/groups/new`}
             variant="secondary"
@@ -100,9 +113,18 @@ export default async function ApiOverviewPage({
           Endpoints
         </h2>
         {endpoints.length === 0 ? (
-          <p className="mt-3 text-sm text-[var(--muted-foreground)]">
-            No endpoints yet.
-          </p>
+          <div>
+            <p className="mt-3 text-sm text-[var(--muted-foreground)]">
+              No endpoints yet.
+            </p>
+            <div className="mt-4 flex flex-wrap items-center gap-2">
+              <AiGeneratePanel
+                projectId={project.id}
+                stage="api"
+                credential={credential}
+              />
+            </div>
+          </div>
         ) : (
           <ul className="mt-3 flex flex-col gap-2">
             {endpoints.map((e) => (

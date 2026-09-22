@@ -5,6 +5,9 @@ import { listDomains } from "@/lib/domains/queries";
 import { listArchitectureComponentsByProject } from "@/lib/architecture/components/queries";
 import { listArchitectureTechnologiesByProject } from "@/lib/architecture/technologies/queries";
 import { listArchitectureDecisionsByProject } from "@/lib/architecture/decisions/queries";
+import { listEntitiesByProject } from "@/lib/entities/queries";
+import { listApiGroupsByProject } from "@/lib/api/groups/queries";
+import { listApiEndpointsByProject } from "@/lib/api/endpoints/queries";
 
 export type AiAssembledContext = {
   userId: string;
@@ -17,6 +20,9 @@ export type AiAssembledContext = {
   architectureComponentNames: string[];
   architectureTechnologyNames: string[];
   architectureDecisionTitles: string[];
+  entityNames: string[];
+  apiGroupNames: string[];
+  apiEndpointSummaries: string[];
 };
 
 function titlesOf(rows: Array<{ title: string }>): string[] {
@@ -57,6 +63,9 @@ export async function assembleAiContext(
     architectureComponents,
     architectureTechnologies,
     architectureDecisions,
+    entities,
+    apiGroups,
+    apiEndpoints,
   ] = await Promise.all([
     listRequirements({ projectId }),
     listDecisions({ projectId }),
@@ -64,6 +73,9 @@ export async function assembleAiContext(
     listArchitectureComponentsByProject({ projectId }),
     listArchitectureTechnologiesByProject({ projectId }),
     listArchitectureDecisionsByProject({ projectId }),
+    listEntitiesByProject(projectId),
+    listApiGroupsByProject({ projectId }),
+    listApiEndpointsByProject({ projectId }),
   ]);
 
   return {
@@ -77,5 +89,10 @@ export async function assembleAiContext(
     architectureComponentNames: namesOf(architectureComponents),
     architectureTechnologyNames: namesOf(architectureTechnologies),
     architectureDecisionTitles: titlesOf(architectureDecisions),
+    entityNames: namesOf(entities),
+    apiGroupNames: namesOf(apiGroups),
+    apiEndpointSummaries: apiEndpoints.map(
+      (endpoint) => `${endpoint.method} ${endpoint.path}`,
+    ),
   };
 }

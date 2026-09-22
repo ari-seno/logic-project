@@ -3,6 +3,10 @@ import { z } from "zod";
 import {
   AI_SUGGESTION_STATUSES,
   AI_TEST_STATUSES,
+  API_ENDPOINT_ENTITY_ROLES,
+  API_HTTP_METHODS,
+  API_PARAMETER_DATA_TYPES,
+  API_PARAMETER_LOCATIONS,
   ARCHITECTURE_COMPONENT_TYPES,
   ARCHITECTURE_TECHNOLOGY_CATEGORIES,
   ENTITY_DATA_TYPES,
@@ -163,6 +167,108 @@ export function flattenArchitectureResponse(
     ),
     ...response.decisions.map(
       (item): AiArchitectureItem => ({ kind: "decision", ...item }),
+    ),
+  ];
+}
+
+const aiApiNameSchema = z.string().trim().min(1).max(120);
+const aiApiDescriptionSchema = z.string().trim().max(5000).default("");
+const aiApiDetailSchema = z.string().trim().max(2000).default("");
+const aiApiExampleTextSchema = z.string().trim().max(1000).default("");
+
+const aiApiJsonSchema = z
+  .union([z.record(z.string(), z.unknown()), z.array(z.unknown()), z.null()])
+  .default(null);
+
+export const aiApiGroupItemSchema = z.object({
+  name: aiApiNameSchema,
+  prefix: z.string().trim().max(200).default(""),
+  description: aiApiDescriptionSchema,
+});
+
+export const aiApiParameterSchema = z.object({
+  name: aiApiNameSchema,
+  location: z.enum(API_PARAMETER_LOCATIONS),
+  data_type: z.enum(API_PARAMETER_DATA_TYPES),
+  required: z.boolean().default(false),
+  description: aiApiDetailSchema,
+  example: aiApiExampleTextSchema,
+});
+
+export const aiApiRequestBodySchema = z.object({
+  content_type: aiApiNameSchema,
+  description: aiApiDetailSchema,
+  schema: aiApiJsonSchema,
+  example: aiApiJsonSchema,
+});
+
+export const aiApiResponseItemSchema = z.object({
+  status_code: z.number().int().min(100).max(599),
+  content_type: z.string().trim().max(200).default(""),
+  description: aiApiDetailSchema,
+  schema: aiApiJsonSchema,
+  example: aiApiJsonSchema,
+});
+
+export const aiApiErrorItemSchema = z.object({
+  code: aiApiNameSchema,
+  message: z.string().trim().min(1).max(500),
+  http_status: z.number().int().min(100).max(599).nullish().default(null),
+  description: aiApiDetailSchema,
+});
+
+export const aiApiEntityLinkSchema = z.object({
+  entity_name: aiApiNameSchema,
+  role: z.enum(API_ENDPOINT_ENTITY_ROLES),
+});
+
+export const aiApiEndpointItemSchema = z.object({
+  group_name: z.string().trim().max(120).default(""),
+  method: z.enum(API_HTTP_METHODS),
+  path: z.string().trim().min(1).max(500),
+  name: aiApiNameSchema,
+  summary: z.string().trim().max(500).default(""),
+  description: aiApiDescriptionSchema,
+  authentication_required: z.boolean().default(true),
+  parameters: z.array(aiApiParameterSchema).max(20).default([]),
+  request_body: aiApiRequestBodySchema.nullish().default(null),
+  responses: z.array(aiApiResponseItemSchema).max(10).default([]),
+  errors: z.array(aiApiErrorItemSchema).max(10).default([]),
+  entities: z.array(aiApiEntityLinkSchema).max(10).default([]),
+  requirement_titles: z
+    .array(z.string().trim().min(1).max(200))
+    .max(10)
+    .default([]),
+});
+
+export const aiApiResponseSchema = z
+  .object({
+    groups: z.array(aiApiGroupItemSchema).max(20).default([]),
+    endpoints: z.array(aiApiEndpointItemSchema).max(25).default([]),
+  })
+  .refine(
+    (value) => value.groups.length + value.endpoints.length > 0,
+    { message: "At least one group or endpoint is required." },
+  );
+
+export type AiApiGroupItem = z.infer<typeof aiApiGroupItemSchema>;
+export type AiApiParameterItem = z.infer<typeof aiApiParameterSchema>;
+export type AiApiRequestBodyItem = z.infer<typeof aiApiRequestBodySchema>;
+export type AiApiResponseItem = z.infer<typeof aiApiResponseItemSchema>;
+export type AiApiErrorItem = z.infer<typeof aiApiErrorItemSchema>;
+export type AiApiEntityLinkItem = z.infer<typeof aiApiEntityLinkSchema>;
+export type AiApiEndpointItem = z.infer<typeof aiApiEndpointItemSchema>;
+export type AiApiResponse = z.infer<typeof aiApiResponseSchema>;
+
+export type AiApiItem =
+  | ({ kind: "group" } & AiApiGroupItem)
+  | ({ kind: "endpoint" } & AiApiEndpointItem);
+
+export function flattenApiResponse(response: AiApiResponse): AiApiItem[] {
+  return [
+    ...response.groups.map((item): AiApiItem => ({ kind: "group", ...item })),
+    ...response.endpoints.map(
+      (item): AiApiItem => ({ kind: "endpoint", ...item }),
     ),
   ];
 }

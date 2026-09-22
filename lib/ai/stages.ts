@@ -3,6 +3,7 @@ export const AI_STAGES = [
   "decisions",
   "domains",
   "architecture",
+  "api",
 ] as const;
 
 export type AiStage = (typeof AI_STAGES)[number];
@@ -12,6 +13,7 @@ const STAGE_ROUTES: Record<AiStage, (projectId: string) => string> = {
   decisions: (projectId) => `/projects/${projectId}/decisions`,
   domains: (projectId) => `/projects/${projectId}/domains/erd`,
   architecture: (projectId) => `/projects/${projectId}/architecture`,
+  api: (projectId) => `/projects/${projectId}/api`,
 };
 
 export function isAiStage(value: unknown): value is AiStage {

@@ -9,12 +9,13 @@ import {
 import { AI_STAGE_LABELS } from "@/components/ai/stage-labels";
 
 describe("ai/stages", () => {
-  it("exposes requirements, decisions, domains, and architecture", () => {
+  it("exposes every registered stage", () => {
     expect(AI_STAGES).toEqual([
       "requirements",
       "decisions",
       "domains",
       "architecture",
+      "api",
     ]);
   });
 
@@ -23,7 +24,7 @@ describe("ai/stages", () => {
     expect(isAiStage("decisions")).toBe(true);
     expect(isAiStage("domains")).toBe(true);
     expect(isAiStage("architecture")).toBe(true);
-    expect(isAiStage("api")).toBe(false);
+    expect(isAiStage("api")).toBe(true);
     expect(isAiStage("")).toBe(false);
     expect(isAiStage(null)).toBe(false);
     expect(isAiStage(3)).toBe(false);
@@ -38,6 +39,7 @@ describe("ai/stages", () => {
     expect(stageRevalidatePath("architecture", "p1")).toBe(
       "/projects/p1/architecture",
     );
+    expect(stageRevalidatePath("api", "p1")).toBe("/projects/p1/api");
   });
 });
 
@@ -70,6 +72,7 @@ describe("ai stage labels registry", () => {
       "Generate decisions",
       "Generate domain model",
       "Generate architecture",
+      "Generate API design",
     ]);
   });
 });
