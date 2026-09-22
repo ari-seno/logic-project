@@ -27,9 +27,9 @@ describe("ai/prompts/domains", () => {
     const prompt = buildDomainsUserPrompt({
       projectName: "Library",
       projectDescription: "Lending and returns.",
-      requirementTitles: ["Track loans"],
-      decisionTitles: ["Use PostgreSQL"],
-      existingDomainNames: ["Billing"],
+      requirements: [{ name: "Track loans", description: null }],
+      decisions: [{ name: "Use PostgreSQL", description: null }],
+      existingDomains: [{ name: "Billing", description: null }],
       userPrompt: "Focus on overdue fines",
     });
 
@@ -45,9 +45,9 @@ describe("ai/prompts/domains", () => {
     const prompt = buildDomainsUserPrompt({
       projectName: "Empty",
       projectDescription: null,
-      requirementTitles: [],
-      decisionTitles: [],
-      existingDomainNames: [],
+      requirements: [],
+      decisions: [],
+      existingDomains: [],
       userPrompt: "anything",
     });
 

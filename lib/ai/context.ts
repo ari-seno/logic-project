@@ -12,11 +12,28 @@ import { listUiScreensByProject } from "@/lib/ui/screens/queries";
 import { listUiComponentsByProject } from "@/lib/ui/components/queries";
 import { listTasksByProject } from "@/lib/tasks/queries";
 
+export type AiContextEntry = {
+  name: string;
+  description: string | null;
+};
+
 export type AiAssembledContext = {
   userId: string;
   projectId: string;
   projectName: string;
   projectDescription: string | null;
+  requirements: AiContextEntry[];
+  decisions: AiContextEntry[];
+  domains: AiContextEntry[];
+  entities: AiContextEntry[];
+  architectureComponents: AiContextEntry[];
+  architectureTechnologies: AiContextEntry[];
+  architectureDecisions: AiContextEntry[];
+  apiGroups: AiContextEntry[];
+  apiEndpoints: AiContextEntry[];
+  uiScreens: AiContextEntry[];
+  uiComponents: AiContextEntry[];
+  tasks: AiContextEntry[];
   requirementTitles: string[];
   decisionTitles: string[];
   domainNames: string[];
@@ -41,6 +58,31 @@ function namesOf(rows: Array<{ name: string }>): string[] {
   return rows
     .map((row) => row.name)
     .filter((n): n is string => typeof n === "string" && n.length > 0);
+}
+
+function describe(value: string | null | undefined): string | null {
+  if (typeof value !== "string") return null;
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : null;
+}
+
+function titlesWithDescriptionOf(
+  rows: Array<{ title: string; description?: string | null }>,
+): AiContextEntry[] {
+  return rows
+    .filter((row) => typeof row.title === "string" && row.title.length > 0)
+    .map((row) => ({
+      name: row.title,
+      description: describe(row.description),
+    }));
+}
+
+function namesWithDescriptionOf(
+  rows: Array<{ name: string; description?: string | null }>,
+): AiContextEntry[] {
+  return rows
+    .filter((row) => typeof row.name === "string" && row.name.length > 0)
+    .map((row) => ({ name: row.name, description: describe(row.description) }));
 }
 
 export async function assembleAiContext(
@@ -95,6 +137,21 @@ export async function assembleAiContext(
     projectId: project.id,
     projectName: project.name,
     projectDescription: project.description,
+    requirements: titlesWithDescriptionOf(requirements),
+    decisions: titlesWithDescriptionOf(decisions),
+    domains: namesWithDescriptionOf(domains),
+    entities: namesWithDescriptionOf(entities),
+    architectureComponents: namesWithDescriptionOf(architectureComponents),
+    architectureTechnologies: namesWithDescriptionOf(architectureTechnologies),
+    architectureDecisions: titlesWithDescriptionOf(architectureDecisions),
+    apiGroups: namesWithDescriptionOf(apiGroups),
+    apiEndpoints: apiEndpoints.map((endpoint) => ({
+      name: `${endpoint.method} ${endpoint.path}`,
+      description: describe(endpoint.summary ?? endpoint.description),
+    })),
+    uiScreens: namesWithDescriptionOf(uiScreens),
+    uiComponents: namesWithDescriptionOf(uiComponents),
+    tasks: titlesWithDescriptionOf(tasks),
     requirementTitles: titlesOf(requirements),
     decisionTitles: titlesOf(decisions),
     domainNames: namesOf(domains),

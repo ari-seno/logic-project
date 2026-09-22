@@ -1,3 +1,6 @@
+import type { AiContextEntry } from "@/lib/ai/context";
+import { bulletList, truncate } from "@/lib/ai/prompts/context-format";
+
 const SYSTEM_PROMPT = `You are a senior software architect who sketches the technical architecture of a software project.
 
 For each invocation, output ONLY a JSON object of this exact shape:
@@ -45,27 +48,14 @@ Rules:
 export type ArchitecturePromptContext = {
   projectName: string;
   projectDescription: string | null;
-  requirementTitles: string[];
-  decisionTitles: string[];
-  domainNames: string[];
-  existingComponentNames: string[];
-  existingTechnologyNames: string[];
-  existingDecisionTitles: string[];
+  requirements: AiContextEntry[];
+  decisions: AiContextEntry[];
+  domains: AiContextEntry[];
+  existingComponents: AiContextEntry[];
+  existingTechnologies: AiContextEntry[];
+  existingDecisions: AiContextEntry[];
   userPrompt: string;
 };
-
-function truncate(value: string, max: number): string {
-  if (value.length <= max) return value;
-  return `${value.slice(0, max).trimEnd()}…`;
-}
-
-function bulletList(titles: string[]): string {
-  if (titles.length === 0) return "(none yet)";
-  return titles
-    .slice(0, 60)
-    .map((title, i) => `${i + 1}. ${title}`)
-    .join("\n");
-}
 
 export function buildArchitectureUserPrompt(
   ctx: ArchitecturePromptContext,
@@ -79,22 +69,22 @@ Project description (truncated to 500 chars):
 ${description}
 
 Requirements already captured (context only, do NOT invent new ones):
-${bulletList(ctx.requirementTitles)}
+${bulletList(ctx.requirements)}
 
 Decisions already captured (context only, do NOT invent new ones):
-${bulletList(ctx.decisionTitles)}
+${bulletList(ctx.decisions)}
 
 Domain model already captured (context only):
-${bulletList(ctx.domainNames)}
+${bulletList(ctx.domains)}
 
-Existing component names to AVOID duplicating:
-${bulletList(ctx.existingComponentNames)}
+Existing components to AVOID duplicating (name + summary):
+${bulletList(ctx.existingComponents)}
 
-Existing technology names to AVOID duplicating:
-${bulletList(ctx.existingTechnologyNames)}
+Existing technologies to AVOID duplicating (name + summary):
+${bulletList(ctx.existingTechnologies)}
 
-Existing architecture decision titles to AVOID duplicating:
-${bulletList(ctx.existingDecisionTitles)}
+Existing architecture decisions to AVOID duplicating (title + summary):
+${bulletList(ctx.existingDecisions)}
 
 User prompt / focus:
 ${truncate(ctx.userPrompt, 1500)}

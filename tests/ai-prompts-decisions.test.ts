@@ -20,8 +20,8 @@ describe("ai/prompts/decisions", () => {
     const user = buildDecisionsUserPrompt({
       projectName: "Library Management System",
       projectDescription: "Helps librarians track books and loans.",
-      existingDecisionTitles: ["Use PostgreSQL"],
-      requirementTitles: ["Borrow book", "Return book"],
+      existingDecisions: [{ name: "Use PostgreSQL", description: null }],
+      requirements: [{ name: "Borrow book", description: null }, { name: "Return book", description: null }],
       userPrompt: "Which auth strategy should we commit to?",
     });
     expect(user).toContain("Library Management System");
@@ -35,8 +35,8 @@ describe("ai/prompts/decisions", () => {
     const user = buildDecisionsUserPrompt({
       projectName: "Demo",
       projectDescription: description,
-      existingDecisionTitles: [],
-      requirementTitles: [],
+      existingDecisions: [],
+      requirements: [],
       userPrompt: "short",
     });
     expect(user.length).toBeLessThan(description.length + 300);
@@ -46,8 +46,8 @@ describe("ai/prompts/decisions", () => {
     const user = buildDecisionsUserPrompt({
       projectName: "Demo",
       projectDescription: null,
-      existingDecisionTitles: [],
-      requirementTitles: [],
+      existingDecisions: [],
+      requirements: [],
       userPrompt: "starter",
     });
     expect(user).toContain("(no description)");

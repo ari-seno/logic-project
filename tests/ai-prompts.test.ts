@@ -17,7 +17,7 @@ describe("ai/prompts/requirements", () => {
     const user = buildRequirementsUserPrompt({
       projectName: "Library Management System",
       projectDescription: "Helps librarians track books and loans.",
-      existingTitles: ["Borrow book", "Return book"],
+      existing: [{ name: "Borrow book", description: null }, { name: "Return book", description: null }],
       userPrompt: "Focus on borrower auth and overdue fines.",
     });
     expect(user).toContain("Library Management System");
@@ -30,7 +30,7 @@ describe("ai/prompts/requirements", () => {
     const user = buildRequirementsUserPrompt({
       projectName: "Demo",
       projectDescription: description,
-      existingTitles: [],
+      existing: [],
       userPrompt: "short",
     });
     expect(user.length).toBeLessThan(description.length + 200);
@@ -40,7 +40,7 @@ describe("ai/prompts/requirements", () => {
     const user = buildRequirementsUserPrompt({
       projectName: "Demo",
       projectDescription: null,
-      existingTitles: [],
+      existing: [],
       userPrompt: "starter",
     });
     expect(user).toContain("(none yet)");

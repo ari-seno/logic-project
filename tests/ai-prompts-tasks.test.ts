@@ -14,14 +14,14 @@ import {
 const baseContext = {
   projectName: "Lending Platform",
   projectDescription: "A lending workflow for small teams.",
-  requirementTitles: ["Borrowers can apply for a loan"],
-  decisionTitles: ["Use Postgres as the primary datastore"],
-  domainNames: ["Lending"],
-  entityNames: ["Loan", "Borrower"],
-  architectureComponentNames: ["Lending API"],
-  apiEndpointSummaries: ["POST /loans"],
-  uiScreenNames: ["Loan List"],
-  existingTaskTitles: ["Set up the database"],
+  requirements: [{ name: "Borrowers can apply for a loan", description: null }],
+  decisions: [{ name: "Use Postgres as the primary datastore", description: null }],
+  domains: [{ name: "Lending", description: null }],
+  entities: [{ name: "Loan", description: null }, { name: "Borrower", description: null }],
+  architectureComponents: [{ name: "Lending API", description: null }],
+  apiEndpoints: [{ name: "POST /loans", description: null }],
+  uiScreens: [{ name: "Loan List", description: null }],
+  existingTasks: [{ name: "Set up the database", description: null }],
   userPrompt: "Cover the loan lifecycle end to end.",
 };
 
@@ -62,14 +62,14 @@ describe("ai/prompts tasks", () => {
     const prompt = buildTasksUserPrompt({
       ...baseContext,
       projectDescription: null,
-      requirementTitles: [],
-      decisionTitles: [],
-      domainNames: [],
-      entityNames: [],
-      architectureComponentNames: [],
-      apiEndpointSummaries: [],
-      uiScreenNames: [],
-      existingTaskTitles: [],
+      requirements: [],
+      decisions: [],
+      domains: [],
+      entities: [],
+      architectureComponents: [],
+      apiEndpoints: [],
+      uiScreens: [],
+      existingTasks: [],
     });
 
     expect(prompt).toContain("(no description)");

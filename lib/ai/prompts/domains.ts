@@ -1,3 +1,6 @@
+import type { AiContextEntry } from "@/lib/ai/context";
+import { bulletList, truncate } from "@/lib/ai/prompts/context-format";
+
 const SYSTEM_PROMPT = `You are a senior data modeller who designs normalised domain models for software projects.
 
 For each invocation, output ONLY a JSON object of this exact shape:
@@ -48,24 +51,11 @@ Rules:
 export type DomainsPromptContext = {
   projectName: string;
   projectDescription: string | null;
-  requirementTitles: string[];
-  decisionTitles: string[];
-  existingDomainNames: string[];
+  requirements: AiContextEntry[];
+  decisions: AiContextEntry[];
+  existingDomains: AiContextEntry[];
   userPrompt: string;
 };
-
-function truncate(value: string, max: number): string {
-  if (value.length <= max) return value;
-  return `${value.slice(0, max).trimEnd()}…`;
-}
-
-function bulletList(titles: string[]): string {
-  if (titles.length === 0) return "(none yet)";
-  return titles
-    .slice(0, 60)
-    .map((title, i) => `${i + 1}. ${title}`)
-    .join("\n");
-}
 
 export function buildDomainsUserPrompt(ctx: DomainsPromptContext): string {
   const description = ctx.projectDescription
@@ -76,14 +66,14 @@ export function buildDomainsUserPrompt(ctx: DomainsPromptContext): string {
 Project description (truncated to 500 chars):
 ${description}
 
-Requirements already captured (context only, do NOT invent new ones):
-${bulletList(ctx.requirementTitles)}
+Requirements already captured (title + summary; context only, do NOT invent new ones):
+${bulletList(ctx.requirements)}
 
-Decisions already captured (context only, do NOT invent new ones):
-${bulletList(ctx.decisionTitles)}
+Decisions already captured (title + summary; context only, do NOT invent new ones):
+${bulletList(ctx.decisions)}
 
-Existing domain names to AVOID duplicating:
-${bulletList(ctx.existingDomainNames)}
+Existing domains to AVOID duplicating (name + summary):
+${bulletList(ctx.existingDomains)}
 
 User prompt / focus:
 ${truncate(ctx.userPrompt, 1500)}

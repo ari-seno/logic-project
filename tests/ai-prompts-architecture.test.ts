@@ -40,12 +40,12 @@ describe("ai/prompts/architecture user prompt", () => {
   const ctx = {
     projectName: "Ledger",
     projectDescription: "Track invoices.",
-    requirementTitles: ["Invoice must be immutable"],
-    decisionTitles: ["Single tenant"],
-    domainNames: ["Billing"],
-    existingComponentNames: ["Existing API"],
-    existingTechnologyNames: ["Existing DB"],
-    existingDecisionTitles: ["Existing decision"],
+    requirements: [{ name: "Invoice must be immutable", description: null }],
+    decisions: [{ name: "Single tenant", description: null }],
+    domains: [{ name: "Billing", description: null }],
+    existingComponents: [{ name: "Existing API", description: null }],
+    existingTechnologies: [{ name: "Existing DB", description: null }],
+    existingDecisions: [{ name: "Existing decision", description: null }],
     userPrompt: "Focus on the payments path.",
   };
 
@@ -67,12 +67,12 @@ describe("ai/prompts/architecture user prompt", () => {
     const prompt = buildArchitectureUserPrompt({
       ...ctx,
       projectDescription: null,
-      requirementTitles: [],
-      decisionTitles: [],
-      domainNames: [],
-      existingComponentNames: [],
-      existingTechnologyNames: [],
-      existingDecisionTitles: [],
+      requirements: [],
+      decisions: [],
+      domains: [],
+      existingComponents: [],
+      existingTechnologies: [],
+      existingDecisions: [],
     });
 
     expect(prompt).toContain("(no description)");

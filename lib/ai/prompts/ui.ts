@@ -1,3 +1,6 @@
+import type { AiContextEntry } from "@/lib/ai/context";
+import { bulletList, truncate } from "@/lib/ai/prompts/context-format";
+
 const SYSTEM_PROMPT = `You are a senior product designer who drafts the screen blueprint of a software project.
 
 For each invocation, output ONLY a JSON object of this exact shape:
@@ -53,29 +56,17 @@ Rules:
 export type UiPromptContext = {
   projectName: string;
   projectDescription: string | null;
-  requirementTitles: string[];
-  decisionTitles: string[];
-  domainNames: string[];
-  entityNames: string[];
-  apiGroupNames: string[];
-  apiEndpointSummaries: string[];
-  existingScreenNames: string[];
-  existingComponentNames: string[];
+  requirements: AiContextEntry[];
+  decisions: AiContextEntry[];
+  domains: AiContextEntry[];
+  entities: AiContextEntry[];
+  apiGroups: AiContextEntry[];
+  apiEndpoints: AiContextEntry[];
+  existingScreens: AiContextEntry[];
+  existingComponents: AiContextEntry[];
   userPrompt: string;
 };
 
-function truncate(value: string, max: number): string {
-  if (value.length <= max) return value;
-  return `${value.slice(0, max).trimEnd()}…`;
-}
-
-function bulletList(titles: string[]): string {
-  if (titles.length === 0) return "(none yet)";
-  return titles
-    .slice(0, 60)
-    .map((title, i) => `${i + 1}. ${title}`)
-    .join("\n");
-}
 
 export function buildUiUserPrompt(ctx: UiPromptContext): string {
   const description = ctx.projectDescription
@@ -87,28 +78,28 @@ Project description (truncated to 500 chars):
 ${description}
 
 Requirements already captured (context only, do NOT invent new ones):
-${bulletList(ctx.requirementTitles)}
+${bulletList(ctx.requirements)}
 
 Decisions already captured (context only, do NOT invent new ones):
-${bulletList(ctx.decisionTitles)}
+${bulletList(ctx.decisions)}
 
 Domain model already captured (context only):
-${bulletList(ctx.domainNames)}
+${bulletList(ctx.domains)}
 
 Entities that screens may use (use these exact names or omit the link):
-${bulletList(ctx.entityNames)}
+${bulletList(ctx.entities)}
 
 API groups already designed (context only):
-${bulletList(ctx.apiGroupNames)}
+${bulletList(ctx.apiGroups)}
 
 API endpoints already designed (context only):
-${bulletList(ctx.apiEndpointSummaries)}
+${bulletList(ctx.apiEndpoints)}
 
 Existing screen names to AVOID duplicating:
-${bulletList(ctx.existingScreenNames)}
+${bulletList(ctx.existingScreens)}
 
 Existing component names to AVOID duplicating:
-${bulletList(ctx.existingComponentNames)}
+${bulletList(ctx.existingComponents)}
 
 User prompt / focus:
 ${truncate(ctx.userPrompt, 1500)}

@@ -14,14 +14,14 @@ import {
 const baseContext = {
   projectName: "Lending Platform",
   projectDescription: "A lending workflow for small teams.",
-  requirementTitles: ["Borrowers can apply for a loan"],
-  decisionTitles: ["Use Postgres as the primary datastore"],
-  domainNames: ["Lending"],
-  entityNames: ["Loan", "Borrower"],
-  apiGroupNames: ["Users"],
-  apiEndpointSummaries: ["GET /loans"],
-  existingScreenNames: ["Dashboard"],
-  existingComponentNames: ["App shell"],
+  requirements: [{ name: "Borrowers can apply for a loan", description: null }],
+  decisions: [{ name: "Use Postgres as the primary datastore", description: null }],
+  domains: [{ name: "Lending", description: null }],
+  entities: [{ name: "Loan", description: null }, { name: "Borrower", description: null }],
+  apiGroups: [{ name: "Users", description: null }],
+  apiEndpoints: [{ name: "GET /loans", description: null }],
+  existingScreens: [{ name: "Dashboard", description: null }],
+  existingComponents: [{ name: "App shell", description: null }],
   userPrompt: "Cover loans and repayments.",
 };
 
@@ -63,14 +63,14 @@ describe("ai/prompts ui", () => {
     const prompt = buildUiUserPrompt({
       ...baseContext,
       projectDescription: null,
-      requirementTitles: [],
-      decisionTitles: [],
-      domainNames: [],
-      entityNames: [],
-      apiGroupNames: [],
-      apiEndpointSummaries: [],
-      existingScreenNames: [],
-      existingComponentNames: [],
+      requirements: [],
+      decisions: [],
+      domains: [],
+      entities: [],
+      apiGroups: [],
+      apiEndpoints: [],
+      existingScreens: [],
+      existingComponents: [],
     });
 
     expect(prompt).toContain("(no description)");

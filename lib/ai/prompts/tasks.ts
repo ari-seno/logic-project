@@ -1,3 +1,6 @@
+import type { AiContextEntry } from "@/lib/ai/context";
+import { bulletList, truncate } from "@/lib/ai/prompts/context-format";
+
 const SYSTEM_PROMPT = `You are a senior delivery lead who turns a product spec into an actionable task backlog.
 
 For each invocation, output ONLY a JSON object of this exact shape:
@@ -37,29 +40,17 @@ Rules:
 export type TasksPromptContext = {
   projectName: string;
   projectDescription: string | null;
-  requirementTitles: string[];
-  decisionTitles: string[];
-  domainNames: string[];
-  entityNames: string[];
-  architectureComponentNames: string[];
-  apiEndpointSummaries: string[];
-  uiScreenNames: string[];
-  existingTaskTitles: string[];
+  requirements: AiContextEntry[];
+  decisions: AiContextEntry[];
+  domains: AiContextEntry[];
+  entities: AiContextEntry[];
+  architectureComponents: AiContextEntry[];
+  apiEndpoints: AiContextEntry[];
+  uiScreens: AiContextEntry[];
+  existingTasks: AiContextEntry[];
   userPrompt: string;
 };
 
-function truncate(value: string, max: number): string {
-  if (value.length <= max) return value;
-  return `${value.slice(0, max).trimEnd()}…`;
-}
-
-function bulletList(titles: string[]): string {
-  if (titles.length === 0) return "(none yet)";
-  return titles
-    .slice(0, 60)
-    .map((title, i) => `${i + 1}. ${title}`)
-    .join("\n");
-}
 
 export function buildTasksUserPrompt(ctx: TasksPromptContext): string {
   const description = ctx.projectDescription
@@ -71,25 +62,25 @@ Project description (truncated to 500 chars):
 ${description}
 
 Requirements already captured (link with kind "requirement", do NOT invent new ones):
-${bulletList(ctx.requirementTitles)}
+${bulletList(ctx.requirements)}
 
 Decisions already captured (link with kind "decision", do NOT invent new ones):
-${bulletList(ctx.decisionTitles)}
+${bulletList(ctx.decisions)}
 
 Domain model already captured (link entities with kind "entity"):
-${bulletList(ctx.entityNames.length > 0 ? ctx.entityNames : ctx.domainNames)}
+${bulletList(ctx.entities.length > 0 ? ctx.entities : ctx.domains)}
 
 Architecture components already captured (link with kind "component"):
-${bulletList(ctx.architectureComponentNames)}
+${bulletList(ctx.architectureComponents)}
 
 API endpoints already captured (link with kind "endpoint", using the exact "METHOD /path" text):
-${bulletList(ctx.apiEndpointSummaries)}
+${bulletList(ctx.apiEndpoints)}
 
 UI screens already captured (link with kind "screen"):
-${bulletList(ctx.uiScreenNames)}
+${bulletList(ctx.uiScreens)}
 
 Existing task titles to AVOID duplicating:
-${bulletList(ctx.existingTaskTitles)}
+${bulletList(ctx.existingTasks)}
 
 User prompt / focus:
 ${truncate(ctx.userPrompt, 1500)}

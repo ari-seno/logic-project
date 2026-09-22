@@ -2,6 +2,7 @@ import {
   AI_SUGGESTION_STATUSES,
   type AiSuggestionStatus,
 } from "@/lib/supabase/types";
+import type { AiContextEntry } from "@/lib/ai/context";
 
 const SYSTEM_PROMPT = `You are a senior product analyst who writes precise, testable requirements.
 
@@ -30,7 +31,7 @@ Rules:
 export type RequirementsPromptContext = {
   projectName: string;
   projectDescription: string | null;
-  existingTitles: string[];
+  existing: AiContextEntry[];
   userPrompt: string;
 };
 
@@ -39,17 +40,19 @@ function truncate(value: string, max: number): string {
   return `${value.slice(0, max).trimEnd()}…`;
 }
 
+function describeEntry(entry: AiContextEntry): string {
+  if (!entry.description) return `- ${entry.name}`;
+  return `- ${entry.name}\n  ${truncate(entry.description, 300)}`;
+}
+
+function bulletList(entries: AiContextEntry[]): string {
+  if (entries.length === 0) return "(none yet)";
+  return entries.slice(0, 60).map(describeEntry).join("\n");
+}
+
 export function buildRequirementsUserPrompt(
   ctx: RequirementsPromptContext,
 ): string {
-  const existing =
-    ctx.existingTitles.length === 0
-      ? "(none yet)"
-      : ctx.existingTitles
-          .slice(0, 60)
-          .map((title, i) => `${i + 1}. ${title}`)
-          .join("\n");
-
   const description = ctx.projectDescription
     ? truncate(ctx.projectDescription, 500)
     : "(no description)";
@@ -58,8 +61,8 @@ export function buildRequirementsUserPrompt(
 Project description (truncated to 500 chars):
 ${description}
 
-Existing requirement titles to AVOID duplicating:
-${existing}
+Existing requirements to AVOID duplicating (title + summary):
+${bulletList(ctx.existing)}
 
 User prompt / focus:
 ${truncate(ctx.userPrompt, 1500)}

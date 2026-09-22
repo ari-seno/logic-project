@@ -15,12 +15,12 @@ import {
 const baseContext = {
   projectName: "Lending Platform",
   projectDescription: "A lending workflow for small teams.",
-  requirementTitles: ["Borrowers can apply for a loan"],
-  decisionTitles: ["Use Postgres as the primary datastore"],
-  domainNames: ["Lending"],
-  entityNames: ["Loan", "Borrower"],
-  existingGroupNames: ["Internal"],
-  existingEndpointSummaries: ["GET /health"],
+  requirements: [{ name: "Borrowers can apply for a loan", description: null }],
+  decisions: [{ name: "Use Postgres as the primary datastore", description: null }],
+  domains: [{ name: "Lending", description: null }],
+  entities: [{ name: "Loan", description: null }, { name: "Borrower", description: null }],
+  existingGroups: [{ name: "Internal", description: null }],
+  existingEndpoints: [{ name: "GET /health", description: null }],
   userPrompt: "Cover loans and repayments.",
 };
 
@@ -63,12 +63,12 @@ describe("ai/prompts api", () => {
     const prompt = buildApiUserPrompt({
       ...baseContext,
       projectDescription: null,
-      requirementTitles: [],
-      decisionTitles: [],
-      domainNames: [],
-      entityNames: [],
-      existingGroupNames: [],
-      existingEndpointSummaries: [],
+      requirements: [],
+      decisions: [],
+      domains: [],
+      entities: [],
+      existingGroups: [],
+      existingEndpoints: [],
     });
 
     expect(prompt).toContain("(no description)");

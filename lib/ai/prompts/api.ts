@@ -1,3 +1,6 @@
+import type { AiContextEntry } from "@/lib/ai/context";
+import { bulletList, truncate } from "@/lib/ai/prompts/context-format";
+
 const SYSTEM_PROMPT = `You are a senior backend engineer who drafts the HTTP API contract of a software project.
 
 For each invocation, output ONLY a JSON object of this exact shape:
@@ -76,27 +79,15 @@ Rules:
 export type ApiPromptContext = {
   projectName: string;
   projectDescription: string | null;
-  requirementTitles: string[];
-  decisionTitles: string[];
-  domainNames: string[];
-  entityNames: string[];
-  existingGroupNames: string[];
-  existingEndpointSummaries: string[];
+  requirements: AiContextEntry[];
+  decisions: AiContextEntry[];
+  domains: AiContextEntry[];
+  entities: AiContextEntry[];
+  existingGroups: AiContextEntry[];
+  existingEndpoints: AiContextEntry[];
   userPrompt: string;
 };
 
-function truncate(value: string, max: number): string {
-  if (value.length <= max) return value;
-  return `${value.slice(0, max).trimEnd()}…`;
-}
-
-function bulletList(titles: string[]): string {
-  if (titles.length === 0) return "(none yet)";
-  return titles
-    .slice(0, 60)
-    .map((title, i) => `${i + 1}. ${title}`)
-    .join("\n");
-}
 
 export function buildApiUserPrompt(ctx: ApiPromptContext): string {
   const description = ctx.projectDescription
@@ -108,22 +99,22 @@ Project description (truncated to 500 chars):
 ${description}
 
 Requirements already captured (context only, do NOT invent new ones):
-${bulletList(ctx.requirementTitles)}
+${bulletList(ctx.requirements)}
 
 Decisions already captured (context only, do NOT invent new ones):
-${bulletList(ctx.decisionTitles)}
+${bulletList(ctx.decisions)}
 
 Domain model already captured (context only):
-${bulletList(ctx.domainNames)}
+${bulletList(ctx.domains)}
 
 Entities that endpoints may link to (use these exact names or omit the link):
-${bulletList(ctx.entityNames)}
+${bulletList(ctx.entities)}
 
-Existing API group names to AVOID duplicating:
-${bulletList(ctx.existingGroupNames)}
+Existing API groups to AVOID duplicating (name + summary):
+${bulletList(ctx.existingGroups)}
 
-Existing endpoints to AVOID duplicating (method + path):
-${bulletList(ctx.existingEndpointSummaries)}
+Existing endpoints to AVOID duplicating (method + path + summary):
+${bulletList(ctx.existingEndpoints)}
 
 User prompt / focus:
 ${truncate(ctx.userPrompt, 1500)}
