@@ -237,7 +237,16 @@ export async function testCredential(
   return { ok: false, status: result.status, message: result.message };
 }
 
-export type SetProjectCredentialResult = { ok: true } | { ok: false; error: string };
+export type LinkedCredentialSummary = {
+  id: string;
+  label: string;
+  provider: string;
+  model: string;
+};
+
+export type SetProjectCredentialResult =
+  | { ok: true; credential: LinkedCredentialSummary | null }
+  | { ok: false; error: string };
 
 export async function setProjectCredential(
   projectId: string,
@@ -259,16 +268,24 @@ export async function setProjectCredential(
     return { ok: false, error: "Project not found." };
   }
 
+  let linked: LinkedCredentialSummary | null = null;
+
   if (credentialId !== null) {
     const { data: credential, error: credErr } = await supabase
       .from("user_ai_credentials")
-      .select("id, user_id")
+      .select("id, user_id, label, provider, model")
       .eq("id", credentialId)
       .eq("user_id", userId)
       .maybeSingle();
     if (credErr || !credential) {
       return { ok: false, error: "Credential not found." };
     }
+    linked = {
+      id: credential.id,
+      label: credential.label,
+      provider: credential.provider,
+      model: credential.model,
+    };
   }
 
   const { error } = await supabase
@@ -281,7 +298,7 @@ export async function setProjectCredential(
     return { ok: false, error: error.message };
   }
   revalidatePath(`/projects/${projectId}`);
-  return { ok: true };
+  return { ok: true, credential: linked };
 }
 
 export async function getProjectCredentialAction(

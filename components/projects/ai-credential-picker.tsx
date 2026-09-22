@@ -21,9 +21,23 @@ export function AiCredentialPicker({
   const [options, setOptions] = useState<
     Array<{ id: string; label: string; model: string; provider: string }>
   >([]);
-  const [currentId, setCurrentId] = useState<string | null>(null);
+  // Which credential is linked. The server already knows the label, so seed it
+  // from that prop; picking a credential only needs to track the id and label.
+  const [override, setOverride] = useState<{
+    id: string | null;
+    label: string | null;
+  } | null>(null);
+  const currentId = override?.id ?? null;
+  const label = override ? override.label : currentLabel;
+  const [saved, setSaved] = useState(false);
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!saved) return;
+    const timer = setTimeout(() => setSaved(false), 2500);
+    return () => clearTimeout(timer);
+  }, [saved]);
 
   useEffect(() => {
     if (!open) return;
@@ -33,12 +47,19 @@ export function AiCredentialPicker({
       if (cancelled) return;
       if (result.ok) {
         setOptions(result.credentials);
+        // Seed the linked id on a fresh page load, where only the label is
+        // known, so "Unlink current credential" is offered without re-picking.
+        setOverride((prev) => {
+          if (prev) return prev;
+          const match = result.credentials.find((c) => c.label === currentLabel);
+          return match ? { id: match.id, label: match.label } : prev;
+        });
       }
     })();
     return () => {
       cancelled = true;
     };
-  }, [open]);
+  }, [open, currentLabel]);
 
   function pick(id: string | null) {
     setError(null);
@@ -48,7 +69,8 @@ export function AiCredentialPicker({
         setError(result.error);
         return;
       }
-      setCurrentId(id);
+      setOverride({ id, label: result.credential?.label ?? null });
+      setSaved(true);
       setOpen(false);
     });
   }
@@ -61,8 +83,16 @@ export function AiCredentialPicker({
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
       >
-        {currentLabel ? `AI: ${currentLabel}` : "Choose AI credential"}
+        {label ? `AI: ${label}` : "Choose AI credential"}
       </Button>
+      {saved ? (
+        <p
+          className="absolute right-0 top-full mt-1 text-xs text-[var(--brand)]"
+          role="status"
+        >
+          AI credential saved.
+        </p>
+      ) : null}
       {open ? (
         <div className="absolute right-0 z-30 mt-2 w-72 rounded-xl border border-[var(--border)] bg-white p-2 shadow-xl">
           {options.length === 0 ? (
