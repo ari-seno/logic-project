@@ -8,6 +8,7 @@ export type AiStageLabels = {
   subtitleFallback: string;
   setupCopy: string;
   promptPlaceholder: string;
+  autoPrompt: string;
   selectionNoun: string;
   suggestionsHeading: string;
 };
@@ -23,6 +24,8 @@ export const AI_STAGE_LABELS: Record<AiStage, AiStageLabels> = {
       "Add an Ollama credential in Settings, then choose it for this project before generating requirements.",
     promptPlaceholder:
       "e.g. Focus on borrower auth, due-date reminders, and overdue fines.",
+    autoPrompt:
+      "Derive a first-draft set of requirements from the project name and description already captured.",
     selectionNoun: "requirement",
     suggestionsHeading: "Suggestions",
   },
@@ -36,6 +39,8 @@ export const AI_STAGE_LABELS: Record<AiStage, AiStageLabels> = {
       "Add an Ollama credential in Settings, then choose it for this project before generating decisions.",
     promptPlaceholder:
       "e.g. Which datastore, auth strategy, and hosting model should we commit to?",
+    autoPrompt:
+      "Propose the decisions needed to satisfy the requirements already captured.",
     selectionNoun: "decision",
     suggestionsHeading: "Suggestions",
   },
@@ -49,6 +54,8 @@ export const AI_STAGE_LABELS: Record<AiStage, AiStageLabels> = {
       "Add an Ollama credential in Settings, then choose it for this project before generating a domain model.",
     promptPlaceholder:
       "e.g. Model a lending workflow: borrowers, loans, repayments, and overdue fines.",
+    autoPrompt:
+      "Model the domain from the requirements and decisions already captured.",
     selectionNoun: "domain",
     suggestionsHeading: "Suggested domains",
   },
@@ -62,6 +69,8 @@ export const AI_STAGE_LABELS: Record<AiStage, AiStageLabels> = {
       "Add an Ollama credential in Settings, then choose it for this project before generating an architecture.",
     promptPlaceholder:
       "e.g. A Next.js frontend, a Bun API, Postgres, and a background worker for exports.",
+    autoPrompt:
+      "Sketch the technical architecture that implements the requirements already captured.",
     selectionNoun: "item",
     suggestionsHeading: "Suggested architecture",
   },
@@ -75,6 +84,8 @@ export const AI_STAGE_LABELS: Record<AiStage, AiStageLabels> = {
       "Add an Ollama credential in Settings, then choose it for this project before generating an API design.",
     promptPlaceholder:
       "e.g. REST endpoints for users, projects, and auth with pagination and error codes.",
+    autoPrompt:
+      "Design the API contract for the domain entities and requirements already captured.",
     selectionNoun: "item",
     suggestionsHeading: "Suggested API design",
   },
@@ -88,6 +99,8 @@ export const AI_STAGE_LABELS: Record<AiStage, AiStageLabels> = {
       "Add an Ollama credential in Settings, then choose it for this project before generating a UI design.",
     promptPlaceholder:
       "e.g. Screens for signing in, listing loans, and reviewing one loan in detail.",
+    autoPrompt:
+      "Design the screens for the API endpoints and domain entities already captured.",
     selectionNoun: "item",
     suggestionsHeading: "Suggested UI design",
   },
@@ -101,6 +114,8 @@ export const AI_STAGE_LABELS: Record<AiStage, AiStageLabels> = {
       "Add an Ollama credential in Settings, then choose it for this project before generating a task backlog.",
     promptPlaceholder:
       "e.g. Break the lending workflow into implementation tasks with priorities and dependencies.",
+    autoPrompt:
+      "Break everything already captured into an implementation task backlog with dependencies.",
     selectionNoun: "task",
     suggestionsHeading: "Suggested tasks",
   },

@@ -26,18 +26,39 @@ export function AiGeneratePanel({
   credential,
 }: AiGeneratePanelProps) {
   const [open, setOpen] = useState(false);
+  const [autoPrompt, setAutoPrompt] = useState<string | undefined>(undefined);
   const labels = AI_STAGE_LABELS[stage];
+
+  const openManually = () => {
+    setAutoPrompt(undefined);
+    setOpen(true);
+  };
+
+  const openAuto = () => {
+    setAutoPrompt(labels.autoPrompt);
+    setOpen(true);
+  };
 
   return (
     <>
       <Button
         variant="secondary"
         size="sm"
-        onClick={() => setOpen(true)}
+        onClick={openManually}
         aria-label={`Open AI generate ${labels.plural} drawer`}
       >
         <span aria-hidden="true">✨</span>
         <span>Generate with AI</span>
+      </Button>
+
+      <Button
+        variant="primary"
+        size="sm"
+        onClick={openAuto}
+        aria-label={`Auto generate ${labels.plural} from existing data`}
+      >
+        <span aria-hidden="true">⚡</span>
+        <span>Auto AI generate</span>
       </Button>
 
       <AiDrawer
@@ -52,9 +73,11 @@ export function AiGeneratePanel({
       >
         {credential ? (
           <AiGenerateContent
+            key={autoPrompt ?? "manual"}
             projectId={projectId}
             stage={stage}
             credential={credential}
+            autoPrompt={autoPrompt}
             onApplied={() => setOpen(false)}
           />
         ) : (

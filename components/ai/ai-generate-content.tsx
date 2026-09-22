@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/input";
@@ -41,6 +41,7 @@ export type AiGenerateContentProps = {
     last_test_status: string | null;
   };
   onApplied?: () => void;
+  autoPrompt?: string;
 };
 
 export function AiGenerateContent({
@@ -48,6 +49,7 @@ export function AiGenerateContent({
   stage,
   credential,
   onApplied,
+  autoPrompt,
 }: AiGenerateContentProps) {
   const { labels, renderItems, suggest, apply } = AI_STAGE_UI[stage];
   const [prompt, setPrompt] = useState("");
@@ -69,12 +71,12 @@ export function AiGenerateContent({
     variant: "success",
   });
 
-  function runSuggest() {
-    if (!prompt.trim()) return;
+  function submit(text: string) {
+    if (!text.trim()) return;
     setError(null);
     setSuggestion(null);
     startTransition(async () => {
-      const result = await suggest({ projectId, prompt });
+      const result = await suggest({ projectId, prompt: text });
       if (!result.ok) {
         setError(
           result.message
@@ -92,6 +94,20 @@ export function AiGenerateContent({
       setSelected(new Set(result.items.map((_, i) => i)));
     });
   }
+
+  function runSuggest() {
+    submit(prompt);
+  }
+
+  const autoRunning = Boolean(autoPrompt) && pending && !suggestion;
+  const autoStarted = useRef(false);
+
+  useEffect(() => {
+    if (!autoPrompt || autoStarted.current) return;
+    autoStarted.current = true;
+    submit(autoPrompt);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoPrompt]);
 
   function toggle(index: number) {
     setSelected((prev) => {
@@ -206,6 +222,22 @@ export function AiGenerateContent({
               </Button>
             </div>
           </div>
+        </div>
+      ) : autoRunning ? (
+        <div className="flex flex-col items-start gap-2 py-6">
+          <p className="text-sm font-medium text-[var(--foreground)]">
+            Generating from your existing data…
+          </p>
+          <p className="text-xs text-[var(--muted-foreground)]">
+            Using {credential.label} · {credential.model}
+          </p>
+        </div>
+      ) : autoPrompt && error ? (
+        <div className="flex flex-col items-start gap-3 py-4">
+          <p className="text-xs text-[var(--danger)]">{error}</p>
+          <Button onClick={() => submit(autoPrompt)} variant="secondary" size="sm">
+            Try again
+          </Button>
         </div>
       ) : (
         <div className="flex flex-col gap-2">
