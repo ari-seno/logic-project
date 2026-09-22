@@ -76,9 +76,9 @@ export function AddScreenComponentForm({
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="label">Label override</Label>
+        <Label htmlFor="placement_label">Label override</Label>
         <Input
-          id="label"
+          id="placement_label"
           name="label"
           placeholder="Optional override for this placement"
         />

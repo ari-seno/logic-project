@@ -41,8 +41,8 @@ export function UiFormFieldForm({
           <Input id="field_name" name="name" required defaultValue={field?.name ?? ""} />
         </div>
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="label">Label</Label>
-          <Input id="label" name="label" required defaultValue={field?.label ?? ""} />
+          <Label htmlFor="field_label">Label</Label>
+          <Input id="field_label" name="label" required defaultValue={field?.label ?? ""} />
         </div>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="field_type">Type</Label>
