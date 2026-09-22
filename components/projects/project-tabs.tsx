@@ -27,6 +27,11 @@ export function ProjectTabs({
       href: `/projects/${projectId}/requirements`,
     },
     {
+      key: "architecture",
+      label: "Architecture",
+      href: `/projects/${projectId}/architecture`,
+    },
+    {
       key: "decisions",
       label: "Decisions",
       href: `/projects/${projectId}/decisions`,
@@ -35,11 +40,6 @@ export function ProjectTabs({
       key: "domain",
       label: "Domain",
       href: `/projects/${projectId}/domains/erd`,
-    },
-    {
-      key: "architecture",
-      label: "Architecture",
-      href: `/projects/${projectId}/architecture`,
     },
     {
       key: "api",
