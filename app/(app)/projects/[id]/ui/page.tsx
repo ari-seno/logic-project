@@ -224,11 +224,11 @@ export default async function UiOverviewPage({
             </div>
           </div>
         ) : (
-          <ul className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
+          <ul className="mt-3 flex flex-col gap-2">
             {components.map((c) => (
               <li
                 key={c.id}
-                className="card-glass flex flex-wrap items-center justify-between gap-3 p-3"
+                className="card-glass flex flex-wrap items-center justify-between gap-3 p-4"
               >
                 <div className="flex flex-wrap items-center gap-2">
                   <UiComponentTypeBadge type={c.component_type} />
@@ -259,15 +259,24 @@ export default async function UiOverviewPage({
           Navigation
         </h2>
         {navigationItems.length === 0 ? (
-          <p className="mt-3 text-sm text-[var(--muted-foreground)]">
-            No navigation items yet.
-          </p>
+          <div>
+            <p className="mt-3 text-sm text-[var(--muted-foreground)]">
+              No navigation items yet.
+            </p>
+            <div className="mt-4 flex flex-wrap items-center gap-2">
+              <AiGeneratePanel
+                projectId={project.id}
+                stage="ui"
+                credential={credential}
+              />
+            </div>
+          </div>
         ) : (
           <ul className="mt-3 flex flex-col gap-2">
             {navigationItems.map((n) => (
               <li
                 key={n.id}
-                className="card-glass flex flex-wrap items-center justify-between gap-3 p-3"
+                className="card-glass flex flex-wrap items-center justify-between gap-3 p-4"
               >
                 <div className="flex items-center gap-2">
                   <Link
