@@ -2,6 +2,7 @@
 
 import {
   applyDecisionsToProject,
+  applyErdToProject,
   applyRequirementsToProject,
 } from "@/lib/ai/apply";
 import { runAiApply, runAiSuggest, safeJsonParse } from "@/lib/ai/suggest";
@@ -14,10 +15,16 @@ import {
   buildDecisionsUserPrompt,
 } from "@/lib/ai/prompts/decisions";
 import {
+  buildDomainsSystemPrompt,
+  buildDomainsUserPrompt,
+} from "@/lib/ai/prompts/domains";
+import {
   aiDecisionsResponseSchema,
+  aiErdResponseSchema,
   aiRequirementsResponseSchema,
   type AiApplyResult,
   type AiDecisionItem,
+  type AiErdDomainItem,
   type AiRequirementItem,
   type SuggestResult,
 } from "@/lib/ai/schema";
@@ -27,6 +34,9 @@ const REQUIREMENTS_SCHEMA_HINT =
 
 const DECISIONS_SCHEMA_HINT =
   "Schema: { decisions: [ { title, context, decision, rationale } ] }, 1..15 items.";
+
+const DOMAINS_SCHEMA_HINT =
+  "Schema: { domains: [ { name, description, entities: [ { name, description, attributes: [ { name, data_type, is_required, is_primary_key, description } ], relationships: [ { target_entity, relationship_type, name, description } ] } ] } ] }, 1..8 domains.";
 
 export type SuggestRequirementsInput = {
   projectId: string;
@@ -48,8 +58,19 @@ export type ApplyDecisionsInput = {
   indices: number[];
 };
 
+export type SuggestDomainsInput = {
+  projectId: string;
+  prompt: string;
+};
+
+export type ApplyDomainsInput = {
+  suggestionId: string;
+  indices: number[];
+};
+
 export type ApplyRequirementsResult = AiApplyResult;
 export type ApplyDecisionsResult = AiApplyResult;
+export type ApplyDomainsResult = AiApplyResult;
 
 export async function aiSuggestRequirements(
   input: SuggestRequirementsInput,
@@ -113,5 +134,39 @@ export async function aiApplyDecisions(
   return runAiApply<AiDecisionItem>(input, {
     stage: "decisions",
     apply: applyDecisionsToProject,
+  });
+}
+
+export async function aiSuggestDomains(
+  input: SuggestDomainsInput,
+): Promise<SuggestResult<AiErdDomainItem>> {
+  return runAiSuggest<AiErdDomainItem>(input, {
+    stage: "domains",
+    buildSystemPrompt: buildDomainsSystemPrompt,
+    buildUserPrompt: (ctx, userPrompt) =>
+      buildDomainsUserPrompt({
+        projectName: ctx.projectName,
+        projectDescription: ctx.projectDescription,
+        requirementTitles: ctx.requirementTitles,
+        decisionTitles: ctx.decisionTitles,
+        existingDomainNames: ctx.domainNames,
+        userPrompt,
+      }),
+    parse: (text) => {
+      const raw = safeJsonParse(text);
+      if (raw === null) return null;
+      const parsed = aiErdResponseSchema.safeParse(raw);
+      return parsed.success ? parsed.data.domains : null;
+    },
+    parseErrorMessage: DOMAINS_SCHEMA_HINT,
+  });
+}
+
+export async function aiApplyDomains(
+  input: ApplyDomainsInput,
+): Promise<AiApplyResult> {
+  return runAiApply<AiErdDomainItem>(input, {
+    stage: "domains",
+    apply: applyErdToProject,
   });
 }

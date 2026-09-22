@@ -1,6 +1,12 @@
-export const AI_STAGES = ["requirements", "decisions"] as const;
+export const AI_STAGES = ["requirements", "decisions", "domains"] as const;
 
 export type AiStage = (typeof AI_STAGES)[number];
+
+const STAGE_ROUTES: Record<AiStage, (projectId: string) => string> = {
+  requirements: (projectId) => `/projects/${projectId}/requirements`,
+  decisions: (projectId) => `/projects/${projectId}/decisions`,
+  domains: (projectId) => `/projects/${projectId}/domains/erd`,
+};
 
 export function isAiStage(value: unknown): value is AiStage {
   return (
@@ -9,5 +15,5 @@ export function isAiStage(value: unknown): value is AiStage {
 }
 
 export function stageRevalidatePath(stage: AiStage, projectId: string): string {
-  return `/projects/${projectId}/${stage}`;
+  return STAGE_ROUTES[stage](projectId);
 }

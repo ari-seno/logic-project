@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { ProjectTabs } from "@/components/projects/project-tabs";
+import { AiGeneratePanel } from "@/components/ai/ai-generate-panel";
 import { ErdDetails } from "@/components/erd/erd-details";
 import { ErdSourceButton } from "@/components/erd/erd-source-button";
 import { ErdViewToggle } from "@/components/erd/erd-view-toggle";
@@ -10,6 +11,7 @@ import { MermaidDiagram } from "@/components/ui/mermaid-diagram";
 import { RelationshipTypeBadge } from "@/components/projects/badges";
 import { getProject } from "@/lib/projects/queries";
 import { loadProjectErd } from "@/lib/domains/erd";
+import { getProjectCredentialAction } from "@/lib/ai/credentials-actions";
 import {
   buildErdMermaid,
   type ErdAttribute,
@@ -35,6 +37,11 @@ export default async function ProjectErdPage({
   }
 
   const erd = await loadProjectErd(project.id);
+  const credentialResult = await getProjectCredentialAction(project.id);
+  const credential =
+    credentialResult.ok && credentialResult.credential
+      ? credentialResult.credential
+      : null;
   const allEntities = Object.values(erd.entitiesByDomain).flat();
   const entityCount = allEntities.length;
   const entityById = new Map(allEntities.map((e) => [e.id, e]));
@@ -78,15 +85,22 @@ export default async function ProjectErdPage({
               {project.name}
             </p>
           </div>
-          {entityCount >= 2 ? (
-            <ButtonLink
-              href={`/projects/${project.id}/domains/relationships/new`}
-              size="sm"
-              variant="secondary"
-            >
-              New relationship
-            </ButtonLink>
-          ) : null}
+          <div className="flex flex-wrap items-center gap-2">
+            <AiGeneratePanel
+              projectId={project.id}
+              stage="domains"
+              credential={credential}
+            />
+            {entityCount >= 2 ? (
+              <ButtonLink
+                href={`/projects/${project.id}/domains/relationships/new`}
+                size="sm"
+                variant="secondary"
+              >
+                New relationship
+              </ButtonLink>
+            ) : null}
+          </div>
         </div>
         <div className="mt-4">
           <ProjectTabs projectId={project.id} active="domain" />
@@ -118,7 +132,12 @@ export default async function ProjectErdPage({
           <p className="mt-1 text-sm text-[var(--muted-foreground)]">
             Add a domain and entity first; the ERD is generated from them.
           </p>
-          <div className="mt-4">
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+            <AiGeneratePanel
+              projectId={project.id}
+              stage="domains"
+              credential={credential}
+            />
             <ButtonLink href={`/projects/${project.id}/domains/new`}>
               Add Domain
             </ButtonLink>

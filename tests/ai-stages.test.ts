@@ -9,13 +9,14 @@ import {
 import { AI_STAGE_LABELS } from "@/components/ai/stage-labels";
 
 describe("ai/stages", () => {
-  it("exposes requirements and decisions", () => {
-    expect(AI_STAGES).toEqual(["requirements", "decisions"]);
+  it("exposes requirements, decisions, and domains", () => {
+    expect(AI_STAGES).toEqual(["requirements", "decisions", "domains"]);
   });
 
   it("accepts known stages and rejects everything else", () => {
     expect(isAiStage("requirements")).toBe(true);
     expect(isAiStage("decisions")).toBe(true);
+    expect(isAiStage("domains")).toBe(true);
     expect(isAiStage("api")).toBe(false);
     expect(isAiStage("")).toBe(false);
     expect(isAiStage(null)).toBe(false);
@@ -27,6 +28,7 @@ describe("ai/stages", () => {
       "/projects/p1/requirements",
     );
     expect(stageRevalidatePath("decisions", "p1")).toBe("/projects/p1/decisions");
+    expect(stageRevalidatePath("domains", "p1")).toBe("/projects/p1/domains/erd");
   });
 });
 
@@ -54,6 +56,10 @@ describe("ai stage labels registry", () => {
     const titles = AI_STAGES.map(
       (stage: AiStage) => AI_STAGE_LABELS[stage].drawerTitle,
     );
-    expect(titles).toEqual(["Generate requirements", "Generate decisions"]);
+    expect(titles).toEqual([
+      "Generate requirements",
+      "Generate decisions",
+      "Generate domain model",
+    ]);
   });
 });

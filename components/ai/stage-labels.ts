@@ -39,4 +39,17 @@ export const AI_STAGE_LABELS: Record<AiStage, AiStageLabels> = {
     selectionNoun: "decision",
     suggestionsHeading: "Suggestions",
   },
+  domains: {
+    id: "domains",
+    singular: "domain",
+    plural: "domains",
+    drawerTitle: "Generate domain model",
+    subtitleFallback: "AI assist for a first-draft domain model and ERD",
+    setupCopy:
+      "Add an Ollama credential in Settings, then choose it for this project before generating a domain model.",
+    promptPlaceholder:
+      "e.g. Model a lending workflow: borrowers, loans, repayments, and overdue fines.",
+    selectionNoun: "domain",
+    suggestionsHeading: "Suggested domains",
+  },
 };

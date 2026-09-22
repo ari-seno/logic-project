@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { listRequirements } from "@/lib/requirements/queries";
 import { listDecisions } from "@/lib/decisions/queries";
+import { listDomains } from "@/lib/domains/queries";
 
 export type AiAssembledContext = {
   userId: string;
@@ -9,12 +10,19 @@ export type AiAssembledContext = {
   projectDescription: string | null;
   requirementTitles: string[];
   decisionTitles: string[];
+  domainNames: string[];
 };
 
 function titlesOf(rows: Array<{ title: string }>): string[] {
   return rows
     .map((row) => row.title)
     .filter((t): t is string => typeof t === "string" && t.length > 0);
+}
+
+function namesOf(rows: Array<{ name: string }>): string[] {
+  return rows
+    .map((row) => row.name)
+    .filter((n): n is string => typeof n === "string" && n.length > 0);
 }
 
 export async function assembleAiContext(
@@ -36,9 +44,10 @@ export async function assembleAiContext(
     return null;
   }
 
-  const [requirements, decisions] = await Promise.all([
+  const [requirements, decisions, domains] = await Promise.all([
     listRequirements({ projectId }),
     listDecisions({ projectId }),
+    listDomains({ projectId }),
   ]);
 
   return {
@@ -48,5 +57,6 @@ export async function assembleAiContext(
     projectDescription: project.description,
     requirementTitles: titlesOf(requirements),
     decisionTitles: titlesOf(decisions),
+    domainNames: namesOf(domains),
   };
 }

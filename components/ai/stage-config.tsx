@@ -4,25 +4,32 @@ import type { ReactNode } from "react";
 
 import { RequirementsSuggestion } from "@/components/ai/requirements-suggestion";
 import { DecisionsSuggestion } from "@/components/ai/decisions-suggestion";
+import { DomainsSuggestion } from "@/components/ai/domains-suggestion";
 import {
   AI_STAGE_LABELS,
   type AiStageLabels,
 } from "@/components/ai/stage-labels";
 import {
   aiApplyDecisions,
+  aiApplyDomains,
   aiApplyRequirements,
   aiSuggestDecisions,
+  aiSuggestDomains,
   aiSuggestRequirements,
 } from "@/lib/ai/actions";
 import type {
   AiApplyResult,
   AiDecisionItem,
+  AiErdDomainItem,
   AiRequirementItem,
   SuggestResult,
 } from "@/lib/ai/schema";
 import type { AiStage } from "@/lib/ai/stages";
 
-export type AiSuggestionItem = AiRequirementItem | AiDecisionItem;
+export type AiSuggestionItem =
+  | AiRequirementItem
+  | AiDecisionItem
+  | AiErdDomainItem;
 
 export type SuggestionListProps = {
   items: AiSuggestionItem[];
@@ -76,5 +83,20 @@ export const AI_STAGE_UI: Record<AiStage, AiStageUiConfig> = {
     ),
     suggest: aiSuggestDecisions,
     apply: aiApplyDecisions,
+  },
+  domains: {
+    labels: AI_STAGE_LABELS.domains,
+    renderItems: (props) => (
+      <DomainsSuggestion
+        items={props.items as AiErdDomainItem[]}
+        selectedIndices={props.selectedIndices}
+        onToggle={props.onToggle}
+        onSelectAll={props.onSelectAll}
+        onSelectNone={props.onSelectNone}
+        showIndex={props.showIndex}
+      />
+    ),
+    suggest: aiSuggestDomains,
+    apply: aiApplyDomains,
   },
 };
