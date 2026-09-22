@@ -8,20 +8,38 @@ import {
   nextAttributePosition,
 } from "@/lib/attributes/queries";
 import { listRelationships } from "@/lib/relationships/queries";
+import { listArchitectureComponentsByProject } from "@/lib/architecture/components/queries";
+import { listArchitectureTechnologiesByProject } from "@/lib/architecture/technologies/queries";
+import { listArchitectureDecisionsByProject } from "@/lib/architecture/decisions/queries";
+import { listArchitectureComponentDependenciesByProject } from "@/lib/architecture/dependencies/queries";
 import { requirementInputSchema } from "@/lib/validation/requirements";
 import { decisionInputSchema } from "@/lib/validation/decisions";
 import { domainInputSchema } from "@/lib/validation/domains";
 import { entityInputSchema } from "@/lib/validation/entities";
 import { attributeInputSchema } from "@/lib/validation/attributes";
 import { relationshipInputSchema } from "@/lib/validation/relationships";
+import { architectureComponentInputSchema } from "@/lib/validation/architecture/components";
+import { architectureTechnologyInputSchema } from "@/lib/validation/architecture/technologies";
+import { architectureDecisionInputSchema } from "@/lib/validation/architecture/decisions";
+import { architectureComponentDependencyInputSchema } from "@/lib/validation/architecture/dependencies";
 import type {
+  AiArchitectureComponentItem,
+  AiArchitectureDecisionItem,
+  AiArchitectureDependencyItem,
+  AiArchitectureItem,
+  AiArchitectureTechnologyItem,
   AiDecisionItem,
   AiErdAttributeItem,
   AiErdDomainItem,
   AiErdRelationshipItem,
   AiRequirementItem,
 } from "@/lib/ai/schema";
-import type { EntityDataType, RelationshipType } from "@/lib/supabase/types";
+import type {
+  ArchitectureComponentType,
+  ArchitectureTechnologyCategory,
+  EntityDataType,
+  RelationshipType,
+} from "@/lib/supabase/types";
 
 export function normalizeRequirementType(
   type: AiRequirementItem["type"],
@@ -716,6 +734,422 @@ export async function applyErdToProject(
     }
 
     relationshipKeys.add(key);
+  }
+
+  return out;
+}
+
+export type ApplyArchitectureOptions = {
+  projectId: string;
+  userId: string;
+  items: AiArchitectureItem[];
+  indices: number[];
+};
+
+export type ArchitectureComponentRow = {
+  name: string;
+  type: ArchitectureComponentType;
+  description: string | null;
+};
+export type ArchitectureTechnologyRow = {
+  name: string;
+  category: ArchitectureTechnologyCategory;
+  description: string | null;
+};
+export type ArchitectureDecisionRow = {
+  title: string;
+  context: string | null;
+  decision: string;
+  rationale: string | null;
+  status: "proposed";
+};
+export type ArchitectureDependencyRow = {
+  source_component_id: string;
+  target_component_id: string;
+  description: string | null;
+};
+
+export function buildArchitectureComponentRow(
+  item: AiArchitectureComponentItem,
+): ArchitectureComponentRow | null {
+  const parsed = architectureComponentInputSchema.safeParse({
+    name: item.name,
+    type: item.type,
+    description: item.description,
+  });
+  if (!parsed.success) return null;
+  return {
+    name: parsed.data.name,
+    type: parsed.data.type,
+    description: optionalText(parsed.data.description ?? ""),
+  };
+}
+
+export function buildArchitectureTechnologyRow(
+  item: AiArchitectureTechnologyItem,
+): ArchitectureTechnologyRow | null {
+  const parsed = architectureTechnologyInputSchema.safeParse({
+    name: item.name,
+    category: item.category,
+    description: item.description,
+  });
+  if (!parsed.success) return null;
+  return {
+    name: parsed.data.name,
+    category: parsed.data.category,
+    description: optionalText(parsed.data.description ?? ""),
+  };
+}
+
+export function buildArchitectureDecisionRow(
+  item: AiArchitectureDecisionItem,
+): ArchitectureDecisionRow | null {
+  const parsed = architectureDecisionInputSchema.safeParse({
+    title: item.title,
+    context: item.context,
+    decision: item.decision,
+    rationale: item.rationale,
+    status: "proposed",
+  });
+  if (!parsed.success) return null;
+  return {
+    title: parsed.data.title,
+    context: optionalText(parsed.data.context ?? ""),
+    decision: parsed.data.decision,
+    rationale: optionalText(parsed.data.rationale ?? ""),
+    status: "proposed",
+  };
+}
+
+export function buildArchitectureDependencyRow(
+  item: AiArchitectureDependencyItem,
+  sourceComponentId: string,
+  targetComponentId: string,
+): ArchitectureDependencyRow | null {
+  const parsed = architectureComponentDependencyInputSchema.safeParse({
+    source_component_id: sourceComponentId,
+    target_component_id: targetComponentId,
+    description: item.description,
+  });
+  if (!parsed.success) return null;
+  return {
+    source_component_id: parsed.data.source_component_id,
+    target_component_id: parsed.data.target_component_id,
+    description: optionalText(parsed.data.description ?? ""),
+  };
+}
+
+export function architectureDependencyDedupeKey(
+  sourceComponentId: string,
+  targetComponentId: string,
+): string {
+  return `${sourceComponentId}|${targetComponentId}`;
+}
+
+type PendingArchitectureDependency = {
+  index: number;
+  label: string;
+  sourceComponentId: string;
+  item: AiArchitectureDependencyItem;
+};
+
+export async function applyArchitectureToProject(
+  options: ApplyArchitectureOptions,
+): Promise<ApplySummary> {
+  const supabase = await createClient();
+  const out: ApplySummary = { created: [], skipped: [], failed: [] };
+
+  const chosen = [...new Set(options.indices)]
+    .filter((n) => Number.isInteger(n) && n >= 0 && n < options.items.length)
+    .sort((a, b) => a - b);
+
+  const [components, technologies, decisions, dependencies] = await Promise.all([
+    listArchitectureComponentsByProject({ projectId: options.projectId }),
+    listArchitectureTechnologiesByProject({ projectId: options.projectId }),
+    listArchitectureDecisionsByProject({ projectId: options.projectId }),
+    listArchitectureComponentDependenciesByProject({
+      projectId: options.projectId,
+    }),
+  ]);
+
+  const componentIdByKey = new Map<string, string>();
+  const componentIdByName = new Map<string, string>();
+  let position = components.reduce(
+    (max, component) => Math.max(max, component.position),
+    -1,
+  );
+  position += 1;
+  for (const component of components) {
+    const key = component.name.trim().toLowerCase();
+    componentIdByKey.set(key, component.id);
+    if (!componentIdByName.has(key)) {
+      componentIdByName.set(key, component.id);
+    }
+  }
+
+  const technologyNames = new Set(
+    technologies.map((technology) => technology.name.trim().toLowerCase()),
+  );
+  const decisionTitles = new Set(
+    decisions.map((decision) => decision.title.trim().toLowerCase()),
+  );
+  const dependencyKeys = new Set(
+    dependencies.map((dependency) =>
+      architectureDependencyDedupeKey(
+        dependency.source_component_id,
+        dependency.target_component_id,
+      ),
+    ),
+  );
+
+  const pending: PendingArchitectureDependency[] = [];
+
+  for (const index of chosen) {
+    const item = options.items[index];
+    if (!item) {
+      out.skipped.push({ kind: "skipped", index, title: "", reason: "invalid" });
+      continue;
+    }
+
+    if (item.kind === "component") {
+      const row = buildArchitectureComponentRow(item);
+      if (!row) {
+        out.skipped.push({
+          kind: "skipped",
+          index,
+          title: item.name,
+          reason: "invalid",
+        });
+        continue;
+      }
+
+      const key = row.name.toLowerCase();
+      let componentId = componentIdByKey.get(key) ?? null;
+
+      if (!componentId) {
+        const { data, error } = await supabase
+          .from("architecture_components")
+          .insert({
+            project_id: options.projectId,
+            name: row.name,
+            description: row.description,
+            type: row.type,
+            position,
+          })
+          .select("id, name")
+          .single();
+
+        if (error || !data) {
+          out.failed.push({
+            kind: "failed",
+            index,
+            title: row.name,
+            error: error?.message ?? "Could not insert component.",
+          });
+          continue;
+        }
+
+        componentId = data.id;
+        componentIdByKey.set(key, data.id);
+        position += 1;
+        out.created.push({
+          kind: "created",
+          index,
+          id: data.id,
+          title: data.name,
+        });
+      } else {
+        out.skipped.push({
+          kind: "skipped",
+          index,
+          title: row.name,
+          reason: "duplicate",
+        });
+      }
+
+      if (!componentIdByName.has(key)) {
+        componentIdByName.set(key, componentId);
+      }
+
+      for (const dependencyItem of item.depends_on) {
+        pending.push({
+          index,
+          label: row.name,
+          sourceComponentId: componentId,
+          item: dependencyItem,
+        });
+      }
+      continue;
+    }
+
+    if (item.kind === "technology") {
+      const row = buildArchitectureTechnologyRow(item);
+      if (!row) {
+        out.skipped.push({
+          kind: "skipped",
+          index,
+          title: item.name,
+          reason: "invalid",
+        });
+        continue;
+      }
+
+      const key = row.name.toLowerCase();
+      if (technologyNames.has(key)) {
+        out.skipped.push({
+          kind: "skipped",
+          index,
+          title: row.name,
+          reason: "duplicate",
+        });
+        continue;
+      }
+
+      const { data, error } = await supabase
+        .from("architecture_technologies")
+        .insert({
+          project_id: options.projectId,
+          name: row.name,
+          category: row.category,
+          description: row.description,
+        })
+        .select("id, name")
+        .single();
+
+      if (error || !data) {
+        out.failed.push({
+          kind: "failed",
+          index,
+          title: row.name,
+          error: error?.message ?? "Could not insert technology.",
+        });
+        continue;
+      }
+
+      technologyNames.add(key);
+      out.created.push({
+        kind: "created",
+        index,
+        id: data.id,
+        title: data.name,
+      });
+      continue;
+    }
+
+    const row = buildArchitectureDecisionRow(item);
+    if (!row) {
+      out.skipped.push({
+        kind: "skipped",
+        index,
+        title: item.title,
+        reason: "invalid",
+      });
+      continue;
+    }
+
+    const key = row.title.toLowerCase();
+    if (decisionTitles.has(key)) {
+      out.skipped.push({
+        kind: "skipped",
+        index,
+        title: row.title,
+        reason: "duplicate",
+      });
+      continue;
+    }
+
+    const { data, error } = await supabase
+      .from("architecture_decisions")
+      .insert({
+        project_id: options.projectId,
+        title: row.title,
+        context: row.context,
+        decision: row.decision,
+        rationale: row.rationale,
+        status: row.status,
+      })
+      .select("id, title")
+      .single();
+
+    if (error || !data) {
+      out.failed.push({
+        kind: "failed",
+        index,
+        title: row.title,
+        error: error?.message ?? "Could not insert architecture decision.",
+      });
+      continue;
+    }
+
+    decisionTitles.add(key);
+    out.created.push({ kind: "created", index, id: data.id, title: data.title });
+  }
+
+  for (const entry of pending) {
+    const label = `${entry.label} → ${entry.item.target_component}`;
+    const targetComponentId =
+      componentIdByName.get(entry.item.target_component.trim().toLowerCase()) ??
+      null;
+
+    if (!targetComponentId || targetComponentId === entry.sourceComponentId) {
+      out.skipped.push({
+        kind: "skipped",
+        index: entry.index,
+        title: label,
+        reason: "invalid",
+      });
+      continue;
+    }
+
+    const row = buildArchitectureDependencyRow(
+      entry.item,
+      entry.sourceComponentId,
+      targetComponentId,
+    );
+    if (!row) {
+      out.skipped.push({
+        kind: "skipped",
+        index: entry.index,
+        title: label,
+        reason: "invalid",
+      });
+      continue;
+    }
+
+    const key = architectureDependencyDedupeKey(
+      row.source_component_id,
+      row.target_component_id,
+    );
+    if (dependencyKeys.has(key)) {
+      out.skipped.push({
+        kind: "skipped",
+        index: entry.index,
+        title: label,
+        reason: "duplicate",
+      });
+      continue;
+    }
+
+    const { error } = await supabase
+      .from("architecture_component_dependencies")
+      .insert({
+        project_id: options.projectId,
+        source_component_id: row.source_component_id,
+        target_component_id: row.target_component_id,
+        description: row.description,
+      });
+
+    if (error) {
+      out.failed.push({
+        kind: "failed",
+        index: entry.index,
+        title: label,
+        error: error.message,
+      });
+      continue;
+    }
+
+    dependencyKeys.add(key);
   }
 
   return out;

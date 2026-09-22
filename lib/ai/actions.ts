@@ -1,6 +1,7 @@
 "use server";
 
 import {
+  applyArchitectureToProject,
   applyDecisionsToProject,
   applyErdToProject,
   applyRequirementsToProject,
@@ -19,10 +20,17 @@ import {
   buildDomainsUserPrompt,
 } from "@/lib/ai/prompts/domains";
 import {
+  buildArchitectureSystemPrompt,
+  buildArchitectureUserPrompt,
+} from "@/lib/ai/prompts/architecture";
+import {
+  aiArchitectureResponseSchema,
   aiDecisionsResponseSchema,
   aiErdResponseSchema,
   aiRequirementsResponseSchema,
+  flattenArchitectureResponse,
   type AiApplyResult,
+  type AiArchitectureItem,
   type AiDecisionItem,
   type AiErdDomainItem,
   type AiRequirementItem,
@@ -37,6 +45,9 @@ const DECISIONS_SCHEMA_HINT =
 
 const DOMAINS_SCHEMA_HINT =
   "Schema: { domains: [ { name, description, entities: [ { name, description, attributes: [ { name, data_type, is_required, is_primary_key, description } ], relationships: [ { target_entity, relationship_type, name, description } ] } ] } ] }, 1..8 domains.";
+
+const ARCHITECTURE_SCHEMA_HINT =
+  "Schema: { components: [ { name, type, description, depends_on: [ { target_component, description } ] } ], technologies: [ { name, category, description } ], decisions: [ { title, context, decision, rationale } ] }, up to 20 components, 20 technologies, 15 decisions.";
 
 export type SuggestRequirementsInput = {
   projectId: string;
@@ -68,9 +79,20 @@ export type ApplyDomainsInput = {
   indices: number[];
 };
 
+export type SuggestArchitectureInput = {
+  projectId: string;
+  prompt: string;
+};
+
+export type ApplyArchitectureInput = {
+  suggestionId: string;
+  indices: number[];
+};
+
 export type ApplyRequirementsResult = AiApplyResult;
 export type ApplyDecisionsResult = AiApplyResult;
 export type ApplyDomainsResult = AiApplyResult;
+export type ApplyArchitectureResult = AiApplyResult;
 
 export async function aiSuggestRequirements(
   input: SuggestRequirementsInput,
@@ -168,5 +190,42 @@ export async function aiApplyDomains(
   return runAiApply<AiErdDomainItem>(input, {
     stage: "domains",
     apply: applyErdToProject,
+  });
+}
+
+export async function aiSuggestArchitecture(
+  input: SuggestArchitectureInput,
+): Promise<SuggestResult<AiArchitectureItem>> {
+  return runAiSuggest<AiArchitectureItem>(input, {
+    stage: "architecture",
+    buildSystemPrompt: buildArchitectureSystemPrompt,
+    buildUserPrompt: (ctx, userPrompt) =>
+      buildArchitectureUserPrompt({
+        projectName: ctx.projectName,
+        projectDescription: ctx.projectDescription,
+        requirementTitles: ctx.requirementTitles,
+        decisionTitles: ctx.decisionTitles,
+        domainNames: ctx.domainNames,
+        existingComponentNames: ctx.architectureComponentNames,
+        existingTechnologyNames: ctx.architectureTechnologyNames,
+        existingDecisionTitles: ctx.architectureDecisionTitles,
+        userPrompt,
+      }),
+    parse: (text) => {
+      const raw = safeJsonParse(text);
+      if (raw === null) return null;
+      const parsed = aiArchitectureResponseSchema.safeParse(raw);
+      return parsed.success ? flattenArchitectureResponse(parsed.data) : null;
+    },
+    parseErrorMessage: ARCHITECTURE_SCHEMA_HINT,
+  });
+}
+
+export async function aiApplyArchitecture(
+  input: ApplyArchitectureInput,
+): Promise<AiApplyResult> {
+  return runAiApply<AiArchitectureItem>(input, {
+    stage: "architecture",
+    apply: applyArchitectureToProject,
   });
 }

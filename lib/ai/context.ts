@@ -2,6 +2,9 @@ import { createClient } from "@/lib/supabase/server";
 import { listRequirements } from "@/lib/requirements/queries";
 import { listDecisions } from "@/lib/decisions/queries";
 import { listDomains } from "@/lib/domains/queries";
+import { listArchitectureComponentsByProject } from "@/lib/architecture/components/queries";
+import { listArchitectureTechnologiesByProject } from "@/lib/architecture/technologies/queries";
+import { listArchitectureDecisionsByProject } from "@/lib/architecture/decisions/queries";
 
 export type AiAssembledContext = {
   userId: string;
@@ -11,6 +14,9 @@ export type AiAssembledContext = {
   requirementTitles: string[];
   decisionTitles: string[];
   domainNames: string[];
+  architectureComponentNames: string[];
+  architectureTechnologyNames: string[];
+  architectureDecisionTitles: string[];
 };
 
 function titlesOf(rows: Array<{ title: string }>): string[] {
@@ -44,10 +50,20 @@ export async function assembleAiContext(
     return null;
   }
 
-  const [requirements, decisions, domains] = await Promise.all([
+  const [
+    requirements,
+    decisions,
+    domains,
+    architectureComponents,
+    architectureTechnologies,
+    architectureDecisions,
+  ] = await Promise.all([
     listRequirements({ projectId }),
     listDecisions({ projectId }),
     listDomains({ projectId }),
+    listArchitectureComponentsByProject({ projectId }),
+    listArchitectureTechnologiesByProject({ projectId }),
+    listArchitectureDecisionsByProject({ projectId }),
   ]);
 
   return {
@@ -58,5 +74,8 @@ export async function assembleAiContext(
     requirementTitles: titlesOf(requirements),
     decisionTitles: titlesOf(decisions),
     domainNames: namesOf(domains),
+    architectureComponentNames: namesOf(architectureComponents),
+    architectureTechnologyNames: namesOf(architectureTechnologies),
+    architectureDecisionTitles: titlesOf(architectureDecisions),
   };
 }

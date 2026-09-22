@@ -3,6 +3,8 @@ import { z } from "zod";
 import {
   AI_SUGGESTION_STATUSES,
   AI_TEST_STATUSES,
+  ARCHITECTURE_COMPONENT_TYPES,
+  ARCHITECTURE_TECHNOLOGY_CATEGORIES,
   ENTITY_DATA_TYPES,
   RELATIONSHIP_TYPES,
 } from "@/lib/supabase/types";
@@ -80,6 +82,47 @@ export const aiErdResponseSchema = z.object({
   domains: z.array(aiErdDomainItemSchema).min(1).max(8),
 });
 
+const aiArchitectureNameSchema = z.string().trim().min(1).max(120);
+const aiArchitectureDescriptionSchema = z.string().trim().max(5000).default("");
+
+export const aiArchitectureDependencySchema = z.object({
+  target_component: aiArchitectureNameSchema,
+  description: aiArchitectureDescriptionSchema,
+});
+
+export const aiArchitectureComponentSchema = z.object({
+  name: aiArchitectureNameSchema,
+  type: z.enum(ARCHITECTURE_COMPONENT_TYPES),
+  description: aiArchitectureDescriptionSchema,
+  depends_on: z.array(aiArchitectureDependencySchema).max(20).default([]),
+});
+
+export const aiArchitectureTechnologySchema = z.object({
+  name: aiArchitectureNameSchema,
+  category: z.enum(ARCHITECTURE_TECHNOLOGY_CATEGORIES),
+  description: aiArchitectureDescriptionSchema,
+});
+
+export const aiArchitectureDecisionSchema = z.object({
+  title: z.string().trim().min(3).max(120),
+  context: z.string().trim().max(5000),
+  decision: z.string().trim().min(1).max(2000),
+  rationale: z.string().trim().max(5000),
+});
+
+export const aiArchitectureResponseSchema = z
+  .object({
+    components: z.array(aiArchitectureComponentSchema).max(20).default([]),
+    technologies: z.array(aiArchitectureTechnologySchema).max(20).default([]),
+    decisions: z.array(aiArchitectureDecisionSchema).max(15).default([]),
+  })
+  .refine(
+    (value) =>
+      value.components.length + value.technologies.length + value.decisions.length >
+      0,
+    { message: "At least one component, technology, or decision is required." },
+  );
+
 export type AiRequirementItem = z.infer<typeof aiRequirementItemSchema>;
 export type AiRequirementsResponse = z.infer<typeof aiRequirementsResponseSchema>;
 export type AiDecisionItem = z.infer<typeof aiDecisionItemSchema>;
@@ -89,6 +132,40 @@ export type AiErdRelationshipItem = z.infer<typeof aiErdRelationshipSchema>;
 export type AiErdEntityItem = z.infer<typeof aiErdEntitySchema>;
 export type AiErdDomainItem = z.infer<typeof aiErdDomainItemSchema>;
 export type AiErdResponse = z.infer<typeof aiErdResponseSchema>;
+export type AiArchitectureComponentItem = z.infer<
+  typeof aiArchitectureComponentSchema
+>;
+export type AiArchitectureTechnologyItem = z.infer<
+  typeof aiArchitectureTechnologySchema
+>;
+export type AiArchitectureDecisionItem = z.infer<
+  typeof aiArchitectureDecisionSchema
+>;
+export type AiArchitectureDependencyItem = z.infer<
+  typeof aiArchitectureDependencySchema
+>;
+export type AiArchitectureResponse = z.infer<typeof aiArchitectureResponseSchema>;
+
+export type AiArchitectureItem =
+  | ({ kind: "component" } & AiArchitectureComponentItem)
+  | ({ kind: "technology" } & AiArchitectureTechnologyItem)
+  | ({ kind: "decision" } & AiArchitectureDecisionItem);
+
+export function flattenArchitectureResponse(
+  response: AiArchitectureResponse,
+): AiArchitectureItem[] {
+  return [
+    ...response.components.map(
+      (item): AiArchitectureItem => ({ kind: "component", ...item }),
+    ),
+    ...response.technologies.map(
+      (item): AiArchitectureItem => ({ kind: "technology", ...item }),
+    ),
+    ...response.decisions.map(
+      (item): AiArchitectureItem => ({ kind: "decision", ...item }),
+    ),
+  ];
+}
 
 export type SuggestSuccess<TItem> = {
   ok: true;

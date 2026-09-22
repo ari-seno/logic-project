@@ -52,4 +52,17 @@ export const AI_STAGE_LABELS: Record<AiStage, AiStageLabels> = {
     selectionNoun: "domain",
     suggestionsHeading: "Suggested domains",
   },
+  architecture: {
+    id: "architecture",
+    singular: "architecture item",
+    plural: "architecture",
+    drawerTitle: "Generate architecture",
+    subtitleFallback: "AI assist for a first-draft technical architecture",
+    setupCopy:
+      "Add an Ollama credential in Settings, then choose it for this project before generating an architecture.",
+    promptPlaceholder:
+      "e.g. A Next.js frontend, a Bun API, Postgres, and a background worker for exports.",
+    selectionNoun: "item",
+    suggestionsHeading: "Suggested architecture",
+  },
 };

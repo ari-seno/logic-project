@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import { ProjectTabs } from "@/components/projects/project-tabs";
 import { ArchitectureSourceButton } from "@/components/erd/architecture-source-button";
+import { AiGeneratePanel } from "@/components/ai/ai-generate-panel";
 import {
   ArchitectureComponentTypeBadge,
   ArchitectureDecisionStatusBadge,
@@ -12,6 +13,7 @@ import { ButtonLink } from "@/components/ui/button";
 import { MermaidDiagram } from "@/components/ui/mermaid-diagram";
 import { formatDate } from "@/lib/utils";
 import { getProject } from "@/lib/projects/queries";
+import { getProjectCredentialAction } from "@/lib/ai/credentials-actions";
 import {
   listArchitectureComponentsByProject,
 } from "@/lib/architecture/components/queries";
@@ -48,6 +50,12 @@ export default async function ArchitectureOverviewPage({
     listArchitectureComponentDependenciesByProject({ projectId: project.id }),
   ]);
 
+  const credentialResult = await getProjectCredentialAction(project.id);
+  const credential =
+    credentialResult.ok && credentialResult.credential
+      ? credentialResult.credential
+      : null;
+
   const componentById = new Map(components.map((c) => [c.id, c]));
 
   const diagramComponents: ArchitectureComponent[] = components.map((c) => ({
@@ -78,12 +86,21 @@ export default async function ArchitectureOverviewPage({
         >
           ← Back to overview
         </Link>
-        <h1 className="mt-2 text-2xl font-semibold tracking-tight">
-          Architecture
-        </h1>
-        <p className="mt-1 text-sm text-[var(--muted-foreground)]">
-          {project.name}
-        </p>
+        <div className="mt-2 flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-semibold tracking-tight">
+              Architecture
+            </h1>
+            <p className="mt-1 text-sm text-[var(--muted-foreground)]">
+              {project.name}
+            </p>
+          </div>
+          <AiGeneratePanel
+            projectId={project.id}
+            stage="architecture"
+            credential={credential}
+          />
+        </div>
       </div>
 
       <section className="card-glass">
@@ -111,9 +128,18 @@ export default async function ArchitectureOverviewPage({
           </div>
         ) : null}
         {components.length === 0 ? (
-          <p className="text-sm text-[var(--muted-foreground)]">
-            No components yet.
-          </p>
+          <div>
+            <p className="text-sm text-[var(--muted-foreground)]">
+              No components yet.
+            </p>
+            <div className="mt-4 flex flex-wrap items-center gap-2">
+              <AiGeneratePanel
+                projectId={project.id}
+                stage="architecture"
+                credential={credential}
+              />
+            </div>
+          </div>
         ) : (
           <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             {components.map((c) => (
