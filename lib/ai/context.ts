@@ -8,6 +8,8 @@ import { listArchitectureDecisionsByProject } from "@/lib/architecture/decisions
 import { listEntitiesByProject } from "@/lib/entities/queries";
 import { listApiGroupsByProject } from "@/lib/api/groups/queries";
 import { listApiEndpointsByProject } from "@/lib/api/endpoints/queries";
+import { listUiScreensByProject } from "@/lib/ui/screens/queries";
+import { listUiComponentsByProject } from "@/lib/ui/components/queries";
 
 export type AiAssembledContext = {
   userId: string;
@@ -23,6 +25,8 @@ export type AiAssembledContext = {
   entityNames: string[];
   apiGroupNames: string[];
   apiEndpointSummaries: string[];
+  uiScreenNames: string[];
+  uiComponentNames: string[];
 };
 
 function titlesOf(rows: Array<{ title: string }>): string[] {
@@ -66,6 +70,8 @@ export async function assembleAiContext(
     entities,
     apiGroups,
     apiEndpoints,
+    uiScreens,
+    uiComponents,
   ] = await Promise.all([
     listRequirements({ projectId }),
     listDecisions({ projectId }),
@@ -76,6 +82,8 @@ export async function assembleAiContext(
     listEntitiesByProject(projectId),
     listApiGroupsByProject({ projectId }),
     listApiEndpointsByProject({ projectId }),
+    listUiScreensByProject({ projectId }),
+    listUiComponentsByProject({ projectId }),
   ]);
 
   return {
@@ -94,5 +102,7 @@ export async function assembleAiContext(
     apiEndpointSummaries: apiEndpoints.map(
       (endpoint) => `${endpoint.method} ${endpoint.path}`,
     ),
+    uiScreenNames: namesOf(uiScreens),
+    uiComponentNames: namesOf(uiComponents),
   };
 }

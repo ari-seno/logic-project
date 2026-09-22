@@ -16,6 +16,7 @@ describe("ai/stages", () => {
       "domains",
       "architecture",
       "api",
+      "ui",
     ]);
   });
 
@@ -25,6 +26,7 @@ describe("ai/stages", () => {
     expect(isAiStage("domains")).toBe(true);
     expect(isAiStage("architecture")).toBe(true);
     expect(isAiStage("api")).toBe(true);
+    expect(isAiStage("ui")).toBe(true);
     expect(isAiStage("")).toBe(false);
     expect(isAiStage(null)).toBe(false);
     expect(isAiStage(3)).toBe(false);
@@ -40,6 +42,7 @@ describe("ai/stages", () => {
       "/projects/p1/architecture",
     );
     expect(stageRevalidatePath("api", "p1")).toBe("/projects/p1/api");
+    expect(stageRevalidatePath("ui", "p1")).toBe("/projects/p1/ui");
   });
 });
 
@@ -73,6 +76,7 @@ describe("ai stage labels registry", () => {
       "Generate domain model",
       "Generate architecture",
       "Generate API design",
+      "Generate UI design",
     ]);
   });
 });

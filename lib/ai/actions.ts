@@ -2,6 +2,7 @@
 
 import {
   applyApiToProject,
+  applyUiToProject,
   applyArchitectureToProject,
   applyDecisionsToProject,
   applyErdToProject,
@@ -29,19 +30,26 @@ import {
   buildApiUserPrompt,
 } from "@/lib/ai/prompts/api";
 import {
+  buildUiSystemPrompt,
+  buildUiUserPrompt,
+} from "@/lib/ai/prompts/ui";
+import {
   aiApiResponseSchema,
   aiArchitectureResponseSchema,
   aiDecisionsResponseSchema,
   aiErdResponseSchema,
   aiRequirementsResponseSchema,
+  aiUiResponseSchema,
   flattenApiResponse,
   flattenArchitectureResponse,
+  flattenUiResponse,
   type AiApiItem,
   type AiApplyResult,
   type AiArchitectureItem,
   type AiDecisionItem,
   type AiErdDomainItem,
   type AiRequirementItem,
+  type AiUiItem,
   type SuggestResult,
 } from "@/lib/ai/schema";
 
@@ -59,6 +67,9 @@ const ARCHITECTURE_SCHEMA_HINT =
 
 const API_SCHEMA_HINT =
   "Schema: { groups: [ { name, prefix, description } ], endpoints: [ { group_name, method, path, name, summary, description, authentication_required, parameters: [ { name, location, data_type, required, description, example } ], request_body: { content_type, description, schema, example } | null, responses: [ { status_code, content_type, description, schema, example } ], errors: [ { code, message, http_status, description } ], entities: [ { entity_name, role } ], requirement_titles: [ string ] } ] }, up to 20 groups, 25 endpoints.";
+
+const UI_SCHEMA_HINT =
+  "Schema: { components: [ { name, component_type, description, purpose, technology } ], screens: [ { name, route, screen_type, description, purpose, authentication_required, placements: [ { component_name, label, description, required, parent_label } ], entities: [ { entity_name, role } ], requirement_titles: [ string ] } ] }, up to 25 components, 25 screens.";
 
 export type SuggestRequirementsInput = {
   projectId: string;
@@ -283,5 +294,52 @@ export async function aiApplyApi(input: ApplyApiInput): Promise<AiApplyResult> {
   return runAiApply<AiApiItem>(input, {
     stage: "api",
     apply: applyApiToProject,
+  });
+}
+
+export type SuggestUiInput = {
+  projectId: string;
+  prompt: string;
+};
+
+export type ApplyUiInput = {
+  suggestionId: string;
+  indices: number[];
+};
+
+export async function aiSuggestUi(
+  input: SuggestUiInput,
+): Promise<SuggestResult<AiUiItem>> {
+  return runAiSuggest<AiUiItem>(input, {
+    stage: "ui",
+    buildSystemPrompt: buildUiSystemPrompt,
+    buildUserPrompt: (ctx, userPrompt) =>
+      buildUiUserPrompt({
+        projectName: ctx.projectName,
+        projectDescription: ctx.projectDescription,
+        requirementTitles: ctx.requirementTitles,
+        decisionTitles: ctx.decisionTitles,
+        domainNames: ctx.domainNames,
+        entityNames: ctx.entityNames,
+        apiGroupNames: ctx.apiGroupNames,
+        apiEndpointSummaries: ctx.apiEndpointSummaries,
+        existingScreenNames: ctx.uiScreenNames,
+        existingComponentNames: ctx.uiComponentNames,
+        userPrompt,
+      }),
+    parse: (text) => {
+      const raw = safeJsonParse(text);
+      if (raw === null) return null;
+      const parsed = aiUiResponseSchema.safeParse(raw);
+      return parsed.success ? flattenUiResponse(parsed.data) : null;
+    },
+    parseErrorMessage: UI_SCHEMA_HINT,
+  });
+}
+
+export async function aiApplyUi(input: ApplyUiInput): Promise<AiApplyResult> {
+  return runAiApply<AiUiItem>(input, {
+    stage: "ui",
+    apply: applyUiToProject,
   });
 }

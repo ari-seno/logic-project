@@ -10,6 +10,8 @@ import { ButtonLink } from "@/components/ui/button";
 import { ApiAuthBadge } from "@/components/projects/badges";
 import { formatDate } from "@/lib/utils";
 import { getProject } from "@/lib/projects/queries";
+import { getProjectCredentialAction } from "@/lib/ai/credentials-actions";
+import { AiGeneratePanel } from "@/components/ai/ai-generate-panel";
 import {
   countUiScreensByProject,
   listUiScreensByProject,
@@ -94,6 +96,12 @@ export default async function UiOverviewPage({
     listUiNavigationItemsByProject({ projectId: project.id }),
   ]);
 
+  const credentialResult = await getProjectCredentialAction(project.id);
+  const credential =
+    credentialResult.ok && credentialResult.credential
+      ? credentialResult.credential
+      : null;
+
   const tree = buildTree(navigationItems);
 
   return (
@@ -107,7 +115,12 @@ export default async function UiOverviewPage({
             {project.name} · Blueprint the screens of your planned application.
           </p>
         </div>
-        <div className="flex shrink-0 flex-wrap gap-2">
+        <div className="flex shrink-0 flex-wrap items-center gap-2">
+          <AiGeneratePanel
+            projectId={project.id}
+            stage="ui"
+            credential={credential}
+          />
           <ButtonLink
             href={`/projects/${project.id}/ui/screens/new`}
             variant="secondary"
@@ -147,9 +160,18 @@ export default async function UiOverviewPage({
           Screens
         </h2>
         {screens.length === 0 ? (
-          <p className="mt-3 text-sm text-[var(--muted-foreground)]">
-            No screens yet.
-          </p>
+          <div>
+            <p className="mt-3 text-sm text-[var(--muted-foreground)]">
+              No screens yet.
+            </p>
+            <div className="mt-4 flex flex-wrap items-center gap-2">
+              <AiGeneratePanel
+                projectId={project.id}
+                stage="ui"
+                credential={credential}
+              />
+            </div>
+          </div>
         ) : (
           <ul className="mt-3 flex flex-col gap-2">
             {screens.map((s) => (
@@ -189,9 +211,18 @@ export default async function UiOverviewPage({
           Components
         </h2>
         {components.length === 0 ? (
-          <p className="mt-3 text-sm text-[var(--muted-foreground)]">
-            No components yet.
-          </p>
+          <div>
+            <p className="mt-3 text-sm text-[var(--muted-foreground)]">
+              No components yet.
+            </p>
+            <div className="mt-4 flex flex-wrap items-center gap-2">
+              <AiGeneratePanel
+                projectId={project.id}
+                stage="ui"
+                credential={credential}
+              />
+            </div>
+          </div>
         ) : (
           <ul className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
             {components.map((c) => (

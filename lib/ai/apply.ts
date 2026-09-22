@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { UI_COMPONENT_TYPES, UI_SCREEN_TYPES } from "@/lib/supabase/types";
 import { listRequirements } from "@/lib/requirements/queries";
 import { listDecisions } from "@/lib/decisions/queries";
 import { listDomains } from "@/lib/domains/queries";
@@ -13,6 +14,13 @@ import { listArchitectureTechnologiesByProject } from "@/lib/architecture/techno
 import { listArchitectureDecisionsByProject } from "@/lib/architecture/decisions/queries";
 import { listArchitectureComponentDependenciesByProject } from "@/lib/architecture/dependencies/queries";
 import { loadProjectApiContract } from "@/lib/api/endpoints/queries";
+import { listUiScreensByProject } from "@/lib/ui/screens/queries";
+import { listUiComponentsByProject } from "@/lib/ui/components/queries";
+import { listScreenComponents } from "@/lib/ui/screen-components/queries";
+import {
+  listScreenEntities,
+  listScreenRequirements,
+} from "@/lib/ui/traceability/queries";
 import { requirementInputSchema } from "@/lib/validation/requirements";
 import { decisionInputSchema } from "@/lib/validation/decisions";
 import { domainInputSchema } from "@/lib/validation/domains";
@@ -41,6 +49,10 @@ import type {
   AiErdDomainItem,
   AiErdRelationshipItem,
   AiRequirementItem,
+  AiUiComponentItem,
+  AiUiItem,
+  AiUiPlacementItem,
+  AiUiScreenItem,
 } from "@/lib/ai/schema";
 import type {
   ApiEndpointEntityRole,
@@ -52,6 +64,8 @@ import type {
   EntityDataType,
   Json,
   RelationshipType,
+  UiComponentType,
+  UiScreenType,
 } from "@/lib/supabase/types";
 
 export function normalizeRequirementType(
@@ -1905,6 +1919,573 @@ export async function applyApiToProject(
         kind: "skipped",
         index,
         title: label,
+        reason: "duplicate",
+      });
+    }
+  }
+
+  return out;
+}
+
+export type ApplyUiOptions = {
+  projectId: string;
+  userId: string;
+  items: AiUiItem[];
+  indices: number[];
+};
+
+export type UiScreenRow = {
+  name: string;
+  route: string | null;
+  screen_type: UiScreenType;
+  description: string | null;
+  purpose: string | null;
+  authentication_required: boolean;
+};
+
+export type UiComponentRow = {
+  name: string;
+  component_type: UiComponentType;
+  description: string | null;
+  purpose: string | null;
+  technology: string | null;
+};
+
+export type UiPlacementRow = {
+  screen_id: string;
+  component_id: string;
+  parent_id: string | null;
+  label: string | null;
+  description: string | null;
+  required: boolean;
+};
+
+export function buildUiScreenRow(item: AiUiScreenItem): UiScreenRow | null {
+  if (!UI_SCREEN_TYPES.includes(item.screen_type)) return null;
+  const name = item.name.trim();
+  if (name.length < 1 || name.length > 200) return null;
+  const route = item.route.trim();
+  if (route.length > 500) return null;
+  const description = item.description.trim();
+  if (description.length > 5000) return null;
+  const purpose = item.purpose.trim();
+  if (purpose.length > 2000) return null;
+  return {
+    name,
+    route: optionalText(route),
+    screen_type: item.screen_type,
+    description: optionalText(description),
+    purpose: optionalText(purpose),
+    authentication_required: item.authentication_required,
+  };
+}
+
+export function buildUiComponentRow(
+  item: AiUiComponentItem,
+): UiComponentRow | null {
+  if (!UI_COMPONENT_TYPES.includes(item.component_type)) return null;
+  const name = item.name.trim();
+  if (name.length < 1 || name.length > 200) return null;
+  const description = item.description.trim();
+  if (description.length > 5000) return null;
+  const purpose = item.purpose.trim();
+  if (purpose.length > 2000) return null;
+  const technology = item.technology.trim();
+  if (technology.length > 200) return null;
+  return {
+    name,
+    component_type: item.component_type,
+    description: optionalText(description),
+    purpose: optionalText(purpose),
+    technology: optionalText(technology),
+  };
+}
+
+export function buildUiPlacementRow(
+  item: AiUiPlacementItem,
+  screenId: string,
+  componentId: string,
+  parentId: string | null,
+): UiPlacementRow | null {
+  const label = item.label.trim();
+  if (label.length > 200) return null;
+  const description = item.description.trim();
+  if (description.length > 5000) return null;
+  if (label.length === 0 && description.length === 0) return null;
+  return {
+    screen_id: screenId,
+    component_id: componentId,
+    parent_id: parentId,
+    label: optionalText(label),
+    description: optionalText(description),
+    required: item.required,
+  };
+}
+
+export function uiComponentDedupeKey(name: string): string {
+  return name.trim().toLowerCase();
+}
+
+export function uiScreenDedupeKey(name: string): string {
+  return name.trim().toLowerCase();
+}
+
+export function uiScreenComponentDedupeKey(
+  screenId: string,
+  componentId: string,
+  label: string,
+): string {
+  return `${screenId}|${componentId}|${label.trim().toLowerCase()}`;
+}
+
+export function uiScreenEntityLinkDedupeKey(
+  screenId: string,
+  entityId: string,
+  role: string,
+): string {
+  return `${screenId}|${entityId}|${role}`;
+}
+
+export function uiScreenRequirementLinkDedupeKey(
+  screenId: string,
+  requirementId: string,
+): string {
+  return `${screenId}|${requirementId}`;
+}
+
+type UiPlacementCache = {
+  keys: Set<string>;
+  labelToId: Map<string, string>;
+  position: number;
+};
+
+export async function applyUiToProject(
+  options: ApplyUiOptions,
+): Promise<ApplySummary> {
+  const supabase = await createClient();
+  const out: ApplySummary = { created: [], skipped: [], failed: [] };
+
+  const chosen = [...new Set(options.indices)]
+    .filter((n) => Number.isInteger(n) && n >= 0 && n < options.items.length)
+    .sort((a, b) => a - b);
+
+  const [screens, components, entities, requirements] = await Promise.all([
+    listUiScreensByProject({ projectId: options.projectId }),
+    listUiComponentsByProject({ projectId: options.projectId }),
+    listEntitiesByProject(options.projectId),
+    listRequirements({ projectId: options.projectId }),
+  ]);
+
+  const screenIdByKey = new Map<string, string>();
+  let screenPosition =
+    screens.reduce((max, screen) => Math.max(max, screen.position), -1) + 1;
+  for (const screen of screens) {
+    screenIdByKey.set(uiScreenDedupeKey(screen.name), screen.id);
+  }
+
+  const componentIdByKey = new Map<string, string>();
+  const componentIdByName = new Map<string, string>();
+  let componentPosition =
+    components.reduce((max, component) => Math.max(max, component.position), -1) +
+    1;
+  for (const component of components) {
+    const key = uiComponentDedupeKey(component.name);
+    componentIdByKey.set(key, component.id);
+    if (!componentIdByName.has(key)) {
+      componentIdByName.set(key, component.id);
+    }
+  }
+
+  const entityIdByName = new Map<string, string>();
+  for (const entity of entities) {
+    const key = entity.name.trim().toLowerCase();
+    if (!entityIdByName.has(key)) entityIdByName.set(key, entity.id);
+  }
+
+  const requirementIdByTitle = new Map<string, string>();
+  for (const requirement of requirements) {
+    const key = requirement.title.trim().toLowerCase();
+    if (!requirementIdByTitle.has(key)) {
+      requirementIdByTitle.set(key, requirement.id);
+    }
+  }
+
+  const placementCacheByScreen = new Map<string, UiPlacementCache>();
+  const placementCacheFor = async (
+    screenId: string,
+  ): Promise<UiPlacementCache> => {
+    const cached = placementCacheByScreen.get(screenId);
+    if (cached) return cached;
+    const rows = await listScreenComponents(screenId);
+    const keys = new Set<string>();
+    const labelToId = new Map<string, string>();
+    let position = -1;
+    for (const row of rows) {
+      keys.add(
+        uiScreenComponentDedupeKey(row.screen_id, row.component_id, row.label ?? ""),
+      );
+      const labelKey = (row.label ?? "").trim().toLowerCase();
+      if (labelKey && !labelToId.has(labelKey)) {
+        labelToId.set(labelKey, row.id);
+      }
+      position = Math.max(position, row.position);
+    }
+    const cache: UiPlacementCache = { keys, labelToId, position: position + 1 };
+    placementCacheByScreen.set(screenId, cache);
+    return cache;
+  };
+
+  const entityLinkKeysByScreen = new Map<string, Set<string>>();
+  const entityLinkKeysFor = async (screenId: string): Promise<Set<string>> => {
+    const cached = entityLinkKeysByScreen.get(screenId);
+    if (cached) return cached;
+    const rows = await listScreenEntities(screenId);
+    const keys = new Set<string>();
+    for (const row of rows) {
+      keys.add(uiScreenEntityLinkDedupeKey(row.screen_id, row.entity_id, row.role));
+    }
+    entityLinkKeysByScreen.set(screenId, keys);
+    return keys;
+  };
+
+  const requirementLinkKeysByScreen = new Map<string, Set<string>>();
+  const requirementLinkKeysFor = async (
+    screenId: string,
+  ): Promise<Set<string>> => {
+    const cached = requirementLinkKeysByScreen.get(screenId);
+    if (cached) return cached;
+    const rows = await listScreenRequirements(screenId);
+    const keys = new Set<string>();
+    for (const row of rows) {
+      keys.add(
+        uiScreenRequirementLinkDedupeKey(row.screen_id, row.requirement_id),
+      );
+    }
+    requirementLinkKeysByScreen.set(screenId, keys);
+    return keys;
+  };
+
+  for (const index of chosen) {
+    const item = options.items[index];
+    if (!item) {
+      out.skipped.push({ kind: "skipped", index, title: "", reason: "invalid" });
+      continue;
+    }
+
+    if (item.kind === "component") {
+      const row = buildUiComponentRow(item);
+      if (!row) {
+        out.skipped.push({
+          kind: "skipped",
+          index,
+          title: item.name,
+          reason: "invalid",
+        });
+        continue;
+      }
+
+      const key = uiComponentDedupeKey(row.name);
+      if (componentIdByKey.has(key)) {
+        out.skipped.push({
+          kind: "skipped",
+          index,
+          title: row.name,
+          reason: "duplicate",
+        });
+        continue;
+      }
+
+      const { data, error } = await supabase
+        .from("ui_components")
+        .insert({
+          project_id: options.projectId,
+          name: row.name,
+          component_type: row.component_type,
+          description: row.description,
+          purpose: row.purpose,
+          technology: row.technology,
+          position: componentPosition,
+        })
+        .select("id, name")
+        .single();
+
+      if (error || !data) {
+        out.failed.push({
+          kind: "failed",
+          index,
+          title: row.name,
+          error: error?.message ?? "Could not insert UI component.",
+        });
+        continue;
+      }
+
+      componentIdByKey.set(key, data.id);
+      componentIdByName.set(key, data.id);
+      componentPosition += 1;
+      out.created.push({ kind: "created", index, id: data.id, title: data.name });
+      continue;
+    }
+
+    const row = buildUiScreenRow(item);
+    if (!row) {
+      out.skipped.push({
+        kind: "skipped",
+        index,
+        title: item.name,
+        reason: "invalid",
+      });
+      continue;
+    }
+
+    const screenKey = uiScreenDedupeKey(row.name);
+    let screenId = screenIdByKey.get(screenKey) ?? null;
+    let createdScreen = false;
+
+    if (!screenId) {
+      const { data, error } = await supabase
+        .from("ui_screens")
+        .insert({
+          project_id: options.projectId,
+          name: row.name,
+          route: row.route,
+          screen_type: row.screen_type,
+          description: row.description,
+          purpose: row.purpose,
+          authentication_required: row.authentication_required,
+          position: screenPosition,
+        })
+        .select("id, name")
+        .single();
+
+      if (error || !data) {
+        out.failed.push({
+          kind: "failed",
+          index,
+          title: row.name,
+          error: error?.message ?? "Could not insert UI screen.",
+        });
+        continue;
+      }
+
+      screenId = data.id;
+      screenIdByKey.set(screenKey, data.id);
+      screenPosition += 1;
+      createdScreen = true;
+    }
+
+    const cache = await placementCacheFor(screenId);
+
+    type PendingParent = {
+      placementId: string;
+      parentLabel: string;
+      label: string;
+    };
+    const pendingParents: PendingParent[] = [];
+
+    for (const placementItem of item.placements) {
+      const placementLabel = `${row.name} → ${placementItem.component_name}`;
+      const componentId =
+        componentIdByName.get(
+          uiComponentDedupeKey(placementItem.component_name),
+        ) ?? null;
+
+      if (!componentId) {
+        out.skipped.push({
+          kind: "skipped",
+          index,
+          title: placementLabel,
+          reason: "invalid",
+        });
+        continue;
+      }
+
+      const placementRow = buildUiPlacementRow(
+        placementItem,
+        screenId,
+        componentId,
+        null,
+      );
+      if (!placementRow) {
+        out.skipped.push({
+          kind: "skipped",
+          index,
+          title: placementLabel,
+          reason: "invalid",
+        });
+        continue;
+      }
+
+      const key = uiScreenComponentDedupeKey(
+        screenId,
+        componentId,
+        placementItem.label,
+      );
+      if (cache.keys.has(key)) {
+        out.skipped.push({
+          kind: "skipped",
+          index,
+          title: placementLabel,
+          reason: "duplicate",
+        });
+        continue;
+      }
+
+      const { data, error } = await supabase
+        .from("ui_screen_components")
+        .insert({
+          screen_id: screenId,
+          component_id: componentId,
+          parent_id: null,
+          label: placementRow.label,
+          description: placementRow.description,
+          required: placementRow.required,
+          position: cache.position,
+        })
+        .select("id")
+        .single();
+
+      if (error || !data) {
+        out.failed.push({
+          kind: "failed",
+          index,
+          title: placementLabel,
+          error: error?.message ?? "Could not insert screen component.",
+        });
+        continue;
+      }
+
+      cache.keys.add(key);
+      cache.position += 1;
+
+      const labelKey = placementItem.label.trim().toLowerCase();
+      if (labelKey && !cache.labelToId.has(labelKey)) {
+        cache.labelToId.set(labelKey, data.id);
+      }
+      if (placementItem.parent_label.trim()) {
+        pendingParents.push({
+          placementId: data.id,
+          parentLabel: placementItem.parent_label.trim(),
+          label: placementLabel,
+        });
+      }
+    }
+
+    for (const pending of pendingParents) {
+      const parentId =
+        cache.labelToId.get(pending.parentLabel.toLowerCase()) ?? null;
+      if (!parentId || parentId === pending.placementId) continue;
+      const { error } = await supabase
+        .from("ui_screen_components")
+        .update({ parent_id: parentId })
+        .eq("id", pending.placementId);
+      if (error) {
+        out.failed.push({
+          kind: "failed",
+          index,
+          title: pending.label,
+          error: error.message,
+        });
+      }
+    }
+
+    for (const link of item.entities) {
+      const linkLabel = `${row.name} → ${link.entity_name}`;
+      const entityId =
+        entityIdByName.get(link.entity_name.trim().toLowerCase()) ?? null;
+
+      if (!entityId) {
+        out.skipped.push({
+          kind: "skipped",
+          index,
+          title: linkLabel,
+          reason: "invalid",
+        });
+        continue;
+      }
+
+      const keys = await entityLinkKeysFor(screenId);
+      const key = uiScreenEntityLinkDedupeKey(screenId, entityId, link.role);
+      if (keys.has(key)) {
+        out.skipped.push({
+          kind: "skipped",
+          index,
+          title: linkLabel,
+          reason: "duplicate",
+        });
+        continue;
+      }
+
+      const { error } = await supabase.from("ui_screen_entities").insert({
+        screen_id: screenId,
+        entity_id: entityId,
+        role: link.role,
+      });
+
+      if (error) {
+        out.failed.push({
+          kind: "failed",
+          index,
+          title: linkLabel,
+          error: error.message,
+        });
+        continue;
+      }
+
+      keys.add(key);
+    }
+
+    for (const requirementTitle of item.requirement_titles) {
+      const linkLabel = `${row.name} → ${requirementTitle}`;
+      const requirementId =
+        requirementIdByTitle.get(requirementTitle.trim().toLowerCase()) ?? null;
+
+      if (!requirementId) {
+        out.skipped.push({
+          kind: "skipped",
+          index,
+          title: linkLabel,
+          reason: "invalid",
+        });
+        continue;
+      }
+
+      const keys = await requirementLinkKeysFor(screenId);
+      const key = uiScreenRequirementLinkDedupeKey(screenId, requirementId);
+      if (keys.has(key)) {
+        out.skipped.push({
+          kind: "skipped",
+          index,
+          title: linkLabel,
+          reason: "duplicate",
+        });
+        continue;
+      }
+
+      const { error } = await supabase.from("ui_screen_requirements").insert({
+        screen_id: screenId,
+        requirement_id: requirementId,
+      });
+
+      if (error) {
+        out.failed.push({
+          kind: "failed",
+          index,
+          title: linkLabel,
+          error: error.message,
+        });
+        continue;
+      }
+
+      keys.add(key);
+    }
+
+    if (createdScreen) {
+      out.created.push({ kind: "created", index, id: screenId, title: row.name });
+    } else {
+      out.skipped.push({
+        kind: "skipped",
+        index,
+        title: row.name,
         reason: "duplicate",
       });
     }

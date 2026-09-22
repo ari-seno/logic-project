@@ -78,4 +78,17 @@ export const AI_STAGE_LABELS: Record<AiStage, AiStageLabels> = {
     selectionNoun: "item",
     suggestionsHeading: "Suggested API design",
   },
+  ui: {
+    id: "ui",
+    singular: "UI item",
+    plural: "UI",
+    drawerTitle: "Generate UI design",
+    subtitleFallback: "AI assist for a first-draft screen blueprint",
+    setupCopy:
+      "Add an Ollama credential in Settings, then choose it for this project before generating a UI design.",
+    promptPlaceholder:
+      "e.g. Screens for signing in, listing loans, and reviewing one loan in detail.",
+    selectionNoun: "item",
+    suggestionsHeading: "Suggested UI design",
+  },
 };

@@ -11,6 +11,9 @@ import {
   ARCHITECTURE_TECHNOLOGY_CATEGORIES,
   ENTITY_DATA_TYPES,
   RELATIONSHIP_TYPES,
+  UI_COMPONENT_TYPES,
+  UI_SCREEN_ENTITY_ROLES,
+  UI_SCREEN_TYPES,
 } from "@/lib/supabase/types";
 
 export const aiTestStatusSchema = z.enum(AI_TEST_STATUSES);
@@ -270,6 +273,77 @@ export function flattenApiResponse(response: AiApiResponse): AiApiItem[] {
     ...response.endpoints.map(
       (item): AiApiItem => ({ kind: "endpoint", ...item }),
     ),
+  ];
+}
+
+const aiUiNameSchema = z.string().trim().min(1).max(120);
+const aiUiDescriptionSchema = z.string().trim().max(5000).default("");
+const aiUiDetailSchema = z.string().trim().max(2000).default("");
+
+export const aiUiPlacementSchema = z.object({
+  component_name: aiUiNameSchema,
+  label: z.string().trim().max(200).default(""),
+  description: aiUiDetailSchema,
+  required: z.boolean().default(false),
+  parent_label: z.string().trim().max(200).default(""),
+});
+
+export const aiUiScreenEntityLinkSchema = z.object({
+  entity_name: aiUiNameSchema,
+  role: z.enum(UI_SCREEN_ENTITY_ROLES),
+});
+
+export const aiUiScreenItemSchema = z.object({
+  name: aiUiNameSchema,
+  route: z.string().trim().max(500).default(""),
+  screen_type: z.enum(UI_SCREEN_TYPES),
+  description: aiUiDescriptionSchema,
+  purpose: aiUiDetailSchema,
+  authentication_required: z.boolean().default(true),
+  placements: z.array(aiUiPlacementSchema).max(20).default([]),
+  entities: z.array(aiUiScreenEntityLinkSchema).max(10).default([]),
+  requirement_titles: z
+    .array(z.string().trim().min(1).max(200))
+    .max(10)
+    .default([]),
+});
+
+export const aiUiComponentItemSchema = z.object({
+  name: aiUiNameSchema,
+  component_type: z.enum(UI_COMPONENT_TYPES),
+  description: aiUiDescriptionSchema,
+  purpose: aiUiDetailSchema,
+  technology: z.string().trim().max(200).default(""),
+});
+
+export const aiUiResponseSchema = z
+  .object({
+    components: z.array(aiUiComponentItemSchema).max(25).default([]),
+    screens: z.array(aiUiScreenItemSchema).max(25).default([]),
+  })
+  .refine(
+    (value) => value.components.length + value.screens.length > 0,
+    { message: "At least one component or screen is required." },
+  );
+
+export type AiUiPlacementItem = z.infer<typeof aiUiPlacementSchema>;
+export type AiUiScreenEntityLinkItem = z.infer<
+  typeof aiUiScreenEntityLinkSchema
+>;
+export type AiUiScreenItem = z.infer<typeof aiUiScreenItemSchema>;
+export type AiUiComponentItem = z.infer<typeof aiUiComponentItemSchema>;
+export type AiUiResponse = z.infer<typeof aiUiResponseSchema>;
+
+export type AiUiItem =
+  | ({ kind: "component" } & AiUiComponentItem)
+  | ({ kind: "screen" } & AiUiScreenItem);
+
+export function flattenUiResponse(response: AiUiResponse): AiUiItem[] {
+  return [
+    ...response.components.map(
+      (item): AiUiItem => ({ kind: "component", ...item }),
+    ),
+    ...response.screens.map((item): AiUiItem => ({ kind: "screen", ...item })),
   ];
 }
 
