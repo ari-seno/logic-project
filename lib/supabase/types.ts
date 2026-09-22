@@ -22,6 +22,8 @@ export type Profile = {
   display_name: string | null;
   created_at: string;
   updated_at: string;
+  deleted_at: string | null;
+  purge_after: string | null;
 };
 
 export const REQUIREMENT_TYPES = [
@@ -742,6 +744,8 @@ type Tables = {
       display_name?: string | null;
       created_at?: string;
       updated_at?: string;
+      deleted_at?: string | null;
+      purge_after?: string | null;
     };
     Update: {
       id?: string;
@@ -749,6 +753,8 @@ type Tables = {
       display_name?: string | null;
       created_at?: string;
       updated_at?: string;
+      deleted_at?: string | null;
+      purge_after?: string | null;
     };
     Relationships: [];
   };

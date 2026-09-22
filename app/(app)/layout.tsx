@@ -16,9 +16,13 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("email, display_name")
+    .select("email, display_name, deleted_at")
     .eq("id", user.id)
     .maybeSingle();
+
+  if (profile?.deleted_at) {
+    redirect("/account/restore");
+  }
 
   const displayName =
     profile?.display_name ?? user.email?.split("@")[0] ?? "Account";

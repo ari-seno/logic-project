@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { ButtonLink } from "@/components/ui/button";
+import { DeleteAccountButton } from "@/components/account/delete-account-button";
 import { getCurrentProfile } from "@/lib/profile/queries";
 import { formatDate } from "@/lib/utils";
 
@@ -101,6 +102,21 @@ export default async function AccountPage() {
             <dd className="mt-2 leading-relaxed">{formatDate(profile.updated_at)}</dd>
           </div>
         </dl>
+      </section>
+
+      <section className="card-glass p-6">
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-[var(--danger)]">
+          Danger zone
+        </h2>
+        <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[var(--muted-foreground)]">
+          Deleting your account makes it and everything in it — projects,
+          requirements, decisions, domains, architecture, API design, UI design,
+          and tasks — immediately inaccessible. They are permanently deleted after
+          30 days, and you can restore access at any point before then.
+        </p>
+        <div className="mt-4">
+          <DeleteAccountButton email={profile.email} />
+        </div>
       </section>
     </div>
   );

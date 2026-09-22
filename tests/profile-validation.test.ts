@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  ACCOUNT_PURGE_GRACE_DAYS,
+  accountDeletionSchema,
   DISPLAY_NAME_MAX,
   profileUpdateSchema,
 } from "@/lib/validation/profile";
@@ -38,5 +40,31 @@ describe("profile validation", () => {
       display_name: "a".repeat(DISPLAY_NAME_MAX),
     });
     expect(r.success).toBe(true);
+  });
+});
+
+describe("account deletion validation", () => {
+  it("exposes a 30 day grace period", () => {
+    expect(ACCOUNT_PURGE_GRACE_DAYS).toBe(30);
+  });
+
+  it("accepts a well formed email", () => {
+    const r = accountDeletionSchema.safeParse({
+      confirmEmail: "  owner@example.com  ",
+    });
+    expect(r.success).toBe(true);
+    if (r.success) expect(r.data.confirmEmail).toBe("owner@example.com");
+  });
+
+  it("rejects a blank confirmation", () => {
+    expect(accountDeletionSchema.safeParse({ confirmEmail: "   " }).success).toBe(
+      false,
+    );
+  });
+
+  it("rejects a value that is not an email", () => {
+    expect(accountDeletionSchema.safeParse({ confirmEmail: "delete" }).success).toBe(
+      false,
+    );
   });
 });

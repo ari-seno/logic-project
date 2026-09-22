@@ -25,6 +25,8 @@ export async function getCurrentProfile(): Promise<ProfileView | null> {
       display_name: null,
       created_at: user.created_at,
       updated_at: user.updated_at ?? user.created_at,
+      deleted_at: null,
+      purge_after: null,
     };
   }
   return {
