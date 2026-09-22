@@ -16,6 +16,8 @@ const ERROR_COPY: Record<SuggestFailure["code"], string> = {
   ollama_auth_error: "Ollama rejected the API key. Update the credential.",
   ollama_unreachable: "Could not reach Ollama. Check base URL and network.",
   ollama_rate_limit: "Ollama is rate-limiting. Try again in a few seconds.",
+  ollama_timeout:
+    "Ollama took too long to respond. Try again or use a smaller model.",
   zod_retry_failed:
     "Ollama output did not match the schema. Try again with a shorter prompt.",
   credential_test_failed: "Credential test failed. Update the credential.",

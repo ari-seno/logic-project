@@ -368,6 +368,7 @@ export type SuggestFailure = {
     | "ollama_auth_error"
     | "ollama_unreachable"
     | "ollama_rate_limit"
+    | "ollama_timeout"
     | "zod_retry_failed"
     | "credential_test_failed"
     | "unknown";

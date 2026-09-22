@@ -2,9 +2,13 @@ import {
   OllamaAuthError,
   OllamaError,
   OllamaRateLimitError,
+  OllamaTimeoutError,
   OllamaUnreachableError,
   ZodRetryFailedError,
 } from "@/lib/ai/errors";
+
+export const DEFAULT_NUM_CTX = 8192;
+export const DEFAULT_TIMEOUT_MS = 60_000;
 
 export type OllamaProviderInput = {
   baseUrl: string;
@@ -13,6 +17,9 @@ export type OllamaProviderInput = {
   system: string;
   user: string;
   temperature?: number;
+  numCtx?: number;
+  numPredict?: number;
+  timeoutMs?: number;
   signal?: AbortSignal;
 };
 
@@ -42,6 +49,20 @@ async function callOllamaChat(
     Authorization: `Bearer ${input.apiKey}`,
     Accept: "application/json",
   };
+  const options: Record<string, number> = {
+    temperature: input.temperature ?? 0.2,
+    num_ctx: input.numCtx ?? DEFAULT_NUM_CTX,
+  };
+  if (input.numPredict !== undefined) {
+    options.num_predict = input.numPredict;
+  }
+
+  const timeoutMs = input.timeoutMs ?? DEFAULT_TIMEOUT_MS;
+  const timeoutSignal = AbortSignal.timeout(timeoutMs);
+  const signal = input.signal
+    ? AbortSignal.any([input.signal, timeoutSignal])
+    : timeoutSignal;
+
   let response: Response;
   try {
     response = await fetch(`${baseUrl}/api/chat`, {
@@ -55,15 +76,18 @@ async function callOllamaChat(
           { role: "system", content: input.system },
           { role: "user", content: input.user },
         ],
-        options: {
-          temperature: input.temperature ?? 0.2,
-        },
+        options,
       }),
-      signal: input.signal ?? null,
+      signal,
     });
   } catch (err) {
+    if (err instanceof Error && err.name === "TimeoutError") {
+      throw new OllamaTimeoutError(
+        `Ollama did not respond within ${Math.round(timeoutMs / 1000)}s.`,
+      );
+    }
     if (err instanceof Error && err.name === "AbortError") {
-      throw new OllamaUnreachableError("Timed out reaching Ollama.");
+      throw new OllamaUnreachableError("Ollama request was cancelled.");
     }
     throw new OllamaUnreachableError(
       err instanceof Error ? err.message : "Unknown network error.",

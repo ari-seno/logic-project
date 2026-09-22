@@ -1,7 +1,11 @@
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 import { z } from "zod";
 
-import { completeOllamaJson } from "@/lib/ai/provider";
+import {
+  DEFAULT_NUM_CTX,
+  __test_only__,
+  completeOllamaJson,
+} from "@/lib/ai/provider";
 
 const realFetch = globalThis.fetch;
 
@@ -140,5 +144,89 @@ describe("ai/provider / completeOllamaJson", () => {
         parseErrorMessage: "expected greeting",
       }),
     ).rejects.toThrow(/expected greeting/);
+  });
+});
+
+describe("ai/provider / callOllamaChat options", () => {
+  const url = "https://api.ollama.com/api/chat";
+
+  function capture(): { current: Record<string, unknown> | null } {
+    const box: { current: Record<string, unknown> | null } = { current: null };
+    handlers.set(url, (init) => {
+      box.current = JSON.parse(String(init?.body ?? "{}")) as Record<
+        string,
+        unknown
+      >;
+      return new Response(
+        JSON.stringify({ message: { role: "assistant", content: "{}" } }),
+        { status: 200, headers: { "content-type": "application/json" } },
+      );
+    });
+    return box;
+  }
+
+  function baseInput() {
+    return {
+      baseUrl: "https://api.ollama.com",
+      apiKey: "sk-test",
+      model: "llama3.1",
+      system: "you are a tester",
+      user: "say hi",
+    };
+  }
+
+  it("sends a context window so long prompts are not silently truncated", async () => {
+    const box = capture();
+
+    await __test_only__.callOllamaChat(baseInput());
+
+    const options = box.current?.options as Record<string, unknown>;
+    expect(options.num_ctx).toBe(DEFAULT_NUM_CTX);
+    expect(options.temperature).toBe(0.2);
+    expect(options.num_predict).toBeUndefined();
+  });
+
+  it("honours explicit numCtx and numPredict", async () => {
+    const box = capture();
+
+    await __test_only__.callOllamaChat({
+      ...baseInput(),
+      numCtx: 2048,
+      numPredict: 512,
+    });
+
+    const options = box.current?.options as Record<string, unknown>;
+    expect(options.num_ctx).toBe(2048);
+    expect(options.num_predict).toBe(512);
+  });
+
+  it("reports a timeout as ollama_timeout", async () => {
+    handlers.set(url, () => {
+      const error = new Error("The operation timed out.");
+      error.name = "TimeoutError";
+      throw error;
+    });
+
+    await expect(
+      __test_only__.callOllamaChat({ ...baseInput(), timeoutMs: 5_000 }),
+    ).rejects.toMatchObject({
+      code: "ollama_timeout",
+      message: "Ollama did not respond within 5s.",
+    });
+  });
+
+  it("reports a cancelled request as ollama_unreachable", async () => {
+    handlers.set(url, () => {
+      const error = new Error("The operation was aborted.");
+      error.name = "AbortError";
+      throw error;
+    });
+
+    await expect(
+      __test_only__.callOllamaChat(baseInput()),
+    ).rejects.toMatchObject({
+      code: "ollama_unreachable",
+      message: "Ollama request was cancelled.",
+    });
   });
 });

@@ -46,6 +46,13 @@ export class OllamaUnreachableError extends AiError {
   }
 }
 
+export class OllamaTimeoutError extends AiError {
+  constructor(message = "Ollama did not respond in time.") {
+    super("ollama_timeout", message);
+    this.name = "OllamaTimeoutError";
+  }
+}
+
 export class ZodRetryFailedError extends AiError {
   constructor(message = "Ollama returned output we could not parse.") {
     super("zod_retry_failed", message);
