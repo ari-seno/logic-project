@@ -91,4 +91,17 @@ export const AI_STAGE_LABELS: Record<AiStage, AiStageLabels> = {
     selectionNoun: "item",
     suggestionsHeading: "Suggested UI design",
   },
+  tasks: {
+    id: "tasks",
+    singular: "task",
+    plural: "tasks",
+    drawerTitle: "Generate tasks",
+    subtitleFallback: "AI assist for a first-draft task backlog",
+    setupCopy:
+      "Add an Ollama credential in Settings, then choose it for this project before generating a task backlog.",
+    promptPlaceholder:
+      "e.g. Break the lending workflow into implementation tasks with priorities and dependencies.",
+    selectionNoun: "task",
+    suggestionsHeading: "Suggested tasks",
+  },
 };

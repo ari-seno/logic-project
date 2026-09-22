@@ -14,6 +14,9 @@ import { listArchitectureTechnologiesByProject } from "@/lib/architecture/techno
 import { listArchitectureDecisionsByProject } from "@/lib/architecture/decisions/queries";
 import { listArchitectureComponentDependenciesByProject } from "@/lib/architecture/dependencies/queries";
 import { loadProjectApiContract } from "@/lib/api/endpoints/queries";
+import { listTasksByProject } from "@/lib/tasks/queries";
+import { listDependenciesByProject } from "@/lib/tasks/dependencies/queries";
+import { listAvailableArtifacts } from "@/lib/tasks/traceability/queries";
 import { listUiScreensByProject } from "@/lib/ui/screens/queries";
 import { listUiComponentsByProject } from "@/lib/ui/components/queries";
 import { listScreenComponents } from "@/lib/ui/screen-components/queries";
@@ -27,6 +30,7 @@ import { domainInputSchema } from "@/lib/validation/domains";
 import { entityInputSchema } from "@/lib/validation/entities";
 import { attributeInputSchema } from "@/lib/validation/attributes";
 import { relationshipInputSchema } from "@/lib/validation/relationships";
+import { taskDependencyInputSchema } from "@/lib/validation/tasks";
 import { architectureComponentInputSchema } from "@/lib/validation/architecture/components";
 import { architectureTechnologyInputSchema } from "@/lib/validation/architecture/technologies";
 import { architectureDecisionInputSchema } from "@/lib/validation/architecture/decisions";
@@ -49,6 +53,8 @@ import type {
   AiErdDomainItem,
   AiErdRelationshipItem,
   AiRequirementItem,
+  AiTaskItem,
+  AiTaskLinkItem,
   AiUiComponentItem,
   AiUiItem,
   AiUiPlacementItem,
@@ -64,8 +70,17 @@ import type {
   EntityDataType,
   Json,
   RelationshipType,
+  TaskDependencyType,
+  TaskEffort,
+  TaskPriority,
+  TaskType,
   UiComponentType,
   UiScreenType,
+} from "@/lib/supabase/types";
+import {
+  TASK_EFFORTS,
+  TASK_PRIORITIES,
+  TASK_TYPES,
 } from "@/lib/supabase/types";
 
 export function normalizeRequirementType(
@@ -2488,6 +2503,464 @@ export async function applyUiToProject(
         title: row.name,
         reason: "duplicate",
       });
+    }
+  }
+
+  return out;
+}
+
+export type ApplyTasksOptions = {
+  projectId: string;
+  userId: string;
+  items: AiTaskItem[];
+  indices: number[];
+};
+
+export type TaskRow = {
+  title: string;
+  task_type: TaskType;
+  priority: TaskPriority;
+  estimated_effort: TaskEffort | null;
+  description: string | null;
+  acceptance_criteria: string | null;
+  implementation_notes: string | null;
+};
+
+export type TaskDependencyRow = {
+  task_id: string;
+  depends_on_task_id: string;
+  dependency_type: TaskDependencyType;
+  description: string | null;
+};
+
+export function buildTaskRow(item: AiTaskItem): TaskRow | null {
+  const title = item.title.trim();
+  if (title.length < 1 || title.length > 200) return null;
+  if (!TASK_TYPES.includes(item.task_type)) return null;
+  if (!TASK_PRIORITIES.includes(item.priority)) return null;
+  const estimatedEffort = item.estimated_effort ?? null;
+  if (estimatedEffort !== null && !TASK_EFFORTS.includes(estimatedEffort)) {
+    return null;
+  }
+  const description = item.description.trim();
+  if (description.length > 5000) return null;
+  const acceptanceCriteria = item.acceptance_criteria.trim();
+  if (acceptanceCriteria.length > 10000) return null;
+  const implementationNotes = item.implementation_notes.trim();
+  if (implementationNotes.length > 10000) return null;
+
+  return {
+    title,
+    task_type: item.task_type,
+    priority: item.priority,
+    estimated_effort: estimatedEffort,
+    description: optionalText(description),
+    acceptance_criteria: optionalText(acceptanceCriteria),
+    implementation_notes: optionalText(implementationNotes),
+  };
+}
+
+export function buildTaskDependencyRow(
+  taskId: string,
+  dependsOnTaskId: string,
+  description: string,
+): TaskDependencyRow | null {
+  const parsed = taskDependencyInputSchema.safeParse({
+    depends_on_task_id: dependsOnTaskId,
+    dependency_type: "blocks",
+    description,
+  });
+  if (!parsed.success) return null;
+  if (parsed.data.depends_on_task_id === taskId) return null;
+
+  return {
+    task_id: taskId,
+    depends_on_task_id: parsed.data.depends_on_task_id,
+    dependency_type: "blocks",
+    description: optionalText(parsed.data.description ?? ""),
+  };
+}
+
+export function taskDependencyDedupeKey(
+  taskId: string,
+  dependsOnTaskId: string,
+): string {
+  return `${taskId}|${dependsOnTaskId}`;
+}
+
+type TaskArtifactIndex = {
+  requirementIdByTitle: Map<string, string>;
+  decisionIdByTitle: Map<string, string>;
+  entityIdByName: Map<string, string>;
+  componentIdByName: Map<string, string>;
+  endpointIdByLabel: Map<string, string>;
+  screenIdByName: Map<string, string>;
+};
+
+type TaskLinkTarget = {
+  table: string;
+  column: string;
+  id: string;
+};
+
+function resolveTaskLink(
+  link: AiTaskLinkItem,
+  index: TaskArtifactIndex,
+  endpointIdByLabel: Map<string, string>,
+): TaskLinkTarget | null {
+  const key = link.name.trim().toLowerCase();
+  if (!key) return null;
+
+  if (link.kind === "requirement") {
+    const id = index.requirementIdByTitle.get(key);
+    return id ? { table: "task_requirements", column: "requirement_id", id } : null;
+  }
+  if (link.kind === "decision") {
+    const id = index.decisionIdByTitle.get(key);
+    return id ? { table: "task_decisions", column: "decision_id", id } : null;
+  }
+  if (link.kind === "entity") {
+    const id = index.entityIdByName.get(key);
+    return id ? { table: "task_domains", column: "entity_id", id } : null;
+  }
+  if (link.kind === "component") {
+    const id = index.componentIdByName.get(key);
+    return id
+      ? { table: "task_architecture_components", column: "component_id", id }
+      : null;
+  }
+  if (link.kind === "endpoint") {
+    const id = endpointIdByLabel.get(key);
+    return id ? { table: "task_api_endpoints", column: "endpoint_id", id } : null;
+  }
+  const id = index.screenIdByName.get(key);
+  return id ? { table: "task_ui_screens", column: "screen_id", id } : null;
+}
+
+export async function applyTasksToProject(
+  options: ApplyTasksOptions,
+): Promise<ApplySummary> {
+  const supabase = await createClient();
+  const out: ApplySummary = { created: [], skipped: [], failed: [] };
+
+  const chosen = [...new Set(options.indices)]
+    .filter((n) => Number.isInteger(n) && n >= 0 && n < options.items.length)
+    .sort((a, b) => a - b);
+
+  const [existingTasks, existingDependencies, artifacts] = await Promise.all([
+    listTasksByProject({ projectId: options.projectId }),
+    listDependenciesByProject({ projectId: options.projectId }),
+    listAvailableArtifacts(options.projectId),
+  ]);
+
+  const taskIdByTitle = new Map<string, string>();
+  let position = existingTasks.reduce(
+    (max, task) => Math.max(max, task.position),
+    -1,
+  );
+  position += 1;
+  for (const task of existingTasks) {
+    const key = task.title.trim().toLowerCase();
+    if (!taskIdByTitle.has(key)) taskIdByTitle.set(key, task.id);
+  }
+
+  const dependencyKeys = new Set(
+    existingDependencies.map((dependency) =>
+      taskDependencyDedupeKey(
+        dependency.task_id,
+        dependency.depends_on_task_id,
+      ),
+    ),
+  );
+
+  const index: TaskArtifactIndex = {
+    requirementIdByTitle: new Map(
+      artifacts.requirements.map((row) => [row.title.trim().toLowerCase(), row.id]),
+    ),
+    decisionIdByTitle: new Map(
+      artifacts.decisions.map((row) => [row.title.trim().toLowerCase(), row.id]),
+    ),
+    entityIdByName: new Map(
+      artifacts.entities.map((row) => [row.name.trim().toLowerCase(), row.id]),
+    ),
+    componentIdByName: new Map(
+      artifacts.architectureComponents.map((row) => [
+        row.name.trim().toLowerCase(),
+        row.id,
+      ]),
+    ),
+    endpointIdByLabel: new Map(
+      artifacts.apiEndpoints.map((row) => [
+        `${row.method} ${row.path}`.trim().toLowerCase(),
+        row.id,
+      ]),
+    ),
+    screenIdByName: new Map(
+      artifacts.uiScreens.map((row) => [row.name.trim().toLowerCase(), row.id]),
+    ),
+  };
+
+  const createdByIndex = new Map<number, string>();
+  const parentIndexByTaskIndex = new Map<number, number>();
+  const dependencyQueue: Array<{ index: number; taskId: string; targetTitle: string }> =
+    [];
+  const linkQueue: Array<{ index: number; taskId: string; label: string; link: AiTaskLinkItem }> =
+    [];
+  const pendingParentUpdates: Array<{ index: number; taskId: string; parentTitle: string }> =
+    [];
+
+  const titleIndex = new Map<string, number>();
+  for (const index of chosen) {
+    const item = options.items[index];
+    if (item) titleIndex.set(item.title.trim().toLowerCase(), index);
+  }
+
+  for (const index of chosen) {
+    const item = options.items[index];
+    if (!item) {
+      out.skipped.push({ kind: "skipped", index, title: "", reason: "invalid" });
+      continue;
+    }
+
+    const row = buildTaskRow(item);
+    if (!row) {
+      out.skipped.push({
+        kind: "skipped",
+        index,
+        title: item.title,
+        reason: "invalid",
+      });
+      continue;
+    }
+
+    const key = row.title.toLowerCase();
+    if (taskIdByTitle.has(key)) {
+      const existingId = taskIdByTitle.get(key);
+      if (existingId) createdByIndex.set(index, existingId);
+      out.skipped.push({
+        kind: "skipped",
+        index,
+        title: row.title,
+        reason: "duplicate",
+      });
+    } else {
+      const { data, error } = await supabase
+        .from("tasks")
+        .insert({
+          project_id: options.projectId,
+          title: row.title,
+          description: row.description,
+          task_type: row.task_type,
+          status: "todo",
+          priority: row.priority,
+          estimated_effort: row.estimated_effort,
+          acceptance_criteria: row.acceptance_criteria,
+          implementation_notes: row.implementation_notes,
+          position,
+        })
+        .select("id, title")
+        .single();
+
+      if (error || !data) {
+        out.failed.push({
+          kind: "failed",
+          index,
+          title: row.title,
+          error: error?.message ?? "Could not insert task.",
+        });
+        continue;
+      }
+
+      taskIdByTitle.set(key, data.id);
+      createdByIndex.set(index, data.id);
+      position += 1;
+      out.created.push({ kind: "created", index, id: data.id, title: data.title });
+    }
+
+    const parentTitle = item.parent_title.trim();
+    if (parentTitle) {
+      const parentKey = parentTitle.toLowerCase();
+      const inlineIndex = titleIndex.get(parentKey);
+      if (inlineIndex === undefined) {
+        const existingParentId = taskIdByTitle.get(parentKey);
+        if (existingParentId) {
+          pendingParentUpdates.push({
+            index,
+            taskId: taskIdByTitle.get(key) ?? "",
+            parentTitle,
+          });
+        }
+      } else if (inlineIndex !== index) {
+        parentIndexByTaskIndex.set(index, inlineIndex);
+      }
+    }
+
+    for (const targetTitle of item.depends_on) {
+      dependencyQueue.push({
+        index,
+        taskId: taskIdByTitle.get(key) ?? "",
+        targetTitle,
+      });
+    }
+
+    for (const link of item.links) {
+      linkQueue.push({ index, taskId: taskIdByTitle.get(key) ?? "", label: link.name, link });
+    }
+  }
+
+  for (const [childIndex, parentIndex] of parentIndexByTaskIndex) {
+    const childId = createdByIndex.get(childIndex);
+    const parentId = createdByIndex.get(parentIndex);
+    if (!childId || !parentId || childId === parentId) {
+      if (childId) {
+        out.skipped.push({
+          kind: "skipped",
+          index: childIndex,
+          title: "parent task",
+          reason: "invalid",
+        });
+      }
+      continue;
+    }
+
+    const { error } = await supabase
+      .from("tasks")
+      .update({ parent_task_id: parentId })
+      .eq("id", childId);
+
+    if (error) {
+      out.failed.push({
+        kind: "failed",
+        index: childIndex,
+        title: "parent task",
+        error: error.message,
+      });
+    }
+  }
+
+  for (const entry of pendingParentUpdates) {
+    if (!entry.taskId) continue;
+    const parentId = taskIdByTitle.get(entry.parentTitle.toLowerCase());
+    if (!parentId || parentId === entry.taskId) continue;
+
+    const { error } = await supabase
+      .from("tasks")
+      .update({ parent_task_id: parentId })
+      .eq("id", entry.taskId);
+
+    if (error) {
+      out.failed.push({
+        kind: "failed",
+        index: entry.index,
+        title: "parent task",
+        error: error.message,
+      });
+    }
+  }
+
+  for (const entry of dependencyQueue) {
+    const label = `${options.items[entry.index]?.title ?? ""} → ${entry.targetTitle}`;
+    if (!entry.taskId) continue;
+
+    const targetId = taskIdByTitle.get(entry.targetTitle.trim().toLowerCase());
+    if (!targetId || targetId === entry.taskId) {
+      out.skipped.push({
+        kind: "skipped",
+        index: entry.index,
+        title: label,
+        reason: "invalid",
+      });
+      continue;
+    }
+
+    const row = buildTaskDependencyRow(entry.taskId, targetId, "");
+    if (!row) {
+      out.skipped.push({
+        kind: "skipped",
+        index: entry.index,
+        title: label,
+        reason: "invalid",
+      });
+      continue;
+    }
+
+    const key = taskDependencyDedupeKey(row.task_id, row.depends_on_task_id);
+    if (dependencyKeys.has(key)) {
+      out.skipped.push({
+        kind: "skipped",
+        index: entry.index,
+        title: label,
+        reason: "duplicate",
+      });
+      continue;
+    }
+
+    const { error } = await supabase.from("task_dependencies").insert({
+      project_id: options.projectId,
+      task_id: row.task_id,
+      depends_on_task_id: row.depends_on_task_id,
+      dependency_type: row.dependency_type,
+      description: row.description,
+    });
+
+    if (error) {
+      out.failed.push({
+        kind: "failed",
+        index: entry.index,
+        title: label,
+        error: error.message,
+      });
+      continue;
+    }
+
+    dependencyKeys.add(key);
+  }
+
+  for (const entry of linkQueue) {
+    if (!entry.taskId) continue;
+    const label = `${options.items[entry.index]?.title ?? ""} → ${entry.label}`;
+
+    const target = resolveTaskLink(entry.link, index, index.endpointIdByLabel);
+    if (!target) {
+      out.skipped.push({
+        kind: "skipped",
+        index: entry.index,
+        title: label,
+        reason: "invalid",
+      });
+      continue;
+    }
+
+    const linkInsert = {
+      task_id: entry.taskId,
+      [target.column]: target.id,
+    };
+    // The link tables are addressed dynamically, so the client's generated
+    // insert types cannot be resolved statically here.
+    const linksTable = supabase.from(
+      target.table as "task_requirements",
+    ) as unknown as {
+      insert: (row: typeof linkInsert) => Promise<{ error: { code?: string; message: string } | null }>;
+    };
+    const { error } = await linksTable.insert(linkInsert);
+
+    if (error) {
+      if (error.code === "23505") {
+        out.skipped.push({
+          kind: "skipped",
+          index: entry.index,
+          title: label,
+          reason: "duplicate",
+        });
+        continue;
+      }
+      out.failed.push({
+        kind: "failed",
+        index: entry.index,
+        title: label,
+        error: error.message,
+      });
+      continue;
     }
   }
 

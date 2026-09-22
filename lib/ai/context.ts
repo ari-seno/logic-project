@@ -10,6 +10,7 @@ import { listApiGroupsByProject } from "@/lib/api/groups/queries";
 import { listApiEndpointsByProject } from "@/lib/api/endpoints/queries";
 import { listUiScreensByProject } from "@/lib/ui/screens/queries";
 import { listUiComponentsByProject } from "@/lib/ui/components/queries";
+import { listTasksByProject } from "@/lib/tasks/queries";
 
 export type AiAssembledContext = {
   userId: string;
@@ -27,6 +28,7 @@ export type AiAssembledContext = {
   apiEndpointSummaries: string[];
   uiScreenNames: string[];
   uiComponentNames: string[];
+  taskTitles: string[];
 };
 
 function titlesOf(rows: Array<{ title: string }>): string[] {
@@ -72,6 +74,7 @@ export async function assembleAiContext(
     apiEndpoints,
     uiScreens,
     uiComponents,
+    tasks,
   ] = await Promise.all([
     listRequirements({ projectId }),
     listDecisions({ projectId }),
@@ -84,6 +87,7 @@ export async function assembleAiContext(
     listApiEndpointsByProject({ projectId }),
     listUiScreensByProject({ projectId }),
     listUiComponentsByProject({ projectId }),
+    listTasksByProject({ projectId }),
   ]);
 
   return {
@@ -104,5 +108,6 @@ export async function assembleAiContext(
     ),
     uiScreenNames: namesOf(uiScreens),
     uiComponentNames: namesOf(uiComponents),
+    taskTitles: titlesOf(tasks),
   };
 }

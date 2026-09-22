@@ -7,6 +7,7 @@ import { DecisionsSuggestion } from "@/components/ai/decisions-suggestion";
 import { DomainsSuggestion } from "@/components/ai/domains-suggestion";
 import { ArchitectureSuggestion } from "@/components/ai/architecture-suggestion";
 import { ApiSuggestion } from "@/components/ai/api-suggestion";
+import { TasksSuggestion } from "@/components/ai/tasks-suggestion";
 import { UiSuggestion } from "@/components/ai/ui-suggestion";
 import {
   AI_STAGE_LABELS,
@@ -19,15 +20,18 @@ import {
   aiApplyDecisions,
   aiApplyDomains,
   aiApplyRequirements,
+  aiApplyTasks,
   aiSuggestApi,
   aiSuggestUi,
   aiSuggestArchitecture,
   aiSuggestDecisions,
   aiSuggestDomains,
   aiSuggestRequirements,
+  aiSuggestTasks,
 } from "@/lib/ai/actions";
 import type {
   AiApiItem,
+  AiTaskItem,
   AiApplyResult,
   AiArchitectureItem,
   AiDecisionItem,
@@ -158,5 +162,20 @@ export const AI_STAGE_UI: Record<AiStage, AiStageUiConfig> = {
     ),
     suggest: aiSuggestUi,
     apply: aiApplyUi,
+  },
+  tasks: {
+    labels: AI_STAGE_LABELS.tasks,
+    renderItems: (props) => (
+      <TasksSuggestion
+        items={props.items as unknown as AiTaskItem[]}
+        selectedIndices={props.selectedIndices}
+        onToggle={props.onToggle}
+        onSelectAll={props.onSelectAll}
+        onSelectNone={props.onSelectNone}
+        showIndex={props.showIndex}
+      />
+    ),
+    suggest: aiSuggestTasks as unknown as AiStageUiConfig["suggest"],
+    apply: aiApplyTasks,
   },
 };

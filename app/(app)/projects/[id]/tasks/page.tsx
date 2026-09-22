@@ -12,6 +12,8 @@ import { ButtonLink } from "@/components/ui/button";
 import { EmptyState, EmptyStateIcon } from "@/components/ui/empty-state";
 import { formatDate } from "@/lib/utils";
 import { getProject } from "@/lib/projects/queries";
+import { getProjectCredentialAction } from "@/lib/ai/credentials-actions";
+import { AiGeneratePanel } from "@/components/ai/ai-generate-panel";
 import { listTasksByProject } from "@/lib/tasks/queries";
 import {
   deriveBlockedByDependency,
@@ -47,6 +49,12 @@ export default async function TasksListPage({
     listTasksByProject({ projectId: project.id }),
     listDependenciesByProject({ projectId: project.id }),
   ]);
+
+  const credentialResult = await getProjectCredentialAction(project.id);
+  const credential =
+    credentialResult.ok && credentialResult.credential
+      ? credentialResult.credential
+      : null;
 
   const status =
     sp.status && (STATUS_FILTERS as readonly string[]).includes(sp.status)
@@ -95,7 +103,12 @@ export default async function TasksListPage({
             {allTasks.length === 1 ? "" : "s"}
           </p>
         </div>
-        <div className="flex shrink-0 gap-2">
+        <div className="flex shrink-0 flex-wrap items-center gap-2">
+          <AiGeneratePanel
+            projectId={project.id}
+            stage="tasks"
+            credential={credential}
+          />
           <ButtonLink
             href={`/projects/${project.id}/tasks/board`}
             variant="secondary"
@@ -181,9 +194,16 @@ export default async function TasksListPage({
           title="No tasks match these filters"
           description="Try clearing filters or creating a new task."
           action={
-            <ButtonLink href={`/projects/${project.id}/tasks/new`}>
-              New task
-            </ButtonLink>
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              <AiGeneratePanel
+                projectId={project.id}
+                stage="tasks"
+                credential={credential}
+              />
+              <ButtonLink href={`/projects/${project.id}/tasks/new`}>
+                New task
+              </ButtonLink>
+            </div>
           }
         />
       ) : (

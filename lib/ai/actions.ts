@@ -2,6 +2,7 @@
 
 import {
   applyApiToProject,
+  applyTasksToProject,
   applyUiToProject,
   applyArchitectureToProject,
   applyDecisionsToProject,
@@ -30,6 +31,10 @@ import {
   buildApiUserPrompt,
 } from "@/lib/ai/prompts/api";
 import {
+  buildTasksSystemPrompt,
+  buildTasksUserPrompt,
+} from "@/lib/ai/prompts/tasks";
+import {
   buildUiSystemPrompt,
   buildUiUserPrompt,
 } from "@/lib/ai/prompts/ui";
@@ -39,6 +44,7 @@ import {
   aiDecisionsResponseSchema,
   aiErdResponseSchema,
   aiRequirementsResponseSchema,
+  aiTasksResponseSchema,
   aiUiResponseSchema,
   flattenApiResponse,
   flattenArchitectureResponse,
@@ -49,6 +55,7 @@ import {
   type AiDecisionItem,
   type AiErdDomainItem,
   type AiRequirementItem,
+  type AiTaskItem,
   type AiUiItem,
   type SuggestResult,
 } from "@/lib/ai/schema";
@@ -64,6 +71,9 @@ const DOMAINS_SCHEMA_HINT =
 
 const ARCHITECTURE_SCHEMA_HINT =
   "Schema: { components: [ { name, type, description, depends_on: [ { target_component, description } ] } ], technologies: [ { name, category, description } ], decisions: [ { title, context, decision, rationale } ] }, up to 20 components, 20 technologies, 15 decisions.";
+
+const TASKS_SCHEMA_HINT =
+  "Schema: { tasks: [ { title, task_type, priority, estimated_effort, description, acceptance_criteria, implementation_notes, parent_title, depends_on: [string], links: [ { kind, name } ] } ] }, 1..25 tasks.";
 
 const API_SCHEMA_HINT =
   "Schema: { groups: [ { name, prefix, description } ], endpoints: [ { group_name, method, path, name, summary, description, authentication_required, parameters: [ { name, location, data_type, required, description, example } ], request_body: { content_type, description, schema, example } | null, responses: [ { status_code, content_type, description, schema, example } ], errors: [ { code, message, http_status, description } ], entities: [ { entity_name, role } ], requirement_titles: [ string ] } ] }, up to 20 groups, 25 endpoints.";
@@ -341,5 +351,54 @@ export async function aiApplyUi(input: ApplyUiInput): Promise<AiApplyResult> {
   return runAiApply<AiUiItem>(input, {
     stage: "ui",
     apply: applyUiToProject,
+  });
+}
+
+export type SuggestTasksInput = {
+  projectId: string;
+  prompt: string;
+};
+
+export type ApplyTasksInput = {
+  suggestionId: string;
+  indices: number[];
+};
+
+export async function aiSuggestTasks(
+  input: SuggestTasksInput,
+): Promise<SuggestResult<AiTaskItem>> {
+  return runAiSuggest<AiTaskItem>(input, {
+    stage: "tasks",
+    buildSystemPrompt: buildTasksSystemPrompt,
+    buildUserPrompt: (ctx, userPrompt) =>
+      buildTasksUserPrompt({
+        projectName: ctx.projectName,
+        projectDescription: ctx.projectDescription,
+        requirementTitles: ctx.requirementTitles,
+        decisionTitles: ctx.decisionTitles,
+        domainNames: ctx.domainNames,
+        entityNames: ctx.entityNames,
+        architectureComponentNames: ctx.architectureComponentNames,
+        apiEndpointSummaries: ctx.apiEndpointSummaries,
+        uiScreenNames: ctx.uiScreenNames,
+        existingTaskTitles: ctx.taskTitles,
+        userPrompt,
+      }),
+    parse: (text) => {
+      const raw = safeJsonParse(text);
+      if (raw === null) return null;
+      const parsed = aiTasksResponseSchema.safeParse(raw);
+      return parsed.success ? parsed.data.tasks : null;
+    },
+    parseErrorMessage: TASKS_SCHEMA_HINT,
+  });
+}
+
+export async function aiApplyTasks(
+  input: ApplyTasksInput,
+): Promise<AiApplyResult> {
+  return runAiApply<AiTaskItem>(input, {
+    stage: "tasks",
+    apply: applyTasksToProject,
   });
 }

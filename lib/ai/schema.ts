@@ -11,6 +11,9 @@ import {
   ARCHITECTURE_TECHNOLOGY_CATEGORIES,
   ENTITY_DATA_TYPES,
   RELATIONSHIP_TYPES,
+  TASK_EFFORTS,
+  TASK_PRIORITIES,
+  TASK_TYPES,
   UI_COMPONENT_TYPES,
   UI_SCREEN_ENTITY_ROLES,
   UI_SCREEN_TYPES,
@@ -387,3 +390,42 @@ export type AiApplySkipped = {
 export type AiApplyResult =
   | { ok: true; created: AiApplyCreated[]; skipped: AiApplySkipped[] }
   | { ok: false; error: string };
+const aiTaskTitleSchema = z.string().trim().min(1).max(200);
+const aiTaskDescriptionSchema = z.string().trim().max(5000).default("");
+const aiTaskLongTextSchema = z.string().trim().max(10000).default("");
+
+export const aiTaskLinkSchema = z.object({
+  kind: z.enum([
+    "requirement",
+    "decision",
+    "entity",
+    "component",
+    "endpoint",
+    "screen",
+  ]),
+  name: aiTaskTitleSchema,
+});
+
+export const aiTaskItemSchema = z.object({
+  title: aiTaskTitleSchema,
+  task_type: z.enum(TASK_TYPES),
+  priority: z.enum(TASK_PRIORITIES).default("medium"),
+  estimated_effort: z.enum(TASK_EFFORTS).nullable().default(null),
+  description: aiTaskDescriptionSchema,
+  acceptance_criteria: aiTaskLongTextSchema,
+  implementation_notes: aiTaskLongTextSchema,
+  parent_title: z.string().trim().max(200).default(""),
+  depends_on: z
+    .array(z.string().trim().min(1).max(200))
+    .max(10)
+    .default([]),
+  links: z.array(aiTaskLinkSchema).max(15).default([]),
+});
+
+export const aiTasksResponseSchema = z.object({
+  tasks: z.array(aiTaskItemSchema).min(1).max(25),
+});
+
+export type AiTaskLinkItem = z.infer<typeof aiTaskLinkSchema>;
+export type AiTaskItem = z.infer<typeof aiTaskItemSchema>;
+export type AiTasksResponse = z.infer<typeof aiTasksResponseSchema>;
