@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createClient, type SupabaseServerClient } from "@/lib/supabase/server";
 import type { Task } from "@/lib/supabase/types";
 
 export async function listTasksByProject({
@@ -19,6 +19,7 @@ export async function listTasksByProject({
 
 export async function countTasksByStatus(
   projectId: string,
+  client?: SupabaseServerClient,
 ): Promise<{
   total: number;
   todo: number;
@@ -29,25 +30,29 @@ export async function countTasksByStatus(
   done: number;
   cancelled: number;
 }> {
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("tasks")
-    .select("status")
-    .eq("project_id", projectId);
-  if (error || !data) {
-    return {
-      total: 0,
-      todo: 0,
-      ready: 0,
-      in_progress: 0,
-      blocked: 0,
-      review: 0,
-      done: 0,
-      cancelled: 0,
-    };
-  }
+  const supabase = client ?? (await createClient());
+  const statuses = [
+    "todo",
+    "ready",
+    "in_progress",
+    "blocked",
+    "review",
+    "done",
+    "cancelled",
+  ] as const;
+
+  const results = await Promise.all(
+    statuses.map((status) =>
+      supabase
+        .from("tasks")
+        .select("id", { count: "exact", head: true })
+        .eq("project_id", projectId)
+        .eq("status", status),
+    ),
+  );
+
   const counts = {
-    total: data.length,
+    total: 0,
     todo: 0,
     ready: 0,
     in_progress: 0,
@@ -56,9 +61,13 @@ export async function countTasksByStatus(
     done: 0,
     cancelled: 0,
   };
-  for (const t of data) {
-    counts[t.status as keyof typeof counts] = (counts[t.status as keyof typeof counts] ?? 0) + 1;
-  }
+
+  statuses.forEach((status, index) => {
+    const value = results[index]?.count ?? 0;
+    counts[status] = value;
+    counts.total += value;
+  });
+
   return counts;
 }
 

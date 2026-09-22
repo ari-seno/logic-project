@@ -1,16 +1,20 @@
-import { createClient } from "@/lib/supabase/server";
+import {
+  createClient,
+  type SupabaseServerClient,
+} from "@/lib/supabase/server";
 import type { Requirement } from "@/lib/supabase/types";
 
 export type ListRequirementsOptions = {
   projectId: string;
   limit?: number;
+  client?: SupabaseServerClient;
 };
 
 export async function listRequirements(
   options: ListRequirementsOptions,
 ): Promise<Requirement[]> {
-  const { projectId, limit } = options;
-  const supabase = await createClient();
+  const { projectId, limit, client } = options;
+  const supabase = client ?? (await createClient());
 
   let query = supabase
     .from("requirements")
@@ -30,8 +34,11 @@ export async function listRequirements(
   return data ?? [];
 }
 
-export async function countRequirements(projectId: string): Promise<number> {
-  const supabase = await createClient();
+export async function countRequirements(
+  projectId: string,
+  client?: SupabaseServerClient,
+): Promise<number> {
+  const supabase = client ?? (await createClient());
   const { count, error } = await supabase
     .from("requirements")
     .select("*", { count: "exact", head: true })

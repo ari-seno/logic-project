@@ -1,4 +1,7 @@
-import { createClient } from "@/lib/supabase/server";
+import {
+  createClient,
+  type SupabaseServerClient,
+} from "@/lib/supabase/server";
 import type { ArchitectureComponentDependency } from "@/lib/supabase/types";
 
 export type ListArchitectureComponentDependenciesOptions = {
@@ -24,8 +27,9 @@ export async function listArchitectureComponentDependenciesByProject(
 
 export async function countArchitectureComponentDependenciesByProject(
   projectId: string,
+  client?: SupabaseServerClient,
 ): Promise<number> {
-  const supabase = await createClient();
+  const supabase = client ?? (await createClient());
   const { count, error } = await supabase
     .from("architecture_component_dependencies")
     .select("*", { count: "exact", head: true })

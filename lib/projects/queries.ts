@@ -1,15 +1,16 @@
-import { createClient } from "@/lib/supabase/server";
+import { createClient, type SupabaseServerClient } from "@/lib/supabase/server";
 import type { Project } from "@/lib/supabase/types";
 
 export type ListProjectsOptions = {
   limit?: number;
+  client?: SupabaseServerClient;
 };
 
 export async function listProjects(
   options: ListProjectsOptions = {},
 ): Promise<Project[]> {
-  const supabase = await createClient();
-  const { limit } = options;
+  const { limit, client } = options;
+  const supabase = client ?? (await createClient());
 
   let query = supabase
     .from("projects")
@@ -28,8 +29,11 @@ export async function listProjects(
   return data ?? [];
 }
 
-export async function getProject(id: string): Promise<Project | null> {
-  const supabase = await createClient();
+export async function getProject(
+  id: string,
+  client?: SupabaseServerClient,
+): Promise<Project | null> {
+  const supabase = client ?? (await createClient());
   const { data, error } = await supabase
     .from("projects")
     .select("*")

@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createClient, type SupabaseServerClient } from "@/lib/supabase/server";
 import type { UiScreen } from "@/lib/supabase/types";
 
 export async function listUiScreensByProject({
@@ -23,8 +23,9 @@ export async function listUiScreensByProject({
 
 export async function countUiScreensByProject(
   projectId: string,
+  client?: SupabaseServerClient,
 ): Promise<number> {
-  const supabase = await createClient();
+  const supabase = client ?? (await createClient());
   const { count, error } = await supabase
     .from("ui_screens")
     .select("id", { count: "exact", head: true })

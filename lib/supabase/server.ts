@@ -30,6 +30,8 @@ export async function createClient() {
   );
 }
 
+export type SupabaseServerClient = Awaited<ReturnType<typeof createClient>>;
+
 export async function getUser() {
   const supabase = await createClient();
   const {

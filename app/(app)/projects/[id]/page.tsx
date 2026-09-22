@@ -15,6 +15,7 @@ import {
 import { ButtonLink } from "@/components/ui/button";
 import { formatDate, formatDateTime } from "@/lib/utils";
 import { getProject } from "@/lib/projects/queries";
+import { createClient } from "@/lib/supabase/server";
 import {
   countRequirements,
   listRequirements,
@@ -47,7 +48,8 @@ export default async function ProjectOverviewPage({
 }) {
   const { id } = await params;
   const sp = await searchParams;
-  const project = await getProject(id);
+  const supabase = await createClient();
+  const project = await getProject(id, supabase);
 
   if (!project) {
     notFound();
@@ -72,22 +74,22 @@ export default async function ProjectOverviewPage({
     recentDecisions,
     credentialResult,
   ] = await Promise.all([
-    countRequirements(project.id),
-    countDecisions(project.id),
-    countDomains(project.id),
-    countEntitiesByProject(project.id),
-    countRelationshipsByProject(project.id),
-    countArchitectureComponentsByProject(project.id),
-    countArchitectureTechnologiesByProject(project.id),
-    countArchitectureDecisionsByProject(project.id),
-    countArchitectureComponentDependenciesByProject(project.id),
-    countApiGroupsByProject(project.id),
-    countApiEndpointsByProject(project.id),
-    countUiScreensByProject(project.id),
-    countUiComponentsByProject(project.id),
-    countTasksByStatus(project.id),
-    listRequirements({ projectId: project.id, limit: 5 }),
-    listDecisions({ projectId: project.id, limit: 5 }),
+    countRequirements(project.id, supabase),
+    countDecisions(project.id, supabase),
+    countDomains(project.id, supabase),
+    countEntitiesByProject(project.id, supabase),
+    countRelationshipsByProject(project.id, supabase),
+    countArchitectureComponentsByProject(project.id, supabase),
+    countArchitectureTechnologiesByProject(project.id, supabase),
+    countArchitectureDecisionsByProject(project.id, supabase),
+    countArchitectureComponentDependenciesByProject(project.id, supabase),
+    countApiGroupsByProject(project.id, supabase),
+    countApiEndpointsByProject(project.id, supabase),
+    countUiScreensByProject(project.id, supabase),
+    countUiComponentsByProject(project.id, supabase),
+    countTasksByStatus(project.id, supabase),
+    listRequirements({ projectId: project.id, limit: 5, client: supabase }),
+    listDecisions({ projectId: project.id, limit: 5, client: supabase }),
     getProjectCredentialAction(project.id),
   ]);
 

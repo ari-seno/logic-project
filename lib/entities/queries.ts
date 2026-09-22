@@ -1,4 +1,7 @@
-import { createClient } from "@/lib/supabase/server";
+import {
+  createClient,
+  type SupabaseServerClient,
+} from "@/lib/supabase/server";
 import type { Entity } from "@/lib/supabase/types";
 
 export type ListEntitiesOptions = {
@@ -56,8 +59,9 @@ export async function listEntitiesByProject(
 
 export async function countEntitiesByProject(
   projectId: string,
+  client?: SupabaseServerClient,
 ): Promise<number> {
-  const supabase = await createClient();
+  const supabase = client ?? (await createClient());
   const { count, error } = await supabase
     .from("entities")
     .select("*, domains!inner(project_id)", { count: "exact", head: true })

@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createClient, type SupabaseServerClient } from "@/lib/supabase/server";
 import type { UiComponent } from "@/lib/supabase/types";
 
 export async function listUiComponentsByProject({
@@ -19,8 +19,9 @@ export async function listUiComponentsByProject({
 
 export async function countUiComponentsByProject(
   projectId: string,
+  client?: SupabaseServerClient,
 ): Promise<number> {
-  const supabase = await createClient();
+  const supabase = client ?? (await createClient());
   const { count, error } = await supabase
     .from("ui_components")
     .select("id", { count: "exact", head: true })

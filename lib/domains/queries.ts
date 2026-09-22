@@ -1,4 +1,7 @@
-import { createClient } from "@/lib/supabase/server";
+import {
+  createClient,
+  type SupabaseServerClient,
+} from "@/lib/supabase/server";
 import type { Domain } from "@/lib/supabase/types";
 
 export type ListDomainsOptions = {
@@ -30,8 +33,11 @@ export async function listDomains(
   return data ?? [];
 }
 
-export async function countDomains(projectId: string): Promise<number> {
-  const supabase = await createClient();
+export async function countDomains(
+  projectId: string,
+  client?: SupabaseServerClient,
+): Promise<number> {
+  const supabase = client ?? (await createClient());
   const { count, error } = await supabase
     .from("domains")
     .select("*", { count: "exact", head: true })

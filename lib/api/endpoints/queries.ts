@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createClient, type SupabaseServerClient } from "@/lib/supabase/server";
 import type {
   ApiEndpoint,
   ApiEndpointEntity,
@@ -32,8 +32,9 @@ export async function listApiEndpointsByProject({
 
 export async function countApiEndpointsByProject(
   projectId: string,
+  client?: SupabaseServerClient,
 ): Promise<number> {
-  const supabase = await createClient();
+  const supabase = client ?? (await createClient());
   const { count, error } = await supabase
     .from("api_endpoints")
     .select("id", { count: "exact", head: true })
