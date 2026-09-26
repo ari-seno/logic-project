@@ -128,23 +128,32 @@ describe("ai/schema tasks response", () => {
     expect(task?.links).toEqual([]);
   });
 
-  it("rejects unsupported enum values", () => {
+  it("normalises unsupported enum values instead of failing the stage", () => {
     const badType = aiTasksResponseSchema.safeParse({
       tasks: [{ title: "Something", task_type: "chore" }],
     });
-    expect(badType.success).toBe(false);
+    expect(badType.success).toBe(true);
+    if (badType.success) {
+      expect(badType.data.tasks[0]?.task_type).toBe("other");
+    }
 
     const badPriority = aiTasksResponseSchema.safeParse({
       tasks: [{ title: "Something", task_type: "feature", priority: "urgent" }],
     });
-    expect(badPriority.success).toBe(false);
+    expect(badPriority.success).toBe(true);
+    if (badPriority.success) {
+      expect(badPriority.data.tasks[0]?.priority).toBe("critical");
+    }
 
     const badEffort = aiTasksResponseSchema.safeParse({
       tasks: [
         { title: "Something", task_type: "feature", estimated_effort: "huge" },
       ],
     });
-    expect(badEffort.success).toBe(false);
+    expect(badEffort.success).toBe(true);
+    if (badEffort.success) {
+      expect(badEffort.data.tasks[0]?.estimated_effort).toBe("xl");
+    }
 
     const badLinkKind = aiTasksResponseSchema.safeParse({
       tasks: [
@@ -155,7 +164,10 @@ describe("ai/schema tasks response", () => {
         },
       ],
     });
-    expect(badLinkKind.success).toBe(false);
+    expect(badLinkKind.success).toBe(true);
+    if (badLinkKind.success) {
+      expect(badLinkKind.data.tasks[0]?.links[0]?.kind).toBe("requirement");
+    }
   });
 
   it("rejects an empty task list", () => {

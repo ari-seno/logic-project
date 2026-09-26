@@ -159,11 +159,14 @@ describe("ai/schema api response", () => {
     expect(parsed.data.groups).toEqual([]);
   });
 
-  it("rejects unsupported enum values", () => {
+  it("normalises unsupported enum values instead of failing the stage", () => {
     const badMethod = aiApiResponseSchema.safeParse({
       endpoints: [{ method: "OPTIONS", path: "/users", name: "Options" }],
     });
-    expect(badMethod.success).toBe(false);
+    expect(badMethod.success).toBe(true);
+    if (badMethod.success) {
+      expect(badMethod.data.endpoints[0]?.method).toBe("GET");
+    }
 
     const badLocation = aiApiResponseSchema.safeParse({
       endpoints: [
@@ -175,7 +178,12 @@ describe("ai/schema api response", () => {
         },
       ],
     });
-    expect(badLocation.success).toBe(false);
+    expect(badLocation.success).toBe(true);
+    if (badLocation.success) {
+      expect(badLocation.data.endpoints[0]?.parameters[0]?.location).toBe(
+        "query",
+      );
+    }
 
     const badDataType = aiApiResponseSchema.safeParse({
       endpoints: [
@@ -187,7 +195,12 @@ describe("ai/schema api response", () => {
         },
       ],
     });
-    expect(badDataType.success).toBe(false);
+    expect(badDataType.success).toBe(true);
+    if (badDataType.success) {
+      expect(badDataType.data.endpoints[0]?.parameters[0]?.data_type).toBe(
+        "number",
+      );
+    }
 
     const badRole = aiApiResponseSchema.safeParse({
       endpoints: [
@@ -199,7 +212,12 @@ describe("ai/schema api response", () => {
         },
       ],
     });
-    expect(badRole.success).toBe(false);
+    expect(badRole.success).toBe(true);
+    if (badRole.success) {
+      expect(badRole.data.endpoints[0]?.entities[0]?.role).toBe(
+        "related_resource",
+      );
+    }
   });
 
   it("rejects an out-of-range status code", () => {

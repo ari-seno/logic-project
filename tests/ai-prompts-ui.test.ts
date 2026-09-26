@@ -137,16 +137,22 @@ describe("ai/schema ui response", () => {
     expect(parsed.data.components).toEqual([]);
   });
 
-  it("rejects unsupported enum values", () => {
+  it("normalises unsupported enum values instead of failing the stage", () => {
     const badScreenType = aiUiResponseSchema.safeParse({
       screens: [{ name: "Canvas", screen_type: "canvas" }],
     });
-    expect(badScreenType.success).toBe(false);
+    expect(badScreenType.success).toBe(true);
+    if (badScreenType.success) {
+      expect(badScreenType.data.screens[0]?.screen_type).toBe("page");
+    }
 
     const badComponentType = aiUiResponseSchema.safeParse({
       components: [{ name: "Widget", component_type: "widget" }],
     });
-    expect(badComponentType.success).toBe(false);
+    expect(badComponentType.success).toBe(true);
+    if (badComponentType.success) {
+      expect(badComponentType.data.components[0]?.component_type).toBe("other");
+    }
 
     const badRole = aiUiResponseSchema.safeParse({
       screens: [
@@ -157,7 +163,10 @@ describe("ai/schema ui response", () => {
         },
       ],
     });
-    expect(badRole.success).toBe(false);
+    expect(badRole.success).toBe(true);
+    if (badRole.success) {
+      expect(badRole.data.screens[0]?.entities[0]?.role).toBe("related");
+    }
   });
 
   it("rejects a response with no components and no screens", () => {

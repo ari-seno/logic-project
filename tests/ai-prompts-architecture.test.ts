@@ -129,20 +129,44 @@ describe("aiArchitectureResponseSchema", () => {
     expect(parsed.data.decisions).toEqual([]);
   });
 
-  it("rejects an unsupported component type", () => {
+  it("normalises an unknown component type onto a synonym or other", () => {
     const parsed = aiArchitectureResponseSchema.safeParse({
-      components: [{ name: "Web App", type: "mobile" }],
+      components: [
+        { name: "Web App", type: "mobile" },
+        { name: "Edge", type: "cdn" },
+        { name: "Mystery", type: "quantum" },
+      ],
     });
 
-    expect(parsed.success).toBe(false);
+    expect(parsed.success).toBe(true);
+    if (!parsed.success) return;
+    expect(parsed.data.components[0]?.type).toBe("frontend");
+    expect(parsed.data.components[1]?.type).toBe("infrastructure");
+    expect(parsed.data.components[2]?.type).toBe("other");
   });
 
-  it("rejects an unsupported technology category", () => {
+  it("normalises an unknown technology category so the stage is not lost", () => {
     const parsed = aiArchitectureResponseSchema.safeParse({
-      technologies: [{ name: "Something", category: "magic" }],
+      technologies: [
+        { name: "Redis", category: "cache" },
+        { name: "Kafka", category: "message bus" },
+        { name: "Prometheus", category: "monitoring" },
+        { name: "Loki", category: "logging" },
+        { name: "AWS S3", category: "storage" },
+        { name: "Something", category: "magic" },
+      ],
     });
 
-    expect(parsed.success).toBe(false);
+    expect(parsed.success).toBe(true);
+    if (!parsed.success) return;
+    expect(parsed.data.technologies.map((t) => t.category)).toEqual([
+      "infrastructure",
+      "infrastructure",
+      "infrastructure",
+      "infrastructure",
+      "hosting",
+      "other",
+    ]);
   });
 
   it("rejects a response with no items at all", () => {

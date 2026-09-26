@@ -22,18 +22,80 @@ import {
 export const aiTestStatusSchema = z.enum(AI_TEST_STATUSES);
 export const aiSuggestionStatusSchema = z.enum(AI_SUGGESTION_STATUSES);
 
-export const aiRequirementTypeSchema = z.enum([
-  "functional",
-  "non_functional",
-  "business",
-]);
+// Models occasionally invent an enum value that is not in our allowed list
+// (for example "cache" or "monitoring" for architecture technology categories).
+// Rejecting the whole response for one such value loses an otherwise valid
+// suggestion, so unknown values are normalised: exact matches are kept,
+// common synonyms are mapped onto the closest allowed value, and anything else
+// falls back to the provided fallback (usually "other").
+function tolerantEnum<const T extends readonly [string, ...string[]]>(
+  values: T,
+  options: { fallback: T[number]; synonyms?: Record<string, T[number]> },
+) {
+  const allowed = new Set<string>(values);
+  const synonyms = new Map<string, string>(
+    Object.entries(options.synonyms ?? {}).map(([key, target]) => [
+      normalizeEnumKey(key),
+      target,
+    ]),
+  );
 
-export const aiRequirementPrioritySchema = z.enum([
-  "must",
-  "should",
-  "could",
-  "wont",
-]);
+  return z
+    .string()
+    .trim()
+    .transform((raw) => {
+      const key = normalizeEnumKey(raw);
+      if (allowed.has(raw)) return raw;
+      const synonym = synonyms.get(key);
+      if (synonym) return synonym;
+      if (allowed.has(key)) return key;
+      return options.fallback;
+    })
+    .pipe(z.enum(values));
+}
+
+function normalizeEnumKey(value: string): string {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/[\s-]+/g, "_");
+}
+
+export const aiRequirementTypeSchema = tolerantEnum(
+  ["functional", "non_functional", "business"] as const,
+  {
+    fallback: "functional",
+    synonyms: {
+      nonfunctional: "non_functional",
+      nonfunctional_requirement: "non_functional",
+      quality: "non_functional",
+      business_requirement: "business",
+      user: "functional",
+      technical: "non_functional",
+      system: "functional",
+    },
+  },
+);
+
+export const aiRequirementPrioritySchema = tolerantEnum(
+  ["must", "should", "could", "wont"] as const,
+  {
+    fallback: "should",
+    synonyms: {
+      must_have: "must",
+      required: "must",
+      critical: "must",
+      high: "should",
+      should_have: "should",
+      medium: "could",
+      could_have: "could",
+      low: "could",
+      wont_have: "wont",
+      optional: "could",
+      nice_to_have: "could",
+    },
+  },
+);
 
 export const aiRequirementItemSchema = z.object({
   title: z.string().trim().min(3).max(120),
@@ -62,7 +124,28 @@ const aiErdDescriptionSchema = z.string().trim().max(5000).default("");
 
 export const aiErdAttributeSchema = z.object({
   name: aiErdNameSchema,
-  data_type: z.enum(ENTITY_DATA_TYPES),
+  data_type: tolerantEnum(ENTITY_DATA_TYPES, {
+    fallback: "string",
+    synonyms: {
+      int: "integer",
+      bigint: "integer",
+      float: "decimal",
+      double: "decimal",
+      numeric: "decimal",
+      money: "decimal",
+      bool: "boolean",
+      timestamp: "datetime",
+      time: "datetime",
+      jsonb: "json",
+      object: "json",
+      array: "json",
+      enum: "string",
+      varchar: "string",
+      char: "string",
+      blob: "text",
+      uuidv4: "uuid",
+    },
+  }),
   is_required: z.boolean().default(false),
   is_primary_key: z.boolean().default(false),
   description: aiErdDescriptionSchema,
@@ -70,7 +153,19 @@ export const aiErdAttributeSchema = z.object({
 
 export const aiErdRelationshipSchema = z.object({
   target_entity: aiErdNameSchema,
-  relationship_type: z.enum(RELATIONSHIP_TYPES),
+  relationship_type: tolerantEnum(RELATIONSHIP_TYPES, {
+    fallback: "one_to_many",
+    synonyms: {
+      one_to_one_: "one_to_one",
+      has_one: "one_to_one",
+      has_many: "one_to_many",
+      one_to_many_: "one_to_many",
+      belongs_to: "many_to_one",
+      many_to_one_: "many_to_one",
+      many_to_many_: "many_to_many",
+      has_and_belongs_to_many: "many_to_many",
+    },
+  }),
   name: z.string().trim().max(200).default(""),
   description: aiErdDescriptionSchema,
 });
@@ -102,14 +197,76 @@ export const aiArchitectureDependencySchema = z.object({
 
 export const aiArchitectureComponentSchema = z.object({
   name: aiArchitectureNameSchema,
-  type: z.enum(ARCHITECTURE_COMPONENT_TYPES),
+  type: tolerantEnum(ARCHITECTURE_COMPONENT_TYPES, {
+    fallback: "other",
+    synonyms: {
+      api: "backend",
+      service: "backend",
+      server: "backend",
+      web: "frontend",
+      ui: "frontend",
+      mobile: "frontend",
+      datastore: "database",
+      db: "database",
+      message_bus: "queue",
+      broker: "queue",
+      stream: "queue",
+      object_storage: "storage",
+      blob_storage: "storage",
+      auth: "authentication",
+      monitoring: "infrastructure",
+      logging: "infrastructure",
+      observability: "infrastructure",
+      gateway: "infrastructure",
+      cdn: "infrastructure",
+      cloud: "infrastructure",
+      container: "infrastructure",
+    },
+  }),
   description: aiArchitectureDescriptionSchema,
   depends_on: z.array(aiArchitectureDependencySchema).max(20).default([]),
 });
 
 export const aiArchitectureTechnologySchema = z.object({
   name: aiArchitectureNameSchema,
-  category: z.enum(ARCHITECTURE_TECHNOLOGY_CATEGORIES),
+  category: tolerantEnum(ARCHITECTURE_TECHNOLOGY_CATEGORIES, {
+    fallback: "other",
+    synonyms: {
+      cache: "infrastructure",
+      caching: "infrastructure",
+      message_bus: "infrastructure",
+      broker: "infrastructure",
+      queue: "infrastructure",
+      streaming: "infrastructure",
+      monitoring: "infrastructure",
+      observability: "infrastructure",
+      logging: "infrastructure",
+      dashboard: "infrastructure",
+      visualization: "infrastructure",
+      encryption: "infrastructure",
+      secrets: "infrastructure",
+      security: "authentication",
+      auth: "authentication",
+      storage: "hosting",
+      object_storage: "hosting",
+      cloud: "hosting",
+      cdn: "hosting",
+      container: "infrastructure",
+      orchestration: "infrastructure",
+      ci: "infrastructure",
+      build: "infrastructure",
+      tooling: "other",
+      library: "package",
+      dependencies: "package",
+      orm: "package",
+      validator: "package",
+      styling: "framework",
+      css: "framework",
+      state_management: "framework",
+      runtime: "language",
+      database_driver: "package",
+    },
+  }),
   description: aiArchitectureDescriptionSchema,
 });
 
@@ -194,8 +351,36 @@ export const aiApiGroupItemSchema = z.object({
 
 export const aiApiParameterSchema = z.object({
   name: aiApiNameSchema,
-  location: z.enum(API_PARAMETER_LOCATIONS),
-  data_type: z.enum(API_PARAMETER_DATA_TYPES),
+  location: tolerantEnum(API_PARAMETER_LOCATIONS, {
+    fallback: "query",
+    synonyms: {
+      body: "query",
+      url: "path",
+      route: "path",
+      url_param: "path",
+      query_param: "query",
+      querystring: "query",
+      header_param: "header",
+      http_header: "header",
+    },
+  }),
+  data_type: tolerantEnum(API_PARAMETER_DATA_TYPES, {
+    fallback: "string",
+    synonyms: {
+      int: "integer",
+      long: "integer",
+      float: "number",
+      double: "number",
+      decimal: "number",
+      bool: "boolean",
+      timestamp: "datetime",
+      date_time: "datetime",
+      json: "string",
+      object: "string",
+      array: "string",
+      guid: "uuid",
+    },
+  }),
   required: z.boolean().default(false),
   description: aiApiDetailSchema,
   example: aiApiExampleTextSchema,
@@ -225,12 +410,26 @@ export const aiApiErrorItemSchema = z.object({
 
 export const aiApiEntityLinkSchema = z.object({
   entity_name: aiApiNameSchema,
-  role: z.enum(API_ENDPOINT_ENTITY_ROLES),
+  role: tolerantEnum(API_ENDPOINT_ENTITY_ROLES, {
+    fallback: "related_resource",
+    synonyms: {
+      primary: "primary_resource",
+      resource: "primary_resource",
+      request: "request_resource",
+      response: "response_resource",
+      input: "request_resource",
+      output: "response_resource",
+      related: "related_resource",
+    },
+  }),
 });
 
 export const aiApiEndpointItemSchema = z.object({
   group_name: z.string().trim().max(120).default(""),
-  method: z.enum(API_HTTP_METHODS),
+  method: tolerantEnum(API_HTTP_METHODS, {
+    fallback: "GET",
+    synonyms: { head: "GET", options: "GET", read: "GET" },
+  }),
   path: z.string().trim().min(1).max(500),
   name: aiApiNameSchema,
   summary: z.string().trim().max(500).default(""),
@@ -293,13 +492,46 @@ export const aiUiPlacementSchema = z.object({
 
 export const aiUiScreenEntityLinkSchema = z.object({
   entity_name: aiUiNameSchema,
-  role: z.enum(UI_SCREEN_ENTITY_ROLES),
+  role: tolerantEnum(UI_SCREEN_ENTITY_ROLES, {
+    fallback: "related",
+    synonyms: {
+      view: "displayed",
+      show: "displayed",
+      create: "created",
+      insert: "created",
+      edit: "edited",
+      update: "edited",
+      delete: "deleted",
+      remove: "deleted",
+      filter: "filtered",
+      search: "filtered",
+      select: "selected",
+      pick: "selected",
+    },
+  }),
 });
 
 export const aiUiScreenItemSchema = z.object({
   name: aiUiNameSchema,
   route: z.string().trim().max(500).default(""),
-  screen_type: z.enum(UI_SCREEN_TYPES),
+  screen_type: tolerantEnum(UI_SCREEN_TYPES, {
+    fallback: "page",
+    synonyms: {
+      screen: "page",
+      popup: "modal",
+      overlay: "modal",
+      edit: "form",
+      create: "form",
+      index: "list",
+      table: "list",
+      view: "detail",
+      login: "authentication",
+      signin: "authentication",
+      register: "authentication",
+      error_page: "error",
+      home: "dashboard",
+    },
+  }),
   description: aiUiDescriptionSchema,
   purpose: aiUiDetailSchema,
   authentication_required: z.boolean().default(true),
@@ -313,7 +545,31 @@ export const aiUiScreenItemSchema = z.object({
 
 export const aiUiComponentItemSchema = z.object({
   name: aiUiNameSchema,
-  component_type: z.enum(UI_COMPONENT_TYPES),
+  component_type: tolerantEnum(UI_COMPONENT_TYPES, {
+    fallback: "other",
+    synonyms: {
+      navbar: "navigation",
+      menu: "navigation",
+      breadcrumb: "navigation",
+      container: "layout",
+      grid: "layout",
+      section: "layout",
+      panel: "card",
+      tile: "card",
+      datagrid: "table",
+      timeline: "list",
+      dropdown: "select",
+      combobox: "select",
+      toggle: "checkbox",
+      switch: "checkbox",
+      cta: "button",
+      popup: "modal",
+      sheet: "drawer",
+      toast: "notification",
+      graph: "chart",
+      graphql: "other",
+    },
+  }),
   description: aiUiDescriptionSchema,
   purpose: aiUiDetailSchema,
   technology: z.string().trim().max(200).default(""),
@@ -395,22 +651,92 @@ const aiTaskDescriptionSchema = z.string().trim().max(5000).default("");
 const aiTaskLongTextSchema = z.string().trim().max(10000).default("");
 
 export const aiTaskLinkSchema = z.object({
-  kind: z.enum([
-    "requirement",
-    "decision",
-    "entity",
-    "component",
-    "endpoint",
-    "screen",
-  ]),
+  kind: tolerantEnum(
+    ["requirement", "decision", "entity", "component", "endpoint", "screen"],
+    {
+      fallback: "requirement",
+      synonyms: {
+        requirements: "requirement",
+        decisions: "decision",
+        entities: "entity",
+        domain: "entity",
+        model: "entity",
+        components: "component",
+        architecture: "component",
+        service: "component",
+        endpoints: "endpoint",
+        api: "endpoint",
+        route: "endpoint",
+        screens: "screen",
+        ui: "screen",
+        page: "screen",
+      },
+    },
+  ),
   name: aiTaskTitleSchema,
 });
 
 export const aiTaskItemSchema = z.object({
   title: aiTaskTitleSchema,
-  task_type: z.enum(TASK_TYPES),
-  priority: z.enum(TASK_PRIORITIES).default("medium"),
-  estimated_effort: z.enum(TASK_EFFORTS).nullable().default(null),
+  task_type: tolerantEnum(TASK_TYPES, {
+    fallback: "other",
+    synonyms: {
+      chore: "other",
+      task: "other",
+      improvement: "refactor",
+      enhancement: "feature",
+      story: "feature",
+      fix: "bug",
+      hotfix: "bug",
+      db: "database",
+      schema: "database",
+      migration: "database",
+      api: "backend",
+      server: "backend",
+      web: "frontend",
+      ui: "frontend",
+      devops: "infrastructure",
+      deploy: "infrastructure",
+      ci: "infrastructure",
+      qa: "testing",
+      test: "testing",
+      docs: "documentation",
+      auth: "security",
+      hardening: "security",
+    },
+  }),
+  priority: tolerantEnum(TASK_PRIORITIES, {
+    fallback: "medium",
+    synonyms: {
+      urgent: "critical",
+      blocker: "critical",
+      p0: "critical",
+      p1: "high",
+      major: "high",
+      normal: "medium",
+      p2: "medium",
+      minor: "low",
+      p3: "low",
+      trivial: "low",
+    },
+  }).default("medium"),
+  estimated_effort: tolerantEnum(TASK_EFFORTS, {
+    fallback: "m",
+    synonyms: {
+      xsmall: "xs",
+      extra_small: "xs",
+      tiny: "xs",
+      small: "s",
+      medium: "m",
+      moderate: "m",
+      large: "l",
+      xlarge: "xl",
+      extra_large: "xl",
+      huge: "xl",
+    },
+  })
+    .nullable()
+    .default(null),
   description: aiTaskDescriptionSchema,
   acceptance_criteria: aiTaskLongTextSchema,
   implementation_notes: aiTaskLongTextSchema,

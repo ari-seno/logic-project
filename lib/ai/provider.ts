@@ -8,7 +8,10 @@ import {
 } from "@/lib/ai/errors";
 
 export const DEFAULT_NUM_CTX = 8192;
-export const DEFAULT_TIMEOUT_MS = 60_000;
+// Large graph stages (API, UI, Tasks) send a rich context and can exceed
+// several minutes on a slow model, so the ceiling is generous: a timeout here
+// surfaces as a failed stage with no suggestion row at all.
+export const DEFAULT_TIMEOUT_MS = 300_000;
 
 export type OllamaProviderInput = {
   baseUrl: string;

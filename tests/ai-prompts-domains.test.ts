@@ -121,22 +121,34 @@ describe("aiErdResponseSchema", () => {
     expect(entity.relationships).toEqual([]);
   });
 
-  it("rejects an unsupported data type", () => {
+  it("normalises an unsupported data type instead of dropping the domain", () => {
     const parsed = aiErdResponseSchema.safeParse({
       domains: [
         {
           name: "Billing",
           entities: [
-            { name: "Invoice", attributes: [{ name: "id", data_type: "money" }] },
+            {
+              name: "Invoice",
+              attributes: [
+                { name: "id", data_type: "money" },
+                { name: "total", data_type: "float" },
+                { name: "meta", data_type: "jsonb" },
+                { name: "weird", data_type: "quantum" },
+              ],
+            },
           ],
         },
       ],
     });
 
-    expect(parsed.success).toBe(false);
+    expect(parsed.success).toBe(true);
+    if (!parsed.success) return;
+    expect(
+      parsed.data.domains[0]?.entities[0]?.attributes.map((a) => a.data_type),
+    ).toEqual(["decimal", "decimal", "json", "string"]);
   });
 
-  it("rejects an unsupported relationship type", () => {
+  it("normalises an unsupported relationship type", () => {
     const parsed = aiErdResponseSchema.safeParse({
       domains: [
         {
@@ -147,6 +159,8 @@ describe("aiErdResponseSchema", () => {
               attributes: [{ name: "id", data_type: "uuid" }],
               relationships: [
                 { target_entity: "Customer", relationship_type: "has_many" },
+                { target_entity: "Ledger", relationship_type: "belongs_to" },
+                { target_entity: "Tax", relationship_type: "nonsense" },
               ],
             },
           ],
@@ -154,7 +168,13 @@ describe("aiErdResponseSchema", () => {
       ],
     });
 
-    expect(parsed.success).toBe(false);
+    expect(parsed.success).toBe(true);
+    if (!parsed.success) return;
+    expect(
+      parsed.data.domains[0]?.entities[0]?.relationships.map(
+        (r) => r.relationship_type,
+      ),
+    ).toEqual(["one_to_many", "many_to_one", "one_to_many"]);
   });
 
   it("rejects an entity with no attributes and a response with no domains", () => {
