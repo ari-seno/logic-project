@@ -59,7 +59,7 @@ export function DomainsSuggestion({
             <li
               key={`${item.name}-${index}`}
               className={cn(
-                "rounded-xl border bg-white p-3",
+                "rounded-xl border bg-[var(--surface-1)] p-3",
                 selected
                   ? "border-[var(--brand)]/40 ring-1 ring-[var(--brand)]/20"
                   : "border-[var(--border)] opacity-80",
@@ -88,10 +88,10 @@ export function DomainsSuggestion({
                     </p>
                   ) : null}
                   <div className="mt-2 flex flex-wrap gap-1.5">
-                    <span className="rounded-full border border-[var(--border)] bg-white px-2 py-0.5 text-[10px] text-[var(--muted-foreground)]">
+                    <span className="rounded-full border border-[var(--border)] bg-[var(--surface-1)] px-2 py-0.5 text-[10px] text-[var(--muted-foreground)]">
                       {entityCount} {entityCount === 1 ? "entity" : "entities"}
                     </span>
-                    <span className="rounded-full border border-[var(--border)] bg-white px-2 py-0.5 text-[10px] text-[var(--muted-foreground)]">
+                    <span className="rounded-full border border-[var(--border)] bg-[var(--surface-1)] px-2 py-0.5 text-[10px] text-[var(--muted-foreground)]">
                       {attributeCount}{" "}
                       {attributeCount === 1 ? "attribute" : "attributes"}
                     </span>
@@ -100,7 +100,7 @@ export function DomainsSuggestion({
                     {item.entities.map((entity, entityIndex) => (
                       <div
                         key={`${entity.name}-${entityIndex}`}
-                        className="rounded-lg border border-[var(--border)] bg-white/60 p-2.5"
+                        className="rounded-lg border border-[var(--border)] bg-[var(--surface-1)]/60 p-2.5"
                       >
                         <p className="text-xs font-semibold text-[var(--foreground)]">
                           {entity.name}
@@ -135,7 +135,7 @@ export function DomainsSuggestion({
                             {entity.relationships.map((rel, relIndex) => (
                               <li
                                 key={`${rel.target_entity}-${relIndex}`}
-                                className="rounded-full border border-[var(--border)] bg-white px-2 py-0.5 text-[10px] text-[var(--muted-foreground)]"
+                                className="rounded-full border border-[var(--border)] bg-[var(--surface-1)] px-2 py-0.5 text-[10px] text-[var(--muted-foreground)]"
                               >
                                 → {rel.target_entity} ·{" "}
                                 {humanizeType(rel.relationship_type)}

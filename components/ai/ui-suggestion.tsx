@@ -46,13 +46,13 @@ function chips(labels: string[], max = 8) {
       {shown.map((label, chipIndex) => (
         <li
           key={`${label}-${chipIndex}`}
-          className="rounded-full border border-[var(--border)] bg-white px-2 py-0.5 text-[10px] text-[var(--muted-foreground)]"
+          className="rounded-full border border-[var(--border)] bg-[var(--surface-1)] px-2 py-0.5 text-[10px] text-[var(--muted-foreground)]"
         >
           {label}
         </li>
       ))}
       {hidden > 0 ? (
-        <li className="rounded-full border border-[var(--border)] bg-white px-2 py-0.5 text-[10px] text-[var(--muted-foreground)]">
+        <li className="rounded-full border border-[var(--border)] bg-[var(--surface-1)] px-2 py-0.5 text-[10px] text-[var(--muted-foreground)]">
           +{hidden} more
         </li>
       ) : null}
@@ -80,7 +80,7 @@ export function UiSuggestion({
       <li
         key={`${item.kind}-${heading}-${index}`}
         className={cn(
-          "rounded-xl border bg-white p-3",
+          "rounded-xl border bg-[var(--surface-1)] p-3",
           selected
             ? "border-[var(--brand)]/40 ring-1 ring-[var(--brand)]/20"
             : "border-[var(--border)] opacity-80",
@@ -104,23 +104,23 @@ export function UiSuggestion({
               {heading}
             </p>
             <div className="mt-1 flex flex-wrap gap-1.5">
-              <span className="rounded-full border border-[var(--border)] bg-white px-2 py-0.5 text-[10px] uppercase tracking-wide text-[var(--muted-foreground)]">
+              <span className="rounded-full border border-[var(--border)] bg-[var(--surface-1)] px-2 py-0.5 text-[10px] uppercase tracking-wide text-[var(--muted-foreground)]">
                 {humanizeType(
                   item.kind === "screen" ? item.screen_type : item.component_type,
                 )}
               </span>
               {item.kind === "screen" && item.route ? (
-                <span className="rounded-full border border-[var(--border)] bg-white px-2 py-0.5 font-mono text-[10px] text-[var(--muted-foreground)]">
+                <span className="rounded-full border border-[var(--border)] bg-[var(--surface-1)] px-2 py-0.5 font-mono text-[10px] text-[var(--muted-foreground)]">
                   {item.route}
                 </span>
               ) : null}
               {item.kind === "screen" ? (
-                <span className="rounded-full border border-[var(--border)] bg-white px-2 py-0.5 text-[10px] uppercase tracking-wide text-[var(--muted-foreground)]">
+                <span className="rounded-full border border-[var(--border)] bg-[var(--surface-1)] px-2 py-0.5 text-[10px] uppercase tracking-wide text-[var(--muted-foreground)]">
                   {item.authentication_required ? "auth required" : "public"}
                 </span>
               ) : null}
               {item.kind === "component" && item.technology ? (
-                <span className="rounded-full border border-[var(--border)] bg-white px-2 py-0.5 text-[10px] text-[var(--muted-foreground)]">
+                <span className="rounded-full border border-[var(--border)] bg-[var(--surface-1)] px-2 py-0.5 text-[10px] text-[var(--muted-foreground)]">
                   {item.technology}
                 </span>
               ) : null}

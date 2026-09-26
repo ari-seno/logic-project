@@ -47,7 +47,7 @@ export default async function EditEntityPage({
         </p>
       </div>
 
-      <div className="rounded-lg border border-[var(--border)] bg-white p-6">
+      <div className="rounded-lg border border-[var(--border)] bg-[var(--surface-1)] p-6">
         <EntityForm domainId={domain.id} entity={entity} />
       </div>
     </div>

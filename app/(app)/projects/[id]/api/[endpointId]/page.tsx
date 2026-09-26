@@ -159,7 +159,7 @@ export default async function ApiEndpointDetailPage({
             {parameters.map((p) => (
               <li
                 key={p.id}
-                className="rounded-md border border-[var(--border)] bg-white/70 p-3"
+                className="rounded-md border border-[var(--border)] bg-[var(--surface-1)]/70 p-3"
               >
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div className="flex flex-wrap items-center gap-2">
@@ -209,7 +209,7 @@ export default async function ApiEndpointDetailPage({
         {requestBody ? (
           <div className="mt-3">
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <span className="rounded bg-white/80 px-2 py-0.5 font-mono text-xs ring-1 ring-inset ring-[var(--border)]">
+              <span className="rounded bg-[var(--surface-1)]/80 px-2 py-0.5 font-mono text-xs ring-1 ring-inset ring-[var(--border)]">
                 {requestBody.content_type}
               </span>
               <ApiRequestBodyActions endpointId={endpoint.id} />
@@ -221,12 +221,12 @@ export default async function ApiEndpointDetailPage({
             ) : null}
             <div className="mt-2 grid grid-cols-1 gap-3 sm:grid-cols-2">
               <DetailBlock label="Schema">
-                <pre className="overflow-x-auto rounded-md bg-white/70 p-2 font-mono text-xs">
+                <pre className="overflow-x-auto rounded-md bg-[var(--surface-1)]/70 p-2 font-mono text-xs">
                   {jsonOrFallback(requestBody.schema_definition)}
                 </pre>
               </DetailBlock>
               <DetailBlock label="Example">
-                <pre className="overflow-x-auto rounded-md bg-white/70 p-2 font-mono text-xs">
+                <pre className="overflow-x-auto rounded-md bg-[var(--surface-1)]/70 p-2 font-mono text-xs">
                   {jsonOrFallback(requestBody.example)}
                 </pre>
               </DetailBlock>
@@ -261,7 +261,7 @@ export default async function ApiEndpointDetailPage({
             {responses.map((r) => (
               <li
                 key={r.id}
-                className="rounded-md border border-[var(--border)] bg-white/70 p-3"
+                className="rounded-md border border-[var(--border)] bg-[var(--surface-1)]/70 p-3"
               >
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div className="flex items-center gap-2">
@@ -293,12 +293,12 @@ export default async function ApiEndpointDetailPage({
                 ) : null}
                 <div className="mt-2 grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <DetailBlock label="Schema">
-                    <pre className="overflow-x-auto rounded-md bg-white/70 p-2 font-mono text-xs">
+                    <pre className="overflow-x-auto rounded-md bg-[var(--surface-1)]/70 p-2 font-mono text-xs">
                       {jsonOrFallback(r.schema_definition)}
                     </pre>
                   </DetailBlock>
                   <DetailBlock label="Example">
-                    <pre className="overflow-x-auto rounded-md bg-white/70 p-2 font-mono text-xs">
+                    <pre className="overflow-x-auto rounded-md bg-[var(--surface-1)]/70 p-2 font-mono text-xs">
                       {jsonOrFallback(r.example)}
                     </pre>
                   </DetailBlock>
@@ -329,11 +329,11 @@ export default async function ApiEndpointDetailPage({
             {errors.map((e) => (
               <li
                 key={e.id}
-                className="rounded-md border border-[var(--border)] bg-white/70 p-3"
+                className="rounded-md border border-[var(--border)] bg-[var(--surface-1)]/70 p-3"
               >
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div className="flex flex-wrap items-center gap-2">
-                    <code className="rounded bg-white/80 px-2 py-0.5 text-xs ring-1 ring-inset ring-[var(--border)]">
+                    <code className="rounded bg-[var(--surface-1)]/80 px-2 py-0.5 text-xs ring-1 ring-inset ring-[var(--border)]">
                       {e.code}
                     </code>
                     {e.http_status ? (
@@ -383,7 +383,7 @@ export default async function ApiEndpointDetailPage({
             {entityLinks.map((link) => (
               <li
                 key={link.id}
-                className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-[var(--border)] bg-white/70 p-3"
+                className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-[var(--border)] bg-[var(--surface-1)]/70 p-3"
               >
                 <div className="flex flex-wrap items-center gap-2">
                   <ApiEntityRoleBadge role={link.role} />
@@ -428,7 +428,7 @@ export default async function ApiEndpointDetailPage({
             {requirementLinks.map((link) => (
               <li
                 key={link.id}
-                className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-[var(--border)] bg-white/70 p-3"
+                className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-[var(--border)] bg-[var(--surface-1)]/70 p-3"
               >
                 <Link
                   href={`/projects/${project.id}/requirements`}

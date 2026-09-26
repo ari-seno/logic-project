@@ -11,7 +11,7 @@ export type SetupRequiredCtaProps = {
 
 export function SetupRequiredCta({ projectId, stage }: SetupRequiredCtaProps) {
   return (
-    <div className="rounded-2xl border border-dashed border-[var(--border)] bg-white/60 p-5 text-sm">
+    <div className="rounded-2xl border border-dashed border-[var(--border)] bg-[var(--surface-1)]/60 p-5 text-sm">
       <p className="font-medium text-[var(--foreground)]">
         Pick an AI credential for this project.
       </p>

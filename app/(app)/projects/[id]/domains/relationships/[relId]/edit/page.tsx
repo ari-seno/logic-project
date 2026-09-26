@@ -44,7 +44,7 @@ export default async function EditRelationshipPage({
         </p>
       </div>
 
-      <div className="rounded-lg border border-[var(--border)] bg-white p-6">
+      <div className="rounded-lg border border-[var(--border)] bg-[var(--surface-1)] p-6">
         <RelationshipForm
           projectId={project.id}
           entities={entities}

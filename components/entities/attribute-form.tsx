@@ -86,7 +86,7 @@ export function AttributeForm({
 
         <div className="flex flex-col gap-1.5">
           <Label>Flags</Label>
-          <div className="flex flex-col gap-2 rounded-md border border-[var(--border)] bg-white p-2">
+          <div className="flex flex-col gap-2 rounded-md border border-[var(--border)] bg-[var(--surface-1)] p-2">
             <label className="flex items-center gap-2 text-sm">
               <input
                 type="checkbox"

@@ -39,14 +39,14 @@ export default async function NewRelationshipPage({
       </div>
 
       {entities.length < 2 ? (
-        <div className="rounded-lg border border-dashed border-[var(--border)] bg-white p-8 text-center">
+        <div className="rounded-lg border border-dashed border-[var(--border)] bg-[var(--surface-1)] p-8 text-center">
           <p className="text-sm text-[var(--muted-foreground)]">
             You need at least two entities in this project to create a
             relationship.
           </p>
         </div>
       ) : (
-        <div className="rounded-lg border border-[var(--border)] bg-white p-6">
+        <div className="rounded-lg border border-[var(--border)] bg-[var(--surface-1)] p-6">
           <RelationshipForm
             projectId={project.id}
             entities={entities}

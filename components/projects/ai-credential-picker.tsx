@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -67,11 +68,17 @@ export function AiCredentialPicker({
       const result = await setProjectCredential(projectId, id);
       if (!result.ok) {
         setError(result.error);
+        toast.error(result.error);
         return;
       }
       setOverride({ id, label: result.credential?.label ?? null });
       setSaved(true);
       setOpen(false);
+      toast.success(
+        result.credential
+          ? `AI credential set to ${result.credential.label}.`
+          : "AI credential unlinked.",
+      );
     });
   }
 
@@ -94,7 +101,7 @@ export function AiCredentialPicker({
         </p>
       ) : null}
       {open ? (
-        <div className="absolute right-0 z-30 mt-2 w-72 rounded-xl border border-[var(--border)] bg-white p-2 shadow-xl">
+        <div className="absolute right-0 z-30 mt-2 w-72 rounded-xl border border-[var(--border)] bg-[var(--surface-1)] p-2 shadow-xl">
           {options.length === 0 ? (
             <p className="px-2 py-3 text-xs text-[var(--muted-foreground)]">
               No saved credentials yet.{" "}

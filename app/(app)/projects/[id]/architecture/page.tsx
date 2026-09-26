@@ -145,7 +145,7 @@ export default async function ArchitectureOverviewPage({
             {components.map((c) => (
               <li
                 key={c.id}
-                className="rounded-md border border-[var(--border)] bg-white/70 p-3"
+                className="rounded-md border border-[var(--border)] bg-[var(--surface-1)]/70 p-3"
               >
                 <Link
                   href={`/projects/${project.id}/architecture/components/${c.id}`}
@@ -180,7 +180,7 @@ export default async function ArchitectureOverviewPage({
             {technologies.slice(0, 8).map((t) => (
               <li
                 key={t.id}
-                className="flex items-center justify-between rounded-md border border-[var(--border)] bg-white/70 px-3 py-2 text-sm"
+                className="flex items-center justify-between rounded-md border border-[var(--border)] bg-[var(--surface-1)]/70 px-3 py-2 text-sm"
               >
                 <Link
                   href={`/projects/${project.id}/architecture/technologies/${t.id}`}
@@ -225,7 +225,7 @@ export default async function ArchitectureOverviewPage({
             {decisions.map((d) => (
               <li
                 key={d.id}
-                className="flex items-center justify-between rounded-md border border-[var(--border)] bg-white/70 px-3 py-2 text-sm"
+                className="flex items-center justify-between rounded-md border border-[var(--border)] bg-[var(--surface-1)]/70 px-3 py-2 text-sm"
               >
                 <Link
                   href={`/projects/${project.id}/architecture/decisions/${d.id}`}
@@ -265,7 +265,7 @@ export default async function ArchitectureOverviewPage({
               return (
                 <li
                   key={dep.id}
-                  className="flex items-center gap-3 rounded-md border border-[var(--border)] bg-white/70 px-3 py-2 text-sm"
+                  className="flex items-center gap-3 rounded-md border border-[var(--border)] bg-[var(--surface-1)]/70 px-3 py-2 text-sm"
                 >
                   <Link
                     href={`/projects/${project.id}/architecture/dependencies/${dep.id}`}

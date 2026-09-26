@@ -18,7 +18,7 @@ export function ErdViewToggle({
     <div
       role="tablist"
       aria-label="ERD view mode"
-      className="inline-flex items-center rounded-lg border border-[var(--border)] bg-white p-1 text-sm shadow-sm"
+      className="inline-flex items-center rounded-lg border border-[var(--border)] bg-[var(--surface-1)] p-1 text-sm shadow-sm"
     >
       <Link
         role="tab"

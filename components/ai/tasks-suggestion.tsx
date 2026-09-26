@@ -25,13 +25,13 @@ function chips(labels: string[], max = 6) {
       {shown.map((label, chipIndex) => (
         <li
           key={`${label}-${chipIndex}`}
-          className="rounded-full border border-[var(--border)] bg-white px-2 py-0.5 text-[10px] text-[var(--muted-foreground)]"
+          className="rounded-full border border-[var(--border)] bg-[var(--surface-1)] px-2 py-0.5 text-[10px] text-[var(--muted-foreground)]"
         >
           {label}
         </li>
       ))}
       {hidden > 0 ? (
-        <li className="rounded-full border border-[var(--border)] bg-white px-2 py-0.5 text-[10px] text-[var(--muted-foreground)]">
+        <li className="rounded-full border border-[var(--border)] bg-[var(--surface-1)] px-2 py-0.5 text-[10px] text-[var(--muted-foreground)]">
           +{hidden} more
         </li>
       ) : null}
@@ -77,7 +77,7 @@ export function TasksSuggestion({
             <li
               key={`${item.title}-${index}`}
               className={cn(
-                "rounded-xl border bg-white p-3",
+                "rounded-xl border bg-[var(--surface-1)] p-3",
                 selected
                   ? "border-[var(--brand)]/40 ring-1 ring-[var(--brand)]/20"
                   : "border-[var(--border)] opacity-80",
@@ -101,19 +101,19 @@ export function TasksSuggestion({
                     {item.title}
                   </p>
                   <div className="mt-1 flex flex-wrap gap-1.5">
-                    <span className="rounded-full border border-[var(--border)] bg-white px-2 py-0.5 text-[10px] uppercase tracking-wide text-[var(--muted-foreground)]">
+                    <span className="rounded-full border border-[var(--border)] bg-[var(--surface-1)] px-2 py-0.5 text-[10px] uppercase tracking-wide text-[var(--muted-foreground)]">
                       {humanizeType(item.task_type)}
                     </span>
-                    <span className="rounded-full border border-[var(--border)] bg-white px-2 py-0.5 text-[10px] uppercase tracking-wide text-[var(--muted-foreground)]">
+                    <span className="rounded-full border border-[var(--border)] bg-[var(--surface-1)] px-2 py-0.5 text-[10px] uppercase tracking-wide text-[var(--muted-foreground)]">
                       {item.priority}
                     </span>
                     {item.estimated_effort ? (
-                      <span className="rounded-full border border-[var(--border)] bg-white px-2 py-0.5 text-[10px] uppercase tracking-wide text-[var(--muted-foreground)]">
+                      <span className="rounded-full border border-[var(--border)] bg-[var(--surface-1)] px-2 py-0.5 text-[10px] uppercase tracking-wide text-[var(--muted-foreground)]">
                         {item.estimated_effort}
                       </span>
                     ) : null}
                     {item.parent_title ? (
-                      <span className="rounded-full border border-[var(--border)] bg-white px-2 py-0.5 text-[10px] text-[var(--muted-foreground)]">
+                      <span className="rounded-full border border-[var(--border)] bg-[var(--surface-1)] px-2 py-0.5 text-[10px] text-[var(--muted-foreground)]">
                         ↳ {item.parent_title}
                       </span>
                     ) : null}

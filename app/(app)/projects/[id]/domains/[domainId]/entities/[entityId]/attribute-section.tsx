@@ -23,7 +23,7 @@ export function AttributeSection({
   return (
     <div className="flex flex-col gap-4">
       {attributes.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-[var(--border)] bg-white p-8 text-center">
+        <div className="rounded-lg border border-dashed border-[var(--border)] bg-[var(--surface-1)] p-8 text-center">
           <p className="text-sm text-[var(--muted-foreground)]">
             No attributes yet.
           </p>
@@ -32,7 +32,7 @@ export function AttributeSection({
           </p>
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-lg border border-[var(--border)] bg-white">
+        <div className="overflow-x-auto rounded-lg border border-[var(--border)] bg-[var(--surface-1)]">
           <table className="w-full text-left text-sm">
             <thead className="border-b border-[var(--border)] bg-[var(--muted)]">
               <tr>
@@ -65,7 +65,7 @@ export function AttributeSection({
       )}
 
       {editingId ? (
-        <div className="flex flex-col gap-3 rounded-lg border border-[var(--border)] bg-white p-5">
+        <div className="flex flex-col gap-3 rounded-lg border border-[var(--border)] bg-[var(--surface-1)] p-5">
           <h3 className="text-sm font-semibold">
             Edit attribute:{" "}
             {attributes.find((a) => a.id === editingId)?.name}
@@ -86,7 +86,7 @@ export function AttributeSection({
       ) : null}
 
       {showForm ? (
-        <div className="flex flex-col gap-3 rounded-lg border border-[var(--border)] bg-white p-5">
+        <div className="flex flex-col gap-3 rounded-lg border border-[var(--border)] bg-[var(--surface-1)] p-5">
           <h3 className="text-sm font-semibold">New attribute</h3>
           <AttributeForm entityId={entityId} />
           <Button

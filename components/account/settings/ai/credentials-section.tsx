@@ -194,7 +194,7 @@ export function CredentialsSection({
           {credentials.map((c) => (
             <li
               key={c.id}
-              className="rounded-lg border border-[var(--border)] bg-white/70 p-4"
+              className="rounded-lg border border-[var(--border)] bg-[var(--surface-1)]/70 p-4"
             >
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
@@ -213,7 +213,7 @@ export function CredentialsSection({
                     {c.base_url}
                   </p>
                   <p className="mt-1 text-xs text-[var(--muted-foreground)]">
-                    Model: <code className="rounded bg-white/80 px-1.5 py-0.5">{c.model}</code>
+                    Model: <code className="rounded bg-[var(--surface-1)]/80 px-1.5 py-0.5">{c.model}</code>
                   </p>
                   {c.last_test_status ? (
                     <p

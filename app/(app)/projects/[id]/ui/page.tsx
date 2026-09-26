@@ -188,7 +188,7 @@ export default async function UiOverviewPage({
                     {s.name}
                   </Link>
                   {s.route ? (
-                    <span className="rounded bg-white/80 px-2 py-0.5 font-mono text-xs text-[var(--muted-foreground)] ring-1 ring-inset ring-[var(--border)]">
+                    <span className="rounded bg-[var(--surface-1)]/80 px-2 py-0.5 font-mono text-xs text-[var(--muted-foreground)] ring-1 ring-inset ring-[var(--border)]">
                       {s.route}
                     </span>
                   ) : null}
@@ -239,7 +239,7 @@ export default async function UiOverviewPage({
                     {c.name}
                   </Link>
                   {c.technology ? (
-                    <span className="rounded bg-white/80 px-2 py-0.5 font-mono text-xs text-[var(--muted-foreground)] ring-1 ring-inset ring-[var(--border)]">
+                    <span className="rounded bg-[var(--surface-1)]/80 px-2 py-0.5 font-mono text-xs text-[var(--muted-foreground)] ring-1 ring-inset ring-[var(--border)]">
                       {c.technology}
                     </span>
                   ) : null}
@@ -286,7 +286,7 @@ export default async function UiOverviewPage({
                     {n.label}
                   </Link>
                   {n.route ? (
-                    <span className="rounded bg-white/80 px-2 py-0.5 font-mono text-xs text-[var(--muted-foreground)] ring-1 ring-inset ring-[var(--border)]">
+                    <span className="rounded bg-[var(--surface-1)]/80 px-2 py-0.5 font-mono text-xs text-[var(--muted-foreground)] ring-1 ring-inset ring-[var(--border)]">
                       {n.route}
                     </span>
                   ) : null}
@@ -308,7 +308,7 @@ export default async function UiOverviewPage({
         <p className="mt-2 text-xs text-[var(--muted-foreground)]">
           Read-only structured summary generated from the stored UI data.
         </p>
-        <pre className="mt-3 overflow-x-auto rounded-md border border-[var(--border)] bg-white/70 p-4 text-xs leading-6 text-[var(--foreground)]">
+        <pre className="mt-3 overflow-x-auto rounded-md border border-[var(--border)] bg-[var(--surface-1)]/70 p-4 text-xs leading-6 text-[var(--foreground)]">
           {renderPreview(screens, components, navigationItems, tree)}
         </pre>
       </section>

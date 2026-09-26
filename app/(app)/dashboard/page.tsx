@@ -40,14 +40,14 @@ export default async function DashboardPage() {
             <ButtonLink
               href="/projects/new"
               size="md"
-              className="!bg-white !text-[var(--brand)] hover:!bg-white/90"
+              className="!bg-[var(--surface-1)] !text-[var(--brand)] hover:!bg-[var(--surface-1)]/90"
             >
               New project
             </ButtonLink>
             <ButtonLink
               href="/projects"
               size="md"
-              className="!bg-white/10 !text-white !border !border-white/30 backdrop-blur hover:!bg-white/20"
+              className="!bg-[var(--surface-1)]/10 !text-white !border !border-white/30 backdrop-blur hover:!bg-[var(--surface-1)]/20"
             >
               View all
             </ButtonLink>

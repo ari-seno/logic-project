@@ -70,7 +70,7 @@ export default async function ArchitectureDecisionsListPage({
           {decisions.map((d) => (
             <li
               key={d.id}
-              className="flex items-start justify-between gap-3 rounded-md border border-[var(--border)] bg-white/70 px-4 py-3"
+              className="flex items-start justify-between gap-3 rounded-md border border-[var(--border)] bg-[var(--surface-1)]/70 px-4 py-3"
             >
               <Link
                 href={`/projects/${project.id}/architecture/decisions/${d.id}`}

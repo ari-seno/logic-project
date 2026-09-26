@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 
-const baseInputClass = "block w-full rounded-lg border border-[var(--input)] bg-white px-3.5 py-2 text-sm";
+const baseInputClass = "block w-full rounded-lg border border-[var(--input)] bg-[var(--surface-1)] px-3.5 py-2 text-sm";
 
 type CredentialFormValues = {
   label: string;
@@ -108,7 +108,7 @@ export function CredentialForm({
       ref={ref}
       aria-labelledby={titleId}
       onClose={() => onOpenChange(false)}
-      className="fixed left-1/2 top-1/2 max-h-[90vh] w-full max-w-xl -translate-x-1/2 -translate-y-1/2 overflow-auto rounded-2xl border border-[var(--glass-border)] bg-white p-6 shadow-2xl backdrop:bg-black/40 focus:outline-none"
+      className="fixed left-1/2 top-1/2 max-h-[90vh] w-full max-w-xl -translate-x-1/2 -translate-y-1/2 overflow-auto rounded-2xl border border-[var(--glass-border)] bg-[var(--surface-1)] p-6 shadow-2xl backdrop:bg-black/40 focus:outline-none"
     >
       <form
         method="dialog"

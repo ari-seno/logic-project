@@ -7,6 +7,7 @@ import {
   ApiMethodBadge,
 } from "@/components/projects/badges";
 import { ButtonLink } from "@/components/ui/button";
+import { DataCell, DataList, DataRow } from "@/components/ui/data-list";
 import { formatDate } from "@/lib/utils";
 import { getProject } from "@/lib/projects/queries";
 import { getProjectCredentialAction } from "@/lib/ai/credentials-actions";
@@ -126,38 +127,47 @@ export default async function ApiOverviewPage({
             </div>
           </div>
         ) : (
-          <ul className="mt-3 flex flex-col gap-2">
+          <DataList
+            caption="API endpoints"
+            columns={[
+              { key: "method", label: "Method" },
+              { key: "path", label: "Path" },
+              { key: "name", label: "Name" },
+              { key: "group", label: "Group" },
+              { key: "auth", label: "Auth" },
+              { key: "actions", label: "Actions", align: "right" },
+            ]}
+          >
             {endpoints.map((e) => (
-              <li
-                key={e.id}
-                className="card-glass flex flex-wrap items-center justify-between gap-3 p-4"
-              >
-                <div className="flex flex-wrap items-center gap-3">
+              <DataRow key={e.id} interactive>
+                <DataCell>
                   <ApiMethodBadge method={e.method} />
+                </DataCell>
+                <DataCell mono>
                   <Link
                     href={`/projects/${project.id}/api/${e.id}`}
-                    className="font-mono text-sm font-medium hover:underline"
+                    className="font-medium hover:underline"
                   >
                     {e.path}
                   </Link>
-                  <span className="text-sm text-[var(--foreground)]">
-                    {e.name}
-                  </span>
-                  {e.group_id ? (
-                    <span className="text-xs text-[var(--muted-foreground)]">
-                      in {groupNameById.get(e.group_id) ?? "—"}
-                    </span>
-                  ) : null}
+                </DataCell>
+                <DataCell>{e.name}</DataCell>
+                <DataCell className="text-[var(--muted-foreground)]">
+                  {e.group_id ? (groupNameById.get(e.group_id) ?? "—") : "—"}
+                </DataCell>
+                <DataCell>
                   <ApiAuthBadge required={e.authentication_required} />
-                </div>
-                <ApiEndpointActions
-                  endpointId={e.id}
-                  projectId={project.id}
-                  editHref={`/projects/${project.id}/api/${e.id}/edit`}
-                />
-              </li>
+                </DataCell>
+                <DataCell align="right">
+                  <ApiEndpointActions
+                    endpointId={e.id}
+                    projectId={project.id}
+                    editHref={`/projects/${project.id}/api/${e.id}/edit`}
+                  />
+                </DataCell>
+              </DataRow>
             ))}
-          </ul>
+          </DataList>
         )}
       </section>
 
@@ -190,7 +200,7 @@ export default async function ApiOverviewPage({
             Add endpoints to see the contract preview.
           </p>
         ) : (
-          <pre className="mt-3 overflow-x-auto rounded-md border border-[var(--border)] bg-white/70 p-4 text-xs leading-6 text-[var(--foreground)]">
+          <pre className="mt-3 overflow-x-auto rounded-md border border-[var(--border)] bg-[var(--surface-1)]/70 p-4 text-xs leading-6 text-[var(--foreground)]">
             {renderContractPreview(groups, endpoints)}
           </pre>
         )}
@@ -222,7 +232,7 @@ function GroupRow({
             {group.name}
           </Link>
           {group.prefix ? (
-            <span className="rounded-md bg-white/80 px-2 py-0.5 font-mono text-xs text-[var(--muted-foreground)] ring-1 ring-inset ring-[var(--border)]">
+            <span className="rounded-md bg-[var(--surface-1)]/80 px-2 py-0.5 font-mono text-xs text-[var(--muted-foreground)] ring-1 ring-inset ring-[var(--border)]">
               {group.prefix}
             </span>
           ) : null}

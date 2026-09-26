@@ -113,7 +113,7 @@ function TreeBranch({
   return (
     <ul className={depth === 0 ? "flex flex-col gap-2" : "ml-4 mt-2 flex flex-col gap-2 border-l border-[var(--border)] pl-3"}>
       {nodes.map((n) => (
-        <li key={n.id} className="rounded-md border border-[var(--border)] bg-white/70 p-3">
+        <li key={n.id} className="rounded-md border border-[var(--border)] bg-[var(--surface-1)]/70 p-3">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="flex flex-wrap items-center gap-2">
               <UiComponentTypeBadge
@@ -307,7 +307,7 @@ export default async function UiScreenDetailPage({
             {states.map((s) => (
               <li
                 key={s.id}
-                className="rounded-md border border-[var(--border)] bg-white/70 p-3"
+                className="rounded-md border border-[var(--border)] bg-[var(--surface-1)]/70 p-3"
               >
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div className="flex flex-wrap items-center gap-2">
@@ -381,7 +381,7 @@ export default async function UiScreenDetailPage({
             {requirementLinks.map((l) => (
               <li
                 key={l.id}
-                className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-[var(--border)] bg-white/70 p-3"
+                className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-[var(--border)] bg-[var(--surface-1)]/70 p-3"
               >
                 <Link
                   href={`/projects/${project.id}/requirements`}
@@ -415,7 +415,7 @@ export default async function UiScreenDetailPage({
             {entityLinks.map((l) => (
               <li
                 key={l.id}
-                className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-[var(--border)] bg-white/70 p-3"
+                className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-[var(--border)] bg-[var(--surface-1)]/70 p-3"
               >
                 <div className="flex flex-wrap items-center gap-2">
                   <UiScreenEntityRoleBadge role={l.role} />
@@ -459,7 +459,7 @@ async function FormBlock({
   const form = await getUiForm(formId);
   const fields = await listUiFormFields(formId);
   return (
-    <li className="rounded-md border border-[var(--border)] bg-white/70 p-3">
+    <li className="rounded-md border border-[var(--border)] bg-[var(--surface-1)]/70 p-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <span className="font-medium">{formName}</span>
         <UiFormActions formId={formId} projectId={projectId} />
@@ -481,7 +481,7 @@ async function FormBlock({
           {fields.map((f) => (
             <li
               key={f.id}
-              className="flex items-center justify-between gap-2 rounded border border-[var(--border)] bg-white/80 px-3 py-1.5 text-sm"
+              className="flex items-center justify-between gap-2 rounded border border-[var(--border)] bg-[var(--surface-1)]/80 px-3 py-1.5 text-sm"
             >
               <div className="flex flex-wrap items-center gap-2">
                 <UiFieldTypeBadge type={f.field_type} />
@@ -519,7 +519,7 @@ async function InteractionBlock({
 }) {
   const links = await listInteractionEndpoints(interaction.id);
   return (
-    <li className="rounded-md border border-[var(--border)] bg-white/70 p-3">
+    <li className="rounded-md border border-[var(--border)] bg-[var(--surface-1)]/70 p-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex flex-wrap items-center gap-2">
           <span className="font-medium">{interaction.name}</span>
@@ -545,7 +545,7 @@ async function InteractionBlock({
           {links.map((l) => (
             <li
               key={l.id}
-              className="flex items-center justify-between gap-2 rounded border border-[var(--border)] bg-white/80 px-3 py-1.5 text-sm"
+              className="flex items-center justify-between gap-2 rounded border border-[var(--border)] bg-[var(--surface-1)]/80 px-3 py-1.5 text-sm"
             >
               <div className="flex flex-wrap items-center gap-2">
                 <ApiMethodBadge method={l.endpoint_method as never} />

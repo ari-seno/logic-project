@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useTransition } from "react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/input";
@@ -130,6 +131,7 @@ export function AiGenerateContent({
       });
       if (!result.ok) {
         setApplyError(result.error);
+        toast.error(result.error);
         return;
       }
       const createdCount = result.created.length;
@@ -149,6 +151,15 @@ export function AiGenerateContent({
             : titles,
         variant: createdCount > 0 ? "success" : "partial",
       });
+      if (createdCount > 0) {
+        toast.success(
+          `Added ${createdCount} ${labels.singular}${
+            createdCount === 1 ? "" : "s"
+          }.`,
+        );
+      } else {
+        toast.info("Nothing was added.");
+      }
       setPrompt("");
       setSuggestion(null);
       onApplied?.();

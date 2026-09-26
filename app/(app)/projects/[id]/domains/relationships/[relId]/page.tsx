@@ -72,13 +72,13 @@ export default async function RelationshipDetailPage({
       </div>
 
       <section className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-        <div className="rounded-lg border border-[var(--border)] bg-white p-4">
+        <div className="rounded-lg border border-[var(--border)] bg-[var(--surface-1)] p-4">
           <p className="text-xs uppercase tracking-wide text-[var(--muted-foreground)]">
             Source
           </p>
           <p className="mt-1 font-semibold">{source?.name ?? "(missing)"}</p>
         </div>
-        <div className="rounded-lg border border-[var(--border)] bg-white p-4">
+        <div className="rounded-lg border border-[var(--border)] bg-[var(--surface-1)] p-4">
           <p className="text-xs uppercase tracking-wide text-[var(--muted-foreground)]">
             Type
           </p>
@@ -86,7 +86,7 @@ export default async function RelationshipDetailPage({
             <RelationshipTypeBadge type={relationship.relationship_type} />
           </p>
         </div>
-        <div className="rounded-lg border border-[var(--border)] bg-white p-4">
+        <div className="rounded-lg border border-[var(--border)] bg-[var(--surface-1)] p-4">
           <p className="text-xs uppercase tracking-wide text-[var(--muted-foreground)]">
             Target
           </p>
@@ -95,7 +95,7 @@ export default async function RelationshipDetailPage({
       </section>
 
       {relationship.description ? (
-        <section className="rounded-lg border border-[var(--border)] bg-white p-5">
+        <section className="rounded-lg border border-[var(--border)] bg-[var(--surface-1)] p-5">
           <h2 className="text-sm font-semibold uppercase tracking-wide text-[var(--muted-foreground)]">
             Description
           </h2>

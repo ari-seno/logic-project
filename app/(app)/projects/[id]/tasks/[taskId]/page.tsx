@@ -175,13 +175,13 @@ export default async function TaskDetailPage({
         <h3 className="mt-4 text-sm font-semibold uppercase tracking-wide text-[var(--muted-foreground)]">
           Acceptance criteria
         </h3>
-        <pre className="mt-2 whitespace-pre-wrap rounded-md border border-[var(--border)] bg-white/70 p-3 text-sm">
+        <pre className="mt-2 whitespace-pre-wrap rounded-md border border-[var(--border)] bg-[var(--surface-1)]/70 p-3 text-sm">
           {task.acceptance_criteria?.trim() || "(none)"}
         </pre>
         <h3 className="mt-4 text-sm font-semibold uppercase tracking-wide text-[var(--muted-foreground)]">
           Implementation notes
         </h3>
-        <pre className="mt-2 whitespace-pre-wrap rounded-md border border-[var(--border)] bg-white/70 p-3 text-sm">
+        <pre className="mt-2 whitespace-pre-wrap rounded-md border border-[var(--border)] bg-[var(--surface-1)]/70 p-3 text-sm">
           {task.implementation_notes?.trim() || "(none)"}
         </pre>
       </section>
@@ -197,7 +197,7 @@ export default async function TaskDetailPage({
             {parent ? (
               <Link
                 href={`/projects/${project.id}/tasks/${parent.id}`}
-                className="mt-1 block rounded-md border border-[var(--border)] bg-white/70 px-3 py-2 text-sm hover:underline"
+                className="mt-1 block rounded-md border border-[var(--border)] bg-[var(--surface-1)]/70 px-3 py-2 text-sm hover:underline"
               >
                 {parent.title}
               </Link>
@@ -218,7 +218,7 @@ export default async function TaskDetailPage({
                 {children.map((c) => (
                   <li
                     key={c.id}
-                    className="rounded-md border border-[var(--border)] bg-white/70 px-3 py-1.5 text-sm"
+                    className="rounded-md border border-[var(--border)] bg-[var(--surface-1)]/70 px-3 py-1.5 text-sm"
                   >
                     <Link
                       href={`/projects/${project.id}/tasks/${c.id}`}
@@ -274,7 +274,7 @@ export default async function TaskDetailPage({
                   return (
                     <li
                       key={d.id}
-                      className="flex items-center justify-between gap-2 rounded-md border border-[var(--border)] bg-white/70 px-3 py-1.5 text-sm"
+                      className="flex items-center justify-between gap-2 rounded-md border border-[var(--border)] bg-[var(--surface-1)]/70 px-3 py-1.5 text-sm"
                     >
                       <span>
                         <TaskDependencyTypeBadge type={d.dependency_type} />{" "}
@@ -310,7 +310,7 @@ export default async function TaskDetailPage({
                   return (
                     <li
                       key={d.id}
-                      className="flex items-center justify-between gap-2 rounded-md border border-[var(--border)] bg-white/70 px-3 py-1.5 text-sm"
+                      className="flex items-center justify-between gap-2 rounded-md border border-[var(--border)] bg-[var(--surface-1)]/70 px-3 py-1.5 text-sm"
                     >
                       <span>
                         <TaskDependencyTypeBadge type={d.dependency_type} />{" "}
@@ -343,7 +343,7 @@ export default async function TaskDetailPage({
                 return (
                   <li
                     key={d.id}
-                    className="flex items-center justify-between gap-2 rounded-md border border-[var(--border)] bg-white/70 px-3 py-1.5 text-sm"
+                    className="flex items-center justify-between gap-2 rounded-md border border-[var(--border)] bg-[var(--surface-1)]/70 px-3 py-1.5 text-sm"
                   >
                     <span>
                       <TaskDependencyTypeBadge type={d.dependency_type} />{" "}
@@ -400,7 +400,7 @@ export default async function TaskDetailPage({
             {reqs.map((r) => (
               <li
                 key={r.id}
-                className="flex items-center justify-between gap-2 rounded-md border border-[var(--border)] bg-white/70 px-3 py-1.5 text-sm"
+                className="flex items-center justify-between gap-2 rounded-md border border-[var(--border)] bg-[var(--surface-1)]/70 px-3 py-1.5 text-sm"
               >
                 <Link
                   href={`/projects/${project.id}/requirements`}
@@ -437,7 +437,7 @@ export default async function TaskDetailPage({
             {decs.map((d) => (
               <li
                 key={d.id}
-                className="flex items-center justify-between gap-2 rounded-md border border-[var(--border)] bg-white/70 px-3 py-1.5 text-sm"
+                className="flex items-center justify-between gap-2 rounded-md border border-[var(--border)] bg-[var(--surface-1)]/70 px-3 py-1.5 text-sm"
               >
                 <Link
                   href={`/projects/${project.id}/decisions`}
@@ -474,7 +474,7 @@ export default async function TaskDetailPage({
             {ents.map((e) => (
               <li
                 key={e.id}
-                className="flex items-center justify-between gap-2 rounded-md border border-[var(--border)] bg-white/70 px-3 py-1.5 text-sm"
+                className="flex items-center justify-between gap-2 rounded-md border border-[var(--border)] bg-[var(--surface-1)]/70 px-3 py-1.5 text-sm"
               >
                 <span>
                   <Link
@@ -518,7 +518,7 @@ export default async function TaskDetailPage({
             {comps.map((c) => (
               <li
                 key={c.id}
-                className="flex items-center justify-between gap-2 rounded-md border border-[var(--border)] bg-white/70 px-3 py-1.5 text-sm"
+                className="flex items-center justify-between gap-2 rounded-md border border-[var(--border)] bg-[var(--surface-1)]/70 px-3 py-1.5 text-sm"
               >
                 <Link
                   href={`/projects/${project.id}/architecture`}
@@ -555,10 +555,10 @@ export default async function TaskDetailPage({
             {apis.map((a) => (
               <li
                 key={a.id}
-                className="flex items-center justify-between gap-2 rounded-md border border-[var(--border)] bg-white/70 px-3 py-1.5 text-sm"
+                className="flex items-center justify-between gap-2 rounded-md border border-[var(--border)] bg-[var(--surface-1)]/70 px-3 py-1.5 text-sm"
               >
                 <span>
-                  <span className="rounded bg-white/80 px-2 py-0.5 font-mono text-xs text-[var(--muted-foreground)] ring-1 ring-inset ring-[var(--border)]">
+                  <span className="rounded bg-[var(--surface-1)]/80 px-2 py-0.5 font-mono text-xs text-[var(--muted-foreground)] ring-1 ring-inset ring-[var(--border)]">
                     {a.method} {a.path}
                   </span>{" "}
                   {a.name}
@@ -596,7 +596,7 @@ export default async function TaskDetailPage({
             {uis.map((u) => (
               <li
                 key={u.id}
-                className="flex items-center justify-between gap-2 rounded-md border border-[var(--border)] bg-white/70 px-3 py-1.5 text-sm"
+                className="flex items-center justify-between gap-2 rounded-md border border-[var(--border)] bg-[var(--surface-1)]/70 px-3 py-1.5 text-sm"
               >
                 <Link
                   href={`/projects/${project.id}/ui`}
@@ -625,7 +625,7 @@ export default async function TaskDetailPage({
         <h2 className="text-sm font-semibold uppercase tracking-wide text-[var(--muted-foreground)]">
           Task context summary
         </h2>
-        <pre className="mt-2 overflow-x-auto rounded-md border border-[var(--border)] bg-white/70 p-3 text-xs leading-6">
+        <pre className="mt-2 overflow-x-auto rounded-md border border-[var(--border)] bg-[var(--surface-1)]/70 p-3 text-xs leading-6">
 {`TASK
 ${task.title}
 
@@ -660,7 +660,7 @@ ${uis.length === 0 ? "  (none)" : uis.map((u) => `- ${u.name}`).join("\n")}`}
         <h2 className="text-sm font-semibold uppercase tracking-wide text-[var(--muted-foreground)]">
           Dependency chain (derived)
         </h2>
-        <pre className="mt-2 overflow-x-auto rounded-md border border-[var(--border)] bg-white/70 p-3 text-xs leading-6">
+        <pre className="mt-2 overflow-x-auto rounded-md border border-[var(--border)] bg-[var(--surface-1)]/70 p-3 text-xs leading-6">
 {chain.join("\n")}
         </pre>
       </section>

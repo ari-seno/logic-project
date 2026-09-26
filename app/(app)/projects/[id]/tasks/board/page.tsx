@@ -97,7 +97,7 @@ export default async function TaskBoardPage({
                     return (
                       <li
                         key={t.id}
-                        className="rounded-md border border-[var(--border)] bg-white/80 p-2 text-sm"
+                        className="rounded-md border border-[var(--border)] bg-[var(--surface-1)]/80 p-2 text-sm"
                       >
                         <div className="flex flex-wrap items-center gap-1.5">
                           <TaskTypeBadge type={t.task_type} />

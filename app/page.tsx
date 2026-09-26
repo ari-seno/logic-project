@@ -18,8 +18,8 @@ export default async function HomePage() {
       <div className="w-full max-w-3xl">
         <div className="hero-panel px-8 py-16 text-center sm:px-12 sm:py-20">
           <div className="relative">
-            <span className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/10 px-3 py-1 text-xs font-medium uppercase tracking-wider text-white/90 backdrop-blur">
-              <span className="h-1.5 w-1.5 rounded-full bg-white" />
+            <span className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-[var(--surface-1)]/10 px-3 py-1 text-xs font-medium uppercase tracking-wider text-white/90 backdrop-blur">
+              <span className="h-1.5 w-1.5 rounded-full bg-[var(--surface-1)]" />
               Project Planner
             </span>
             <h1 className="mt-6 text-4xl font-semibold tracking-tight sm:text-5xl md:text-6xl">
@@ -38,14 +38,14 @@ export default async function HomePage() {
               <ButtonLink
                 href="/register"
                 size="lg"
-                className="!bg-white !text-[var(--brand)] hover:!bg-white/90"
+                className="!bg-[var(--surface-1)] !text-[var(--brand)] hover:!bg-[var(--surface-1)]/90"
               >
                 Create account
               </ButtonLink>
               <ButtonLink
                 href="/login"
                 size="lg"
-                className="!bg-white/10 !text-white !border !border-white/30 backdrop-blur hover:!bg-white/20"
+                className="!bg-[var(--surface-1)]/10 !text-white !border !border-white/30 backdrop-blur hover:!bg-[var(--surface-1)]/20"
               >
                 Sign in
               </ButtonLink>

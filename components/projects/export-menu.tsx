@@ -27,7 +27,7 @@ export function ExportMenu({ projectId }: { projectId: string }) {
         Export
       </Button>
       {open ? (
-        <div className="absolute right-0 z-30 mt-2 w-64 rounded-xl border border-[var(--border)] bg-white p-2 shadow-xl">
+        <div className="absolute right-0 z-30 mt-2 w-64 rounded-xl border border-[var(--border)] bg-[var(--surface-1)] p-2 shadow-xl">
           <ul className="flex flex-col">
             {OPTIONS.map((opt) => (
               <li key={opt.format}>

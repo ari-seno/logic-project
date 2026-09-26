@@ -50,7 +50,7 @@ export function DecisionsSuggestion({
             <li
               key={`${item.title}-${index}`}
               className={cn(
-                "rounded-xl border bg-white p-3",
+                "rounded-xl border bg-[var(--surface-1)] p-3",
                 selected
                   ? "border-[var(--brand)]/40 ring-1 ring-[var(--brand)]/20"
                   : "border-[var(--border)] opacity-80",
@@ -87,7 +87,7 @@ export function DecisionsSuggestion({
                     </p>
                   ) : null}
                   <div className="mt-2 flex flex-wrap gap-1.5">
-                    <span className="rounded-full border border-[var(--border)] bg-white px-2 py-0.5 text-[10px] text-[var(--muted-foreground)]">
+                    <span className="rounded-full border border-[var(--border)] bg-[var(--surface-1)] px-2 py-0.5 text-[10px] text-[var(--muted-foreground)]">
                       Proposed
                     </span>
                   </div>

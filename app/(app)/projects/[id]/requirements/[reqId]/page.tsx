@@ -89,7 +89,7 @@ export default async function RequirementDetailPage({
         </div>
       </div>
 
-      <section className="rounded-lg border border-[var(--border)] bg-white p-6">
+      <section className="rounded-lg border border-[var(--border)] bg-[var(--surface-1)] p-6">
         <h2 className="text-sm font-semibold uppercase tracking-wide text-[var(--muted-foreground)]">
           Description
         </h2>

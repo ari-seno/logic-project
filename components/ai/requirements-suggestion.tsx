@@ -29,7 +29,7 @@ const PRIORITY_BADGE: Record<AiRequirementItem["priority"], string> = {
   must: "bg-[var(--danger)]/15 text-[var(--danger)]",
   should: "bg-[var(--brand)]/15 text-[var(--brand)]",
   could: "bg-[var(--muted)] text-[var(--muted-foreground)]",
-  wont: "bg-white text-[var(--muted-foreground)] line-through",
+  wont: "bg-[var(--surface-1)] text-[var(--muted-foreground)] line-through",
 };
 
 export function RequirementsSuggestion({
@@ -70,7 +70,7 @@ export function RequirementsSuggestion({
             <li
               key={`${item.title}-${index}`}
               className={cn(
-                "rounded-xl border bg-white p-3",
+                "rounded-xl border bg-[var(--surface-1)] p-3",
                 selected
                   ? "border-[var(--brand)]/40 ring-1 ring-[var(--brand)]/20"
                   : "border-[var(--border)] opacity-80",
@@ -97,7 +97,7 @@ export function RequirementsSuggestion({
                     {item.description}
                   </p>
                   <div className="mt-2 flex flex-wrap gap-1.5">
-                    <span className="rounded-full border border-[var(--border)] bg-white px-2 py-0.5 text-[10px] text-[var(--muted-foreground)]">
+                    <span className="rounded-full border border-[var(--border)] bg-[var(--surface-1)] px-2 py-0.5 text-[10px] text-[var(--muted-foreground)]">
                       {TYPE_LABEL[item.type]}
                     </span>
                     <span

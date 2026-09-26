@@ -9,7 +9,16 @@ import {
   TaskTypeBadge,
 } from "@/components/projects/badges";
 import { ButtonLink } from "@/components/ui/button";
+import {
+  DataCell,
+  DataList,
+  DataRow,
+  type DataListColumn,
+} from "@/components/ui/data-list";
 import { EmptyState, EmptyStateIcon } from "@/components/ui/empty-state";
+import { Input } from "@/components/ui/input";
+import { SegmentedNav } from "@/components/ui/segmented-nav";
+import { Select } from "@/components/ui/select";
 import { formatDate } from "@/lib/utils";
 import { getProject } from "@/lib/projects/queries";
 import { getProjectCredentialAction } from "@/lib/ai/credentials-actions";
@@ -33,12 +42,51 @@ const STATUS_FILTERS = [
   "cancelled",
 ] as const;
 
+const SORT_OPTIONS: { value: SortKey; label: string }[] = [
+  { value: "position", label: "Position" },
+  { value: "priority", label: "Priority" },
+  { value: "updated", label: "Updated" },
+  { value: "title", label: "Title" },
+];
+
+function filterHref(
+  projectId: string,
+  next: { status?: string; type?: string; sort?: string },
+  current: { status: string; type: string; sort: SortKey },
+) {
+  const status = next.status ?? current.status;
+  const type = next.type ?? current.type;
+  const sort = next.sort ?? current.sort;
+  const params = new URLSearchParams();
+  if (status !== "all") params.set("status", status);
+  if (type) params.set("type", type);
+  if (sort !== "position") params.set("sort", sort);
+  const qs = params.toString();
+  return `/projects/${projectId}/tasks${qs ? `?${qs}` : ""}`;
+}
+
+function TASK_COLUMNS(sort: SortKey): DataListColumn[] {
+  return [
+    { key: "title", label: "Task", sortDirection: sort === "title" ? "asc" : undefined },
+    { key: "type", label: "Type" },
+    { key: "status", label: "Status" },
+    { key: "priority", label: "Priority", sortDirection: sort === "priority" ? "desc" : undefined },
+    { key: "blocked", label: "Blocked" },
+    { key: "actions", label: "Actions", align: "right" },
+  ];
+}
+
 export default async function TasksListPage({
   params,
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ status?: string; type?: string; sort?: string }>;
+  searchParams: Promise<{
+    status?: string;
+    type?: string;
+    sort?: string;
+    q?: string;
+  }>;
 }) {
   const { id } = await params;
   const sp = await searchParams;
@@ -61,6 +109,7 @@ export default async function TasksListPage({
       ? sp.status
       : "all";
   const type = sp.type ?? "";
+  const query = (sp.q ?? "").trim();
   const sortRaw = sp.sort ?? "position";
   const sort: SortKey =
     sortRaw === "priority" ||
@@ -72,6 +121,10 @@ export default async function TasksListPage({
   const filtered = allTasks.filter((t) => {
     if (status !== "all" && t.status !== status) return false;
     if (type && t.task_type !== type) return false;
+    if (query) {
+      const haystack = `${t.title} ${t.description ?? ""}`.toLowerCase();
+      if (!haystack.includes(query.toLowerCase())) return false;
+    }
     return true;
   });
 
@@ -124,65 +177,73 @@ export default async function TasksListPage({
         </div>
       </div>
 
-      <form className="card-glass flex flex-wrap items-end gap-3" action="">
-        <div className="flex flex-col gap-1">
-          <label className="text-xs font-medium" htmlFor="status">
-            Status
-          </label>
-          <select
-            id="status"
-            name="status"
-            defaultValue={status}
-            className="rounded-md border border-[var(--border)] bg-white px-2 py-1 text-sm"
-          >
-            {STATUS_FILTERS.map((s) => (
-              <option key={s} value={s}>
-                {s.replace(/_/g, " ")}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className="flex flex-col gap-1">
-          <label className="text-xs font-medium" htmlFor="type">
-            Type
-          </label>
-          <select
-            id="type"
-            name="type"
-            defaultValue={type}
-            className="rounded-md border border-[var(--border)] bg-white px-2 py-1 text-sm"
-          >
-            <option value="">All</option>
-            {typesAvailable.map((t) => (
-              <option key={t} value={t}>
-                {t}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className="flex flex-col gap-1">
-          <label className="text-xs font-medium" htmlFor="sort">
-            Sort by
-          </label>
-          <select
-            id="sort"
-            name="sort"
-            defaultValue={sort}
-            className="rounded-md border border-[var(--border)] bg-white px-2 py-1 text-sm"
-          >
-            <option value="position">Position</option>
-            <option value="priority">Priority</option>
-            <option value="updated">Updated</option>
-            <option value="title">Title</option>
-          </select>
-        </div>
-        <button
-          type="submit"
-          className="rounded-md border border-[var(--border)] bg-white px-3 py-1 text-sm"
+      <div className="flex flex-col gap-3">
+        <SegmentedNav
+          ariaLabel="Filter tasks by status"
+          activeKey={status}
+          items={STATUS_FILTERS.map((s) => ({
+            key: s,
+            label: s === "all" ? "All" : s.replace(/_/g, " "),
+            href: filterHref(project.id, { status: s }, { status, type, sort }),
+            count:
+              s === "all"
+                ? allTasks.length
+                : allTasks.filter((t) => t.status === s).length,
+          }))}
+        />
+
+        <form
+          className="flex flex-wrap items-end gap-3 rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--surface-1)] p-3"
+          action={`/projects/${project.id}/tasks`}
         >
-          Apply
-        </button>
-      </form>
+          {status !== "all" ? (
+            <input type="hidden" name="status" value={status} />
+          ) : null}
+          <div className="flex min-w-[12rem] flex-1 flex-col gap-1">
+            <label className="text-xs font-medium" htmlFor="q">
+              Search
+            </label>
+            <Input
+              id="q"
+              name="q"
+              defaultValue={query}
+              placeholder="Search tasks"
+              type="search"
+            />
+          </div>
+          <div className="flex flex-col gap-1">
+            <label className="text-xs font-medium" htmlFor="type">
+              Type
+            </label>
+            <Select id="type" name="type" defaultValue={type} className="w-auto">
+              <option value="">All</option>
+              {typesAvailable.map((t) => (
+                <option key={t} value={t}>
+                  {t}
+                </option>
+              ))}
+            </Select>
+          </div>
+          <div className="flex flex-col gap-1">
+            <label className="text-xs font-medium" htmlFor="sort">
+              Sort by
+            </label>
+            <Select id="sort" name="sort" defaultValue={sort} className="w-auto">
+              {SORT_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </Select>
+          </div>
+          <button
+            type="submit"
+            className="rounded-md border border-[var(--border)] bg-[var(--surface-1)] px-3 py-2 text-sm"
+          >
+            Apply
+          </button>
+        </form>
+      </div>
 
       {sorted.length === 0 ? (
         <EmptyState
@@ -207,29 +268,23 @@ export default async function TasksListPage({
           }
         />
       ) : (
-        <ul className="flex flex-col gap-2">
+        <DataList
+          caption="Project tasks"
+          columns={TASK_COLUMNS(sort)}
+        >
           {sorted.map((t) => {
             const parent = allTasks.find((p) => p.id === t.parent_task_id);
             const blocked = deriveBlockedByDependency(t.id, allDeps, allTasks);
             return (
-              <li
-                key={t.id}
-                className="card-glass flex flex-wrap items-start justify-between gap-3 p-4"
-              >
-                <div className="flex flex-col gap-2">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <TaskTypeBadge type={t.task_type} />
-                    <TaskStatusBadge status={t.status} />
-                    <TaskPriorityBadge priority={t.priority} />
-                    {blocked.blocked ? <TaskBlockedBadge /> : null}
-                  </div>
+              <DataRow key={t.id} interactive>
+                <DataCell>
                   <Link
                     href={`/projects/${project.id}/tasks/${t.id}`}
                     className="font-medium hover:underline"
                   >
                     {t.title}
                   </Link>
-                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[var(--muted-foreground)]">
+                  <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[var(--muted-foreground)]">
                     {parent ? (
                       <span>
                         Parent:{" "}
@@ -243,12 +298,26 @@ export default async function TasksListPage({
                     ) : null}
                     <span>Updated {formatDate(t.updated_at)}</span>
                   </div>
-                </div>
-                <TaskActions taskId={t.id} />
-              </li>
+                </DataCell>
+                <DataCell>
+                  <TaskTypeBadge type={t.task_type} />
+                </DataCell>
+                <DataCell>
+                  <TaskStatusBadge status={t.status} />
+                </DataCell>
+                <DataCell>
+                  <TaskPriorityBadge priority={t.priority} />
+                </DataCell>
+                <DataCell>
+                  {blocked.blocked ? <TaskBlockedBadge /> : null}
+                </DataCell>
+                <DataCell align="right">
+                  <TaskActions taskId={t.id} />
+                </DataCell>
+              </DataRow>
             );
           })}
-        </ul>
+        </DataList>
       )}
     </div>
   );

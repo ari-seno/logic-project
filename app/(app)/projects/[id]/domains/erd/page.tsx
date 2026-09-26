@@ -218,7 +218,7 @@ export default async function ProjectErdPage({
                             <Link
                               key={entity.id}
                               href={`/projects/${project.id}/domains/${domain.id}/entities/${entity.id}`}
-                              className="block rounded-xl border border-[var(--border)] bg-white/60 p-4 transition-all hover:border-[var(--brand)] hover:shadow-md"
+                              className="block rounded-xl border border-[var(--border)] bg-[var(--surface-1)]/60 p-4 transition-all hover:border-[var(--brand)] hover:shadow-md"
                             >
                               <p className="text-sm font-semibold tracking-tight">
                                 {entity.name}
@@ -271,7 +271,7 @@ export default async function ProjectErdPage({
                   return (
                     <li
                       key={rel.id}
-                      className="flex flex-wrap items-center gap-3 rounded-lg border border-[var(--border)] bg-white/60 px-4 py-2.5"
+                      className="flex flex-wrap items-center gap-3 rounded-lg border border-[var(--border)] bg-[var(--surface-1)]/60 px-4 py-2.5"
                     >
                       <Link
                         href={`/projects/${project.id}/domains/relationships/${rel.id}`}

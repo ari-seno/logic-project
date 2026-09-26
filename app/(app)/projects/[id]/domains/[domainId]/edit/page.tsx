@@ -41,7 +41,7 @@ export default async function EditDomainPage({
         </p>
       </div>
 
-      <div className="rounded-lg border border-[var(--border)] bg-white p-6">
+      <div className="rounded-lg border border-[var(--border)] bg-[var(--surface-1)] p-6">
         <DomainForm projectId={project.id} domain={domain} />
       </div>
     </div>

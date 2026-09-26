@@ -73,7 +73,7 @@ export function ErdDetails({
                     {domainEntities.map((entity) => (
                       <li
                         key={entity.id}
-                        className="rounded-lg border border-[var(--border)] bg-white/60 p-4"
+                        className="rounded-lg border border-[var(--border)] bg-[var(--surface-1)]/60 p-4"
                       >
                         <div className="flex items-baseline justify-between gap-3">
                           <Link
@@ -94,7 +94,7 @@ export function ErdDetails({
                             No attributes yet.
                           </p>
                         ) : (
-                          <div className="mt-3 overflow-x-auto rounded-md border border-[var(--border)] bg-white">
+                          <div className="mt-3 overflow-x-auto rounded-md border border-[var(--border)] bg-[var(--surface-1)]">
                             <table className="w-full text-left text-xs">
                               <thead className="bg-[var(--muted)] text-[10px] uppercase tracking-wide text-[var(--muted-foreground)]">
                                 <tr>
@@ -178,7 +178,7 @@ export function ErdDetails({
                   return (
                     <li
                       key={rel.id}
-                      className="flex flex-wrap items-center gap-3 rounded-md border border-[var(--border)] bg-white/60 px-4 py-2"
+                      className="flex flex-wrap items-center gap-3 rounded-md border border-[var(--border)] bg-[var(--surface-1)]/60 px-4 py-2"
                     >
                       <Link
                         href={`/projects/${projectId}/domains/relationships/${rel.id}`}

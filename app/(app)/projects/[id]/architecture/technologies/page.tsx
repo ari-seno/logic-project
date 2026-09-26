@@ -70,7 +70,7 @@ export default async function ArchitectureTechnologiesListPage({
           {technologies.map((t) => (
             <li
               key={t.id}
-              className="flex items-center justify-between gap-3 rounded-md border border-[var(--border)] bg-white/70 px-4 py-3"
+              className="flex items-center justify-between gap-3 rounded-md border border-[var(--border)] bg-[var(--surface-1)]/70 px-4 py-3"
             >
               <Link
                 href={`/projects/${project.id}/architecture/technologies/${t.id}`}

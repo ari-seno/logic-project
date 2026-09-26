@@ -46,13 +46,13 @@ function chips(labels: string[], max = 8) {
       {shown.map((label, chipIndex) => (
         <li
           key={`${label}-${chipIndex}`}
-          className="rounded-full border border-[var(--border)] bg-white px-2 py-0.5 text-[10px] text-[var(--muted-foreground)]"
+          className="rounded-full border border-[var(--border)] bg-[var(--surface-1)] px-2 py-0.5 text-[10px] text-[var(--muted-foreground)]"
         >
           {label}
         </li>
       ))}
       {hidden > 0 ? (
-        <li className="rounded-full border border-[var(--border)] bg-white px-2 py-0.5 text-[10px] text-[var(--muted-foreground)]">
+        <li className="rounded-full border border-[var(--border)] bg-[var(--surface-1)] px-2 py-0.5 text-[10px] text-[var(--muted-foreground)]">
           +{hidden} more
         </li>
       ) : null}
@@ -80,7 +80,7 @@ export function ApiSuggestion({
       <li
         key={`${item.kind}-${heading}-${index}`}
         className={cn(
-          "rounded-xl border bg-white p-3",
+          "rounded-xl border bg-[var(--surface-1)] p-3",
           selected
             ? "border-[var(--brand)]/40 ring-1 ring-[var(--brand)]/20"
             : "border-[var(--border)] opacity-80",
@@ -110,17 +110,17 @@ export function ApiSuggestion({
             ) : null}
             <div className="mt-1 flex flex-wrap gap-1.5">
               {item.kind === "group" && item.prefix ? (
-                <span className="rounded-full border border-[var(--border)] bg-white px-2 py-0.5 font-mono text-[10px] text-[var(--muted-foreground)]">
+                <span className="rounded-full border border-[var(--border)] bg-[var(--surface-1)] px-2 py-0.5 font-mono text-[10px] text-[var(--muted-foreground)]">
                   {item.prefix}
                 </span>
               ) : null}
               {item.kind === "endpoint" && item.group_name ? (
-                <span className="rounded-full border border-[var(--border)] bg-white px-2 py-0.5 text-[10px] uppercase tracking-wide text-[var(--muted-foreground)]">
+                <span className="rounded-full border border-[var(--border)] bg-[var(--surface-1)] px-2 py-0.5 text-[10px] uppercase tracking-wide text-[var(--muted-foreground)]">
                   {item.group_name}
                 </span>
               ) : null}
               {item.kind === "endpoint" ? (
-                <span className="rounded-full border border-[var(--border)] bg-white px-2 py-0.5 text-[10px] uppercase tracking-wide text-[var(--muted-foreground)]">
+                <span className="rounded-full border border-[var(--border)] bg-[var(--surface-1)] px-2 py-0.5 text-[10px] uppercase tracking-wide text-[var(--muted-foreground)]">
                   {item.authentication_required ? "auth required" : "public"}
                 </span>
               ) : null}

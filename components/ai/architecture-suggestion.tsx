@@ -64,7 +64,7 @@ export function ArchitectureSuggestion({
       <li
         key={`${item.kind}-${heading}-${index}`}
         className={cn(
-          "rounded-xl border bg-white p-3",
+          "rounded-xl border bg-[var(--surface-1)] p-3",
           selected
             ? "border-[var(--brand)]/40 ring-1 ring-[var(--brand)]/20"
             : "border-[var(--border)] opacity-80",
@@ -89,7 +89,7 @@ export function ArchitectureSuggestion({
             </p>
             <div className="mt-1 flex flex-wrap gap-1.5">
               {item.kind === "component" || item.kind === "technology" ? (
-                <span className="rounded-full border border-[var(--border)] bg-white px-2 py-0.5 text-[10px] uppercase tracking-wide text-[var(--muted-foreground)]">
+                <span className="rounded-full border border-[var(--border)] bg-[var(--surface-1)] px-2 py-0.5 text-[10px] uppercase tracking-wide text-[var(--muted-foreground)]">
                   {humanizeType(
                     item.kind === "component" ? item.type : item.category,
                   )}
@@ -116,7 +116,7 @@ export function ArchitectureSuggestion({
                 {item.depends_on.map((dependency, dependencyIndex) => (
                   <li
                     key={`${dependency.target_component}-${dependencyIndex}`}
-                    className="rounded-full border border-[var(--border)] bg-white px-2 py-0.5 text-[10px] text-[var(--muted-foreground)]"
+                    className="rounded-full border border-[var(--border)] bg-[var(--surface-1)] px-2 py-0.5 text-[10px] text-[var(--muted-foreground)]"
                   >
                     → {dependency.target_component}
                   </li>
