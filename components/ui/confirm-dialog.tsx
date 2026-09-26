@@ -69,7 +69,7 @@ export function ConfirmDialog({
       }}
       className={cn(
         "fixed left-1/2 top-1/2 max-h-[85vh] w-full max-w-md -translate-x-1/2 -translate-y-1/2",
-        "rounded-2xl border border-[var(--glass-border)] bg-white/95 p-6 shadow-2xl backdrop-blur-xl",
+        "rounded-2xl border border-[var(--glass-border)] bg-[var(--surface-1)]/95 p-6 shadow-[var(--shadow-3)] backdrop-blur-xl",
         "backdrop:bg-black/40",
         "focus:outline-none",
       )}

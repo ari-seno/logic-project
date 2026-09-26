@@ -49,14 +49,14 @@ export function JsonBlock({ json, filename, summary, truncated }: JsonBlockProps
         <button
           type="button"
           onClick={() => setWrap((w) => !w)}
-          className="rounded-md border border-[var(--border)] bg-white/70 px-2.5 py-1 text-xs font-medium text-[var(--foreground)] hover:bg-white"
+          className="rounded-md border border-[var(--border)] bg-[var(--surface-1)]/70 px-2.5 py-1 text-xs font-medium text-[var(--foreground)] hover:bg-[var(--surface-1)]"
         >
           {wrap ? "No wrap" : "Wrap"}
         </button>
         <a
           href={`data:application/json;charset=utf-8,${encodeURIComponent(json)}`}
           download={filename}
-          className="rounded-md border border-[var(--border)] bg-white/70 px-2.5 py-1 text-xs font-medium text-[var(--foreground)] hover:bg-white"
+          className="rounded-md border border-[var(--border)] bg-[var(--surface-1)]/70 px-2.5 py-1 text-xs font-medium text-[var(--foreground)] hover:bg-[var(--surface-1)]"
         >
           Download .json
         </a>
@@ -72,7 +72,7 @@ export function JsonBlock({ json, filename, summary, truncated }: JsonBlockProps
       )}
       <pre
         className={
-          "rounded-md border border-[var(--border)] bg-white/70 p-4 font-mono text-[11px] leading-relaxed text-[var(--foreground)] " +
+          "rounded-md border border-[var(--border)] bg-[var(--surface-1)]/70 p-4 font-mono text-[11px] leading-relaxed text-[var(--foreground)] " +
           (wrap
             ? "whitespace-pre-wrap break-words"
             : "max-h-[480px] overflow-auto whitespace-pre")

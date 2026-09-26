@@ -61,7 +61,7 @@ export function ProjectTabs({
   return (
     <nav
       aria-label="Project sections"
-      className="inline-flex flex-wrap gap-1 rounded-xl border border-[var(--border)] bg-[var(--muted)] p-1"
+      className="flex snap-x snap-mandatory gap-1 overflow-x-auto rounded-xl border border-[var(--border)] bg-[var(--muted)] p-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
     >
       {tabs.map((tab) => {
         const isActive = tab.key === active;
@@ -71,9 +71,9 @@ export function ProjectTabs({
             href={tab.href}
             aria-current={isActive ? "page" : undefined}
             className={cn(
-              "rounded-lg px-3.5 py-1.5 text-sm font-medium transition-all",
+              "shrink-0 snap-center rounded-lg px-3.5 py-1.5 text-sm font-medium transition-all",
               isActive
-                ? "bg-white text-[var(--brand)] shadow-sm"
+                ? "bg-[var(--surface-1)] text-[var(--brand)] shadow-sm"
                 : "text-[var(--muted-foreground)] hover:text-[var(--foreground)]",
             )}
           >

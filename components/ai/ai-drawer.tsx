@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -13,6 +13,9 @@ export type AiDrawerProps = {
   footer?: React.ReactNode;
 };
 
+const FOCUSABLE =
+  'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
 export function AiDrawer({
   open,
   onClose,
@@ -21,25 +24,60 @@ export function AiDrawer({
   children,
   footer,
 }: AiDrawerProps) {
+  const panelRef = useRef<HTMLElement | null>(null);
+  const restoreRef = useRef<HTMLElement | null>(null);
+
   useEffect(() => {
+    if (!open) return undefined;
+
+    restoreRef.current =
+      document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : null;
+
+    const panel = panelRef.current;
+    const first = panel?.querySelector<HTMLElement>(FOCUSABLE);
+    (first ?? panel)?.focus();
+
     function onKey(event: KeyboardEvent) {
-      if (event.key === "Escape") onClose();
+      if (event.key === "Escape") {
+        onClose();
+        return;
+      }
+      if (event.key !== "Tab") return;
+
+      const node = panelRef.current;
+      if (!node) return;
+      const items = Array.from(node.querySelectorAll<HTMLElement>(FOCUSABLE));
+      if (items.length === 0) {
+        event.preventDefault();
+        return;
+      }
+
+      const firstItem = items[0];
+      const lastItem = items[items.length - 1];
+      if (!firstItem || !lastItem) return;
+
+      if (event.shiftKey && document.activeElement === firstItem) {
+        event.preventDefault();
+        lastItem.focus();
+      } else if (!event.shiftKey && document.activeElement === lastItem) {
+        event.preventDefault();
+        firstItem.focus();
+      }
     }
-    if (open) {
-      window.addEventListener("keydown", onKey);
-      return () => window.removeEventListener("keydown", onKey);
-    }
-    return undefined;
+
+    window.addEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      restoreRef.current?.focus();
+    };
   }, [open, onClose]);
 
+  if (!open) return null;
+
   return (
-    <div
-      aria-hidden={!open}
-      className={cn(
-        "fixed inset-0 z-50 transition-opacity",
-        open ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0",
-      )}
-    >
+    <div className="fixed inset-0 z-50">
       <button
         type="button"
         aria-label="Close drawer"
@@ -47,12 +85,13 @@ export function AiDrawer({
         className="absolute inset-0 bg-black/40"
       />
       <aside
+        ref={panelRef}
         role="dialog"
         aria-modal="true"
         aria-label={title}
+        tabIndex={-1}
         className={cn(
-          "absolute right-0 top-0 flex h-full w-full max-w-[480px] flex-col bg-white shadow-2xl transition-transform",
-          open ? "translate-x-0" : "translate-x-full",
+          "absolute right-0 top-0 flex h-full w-full max-w-[480px] flex-col bg-[var(--surface-1)] shadow-[var(--shadow-3)]",
         )}
       >
         <header className="flex items-start justify-between gap-3 border-b border-[var(--border)] px-5 py-4">

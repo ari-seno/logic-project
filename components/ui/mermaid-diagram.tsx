@@ -84,7 +84,7 @@ export function MermaidDiagram({
       role="img"
       aria-label={ariaLabel}
       className={cn(
-        "flex justify-center overflow-x-auto rounded-lg border border-[var(--border)] bg-white p-4",
+        "flex justify-center overflow-x-auto rounded-lg border border-[var(--border)] bg-[var(--surface-1)] p-4",
         className,
       )}
     />

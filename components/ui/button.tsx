@@ -1,4 +1,6 @@
 import { forwardRef, type ButtonHTMLAttributes } from "react";
+import Link from "next/link";
+import type { ComponentProps } from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -17,7 +19,7 @@ const variants: Record<ButtonVariant, string> = {
   primary:
     "bg-gradient-to-br from-[var(--brand)] to-[var(--brand-accent)] text-[var(--brand-foreground)] shadow-sm hover:shadow-md hover:brightness-110 active:brightness-95",
   secondary:
-    "bg-white text-[var(--foreground)] border border-[var(--border)] hover:bg-[var(--muted)] hover:border-[var(--muted-foreground)]/20",
+    "bg-[var(--surface-1)] text-[var(--foreground)] border border-[var(--border)] hover:bg-[var(--muted)] hover:border-[var(--muted-foreground)]/20",
   ghost:
     "bg-transparent text-[var(--foreground)] hover:bg-[var(--muted)]",
   danger:
@@ -49,7 +51,7 @@ export type ButtonLinkProps = {
   size?: ButtonSize;
   className?: string;
   children: React.ReactNode;
-} & React.AnchorHTMLAttributes<HTMLAnchorElement>;
+} & Omit<ComponentProps<typeof Link>, "className" | "children">;
 
 export const ButtonLink = forwardRef<HTMLAnchorElement, ButtonLinkProps>(
   function ButtonLink(
@@ -57,13 +59,13 @@ export const ButtonLink = forwardRef<HTMLAnchorElement, ButtonLinkProps>(
     ref,
   ) {
     return (
-      <a
+      <Link
         ref={ref}
         className={cn(base, variants[variant], sizes[size], className)}
         {...rest}
       >
         {children}
-      </a>
+      </Link>
     );
   },
 );

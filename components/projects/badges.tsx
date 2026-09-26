@@ -46,11 +46,11 @@ export function TypeBadge({ type }: { type: RequirementType }) {
   const map: Record<RequirementType, { label: string; cls: string }> = {
     functional: {
       label: "Functional",
-      cls: "bg-blue-50 text-blue-700 ring-blue-200",
+      cls: "bg-[var(--info-bg)] text-[var(--info-fg)] ring-[var(--info-border)]",
     },
     non_functional: {
       label: "Non-functional",
-      cls: "bg-violet-50 text-violet-700 ring-violet-200",
+      cls: "bg-[var(--brand-bg)] text-[var(--brand-fg)] ring-[var(--brand-border)]",
     },
   };
   return <Pill className={map[type].cls}>{map[type].label}</Pill>;
@@ -60,19 +60,19 @@ export function RequirementStatusBadge({ status }: { status: RequirementStatus }
   const map: Record<RequirementStatus, { label: string; cls: string }> = {
     draft: {
       label: "Draft",
-      cls: "bg-zinc-50 text-zinc-700 ring-zinc-200",
+      cls: "bg-[var(--neutral-bg)] text-[var(--neutral-fg)] ring-[var(--neutral-border)]",
     },
     approved: {
       label: "Approved",
-      cls: "bg-emerald-50 text-emerald-700 ring-emerald-200",
+      cls: "bg-[var(--success-bg)] text-[var(--success-fg)] ring-[var(--success-border)]",
     },
     rejected: {
       label: "Rejected",
-      cls: "bg-red-50 text-red-700 ring-red-200",
+      cls: "bg-[var(--danger-bg)] text-[var(--danger-fg)] ring-[var(--danger-border)]",
     },
     implemented: {
       label: "Implemented",
-      cls: "bg-indigo-50 text-indigo-700 ring-indigo-200",
+      cls: "bg-[var(--brand-bg)] text-[var(--brand-fg)] ring-[var(--brand-border)]",
     },
   };
   return <Pill className={map[status].cls}>{map[status].label}</Pill>;
@@ -82,19 +82,19 @@ export function PriorityBadge({ priority }: { priority: RequirementPriority }) {
   const map: Record<RequirementPriority, { label: string; cls: string }> = {
     low: {
       label: "Low",
-      cls: "bg-slate-50 text-slate-700 ring-slate-200",
+      cls: "bg-[var(--neutral-bg)] text-[var(--neutral-fg)] ring-[var(--neutral-border)]",
     },
     medium: {
       label: "Medium",
-      cls: "bg-amber-50 text-amber-700 ring-amber-200",
+      cls: "bg-[var(--warning-bg)] text-[var(--warning-fg)] ring-[var(--warning-border)]",
     },
     high: {
       label: "High",
-      cls: "bg-orange-50 text-orange-700 ring-orange-200",
+      cls: "bg-[var(--warning-bg)] text-[var(--warning-fg)] ring-[var(--warning-border)]",
     },
     critical: {
       label: "Critical",
-      cls: "bg-rose-50 text-rose-700 ring-rose-200",
+      cls: "bg-[var(--danger-bg)] text-[var(--danger-fg)] ring-[var(--danger-border)]",
     },
   };
   return <Pill className={map[priority].cls}>{map[priority].label}</Pill>;
@@ -104,15 +104,15 @@ export function DecisionStatusBadge({ status }: { status: DecisionStatus }) {
   const map: Record<DecisionStatus, { label: string; cls: string }> = {
     proposed: {
       label: "Proposed",
-      cls: "bg-blue-50 text-blue-700 ring-blue-200",
+      cls: "bg-[var(--info-bg)] text-[var(--info-fg)] ring-[var(--info-border)]",
     },
     accepted: {
       label: "Accepted",
-      cls: "bg-emerald-50 text-emerald-700 ring-emerald-200",
+      cls: "bg-[var(--success-bg)] text-[var(--success-fg)] ring-[var(--success-border)]",
     },
     superseded: {
       label: "Superseded",
-      cls: "bg-zinc-50 text-zinc-500 ring-zinc-200",
+      cls: "bg-[var(--neutral-bg)] text-[var(--neutral-fg)] ring-[var(--neutral-border)]",
     },
   };
   return <Pill className={map[status].cls}>{map[status].label}</Pill>;
@@ -120,7 +120,7 @@ export function DecisionStatusBadge({ status }: { status: DecisionStatus }) {
 
 export function DataTypeBadge({ dataType }: { dataType: EntityDataType }) {
   const cls =
-    "bg-slate-50 text-slate-700 ring-slate-200 font-mono text-[11px] lowercase";
+    "bg-[var(--neutral-bg)] text-[var(--neutral-fg)] ring-[var(--neutral-border)] font-mono text-[11px] lowercase";
   return <Pill className={cls}>{dataType}</Pill>;
 }
 
@@ -132,19 +132,19 @@ export function RelationshipTypeBadge({
   const map: Record<RelationshipType, { label: string; cls: string }> = {
     one_to_one: {
       label: "1 → 1",
-      cls: "bg-violet-50 text-violet-700 ring-violet-200",
+      cls: "bg-[var(--brand-bg)] text-[var(--brand-fg)] ring-[var(--brand-border)]",
     },
     one_to_many: {
       label: "1 → N",
-      cls: "bg-indigo-50 text-indigo-700 ring-indigo-200",
+      cls: "bg-[var(--brand-bg)] text-[var(--brand-fg)] ring-[var(--brand-border)]",
     },
     many_to_one: {
       label: "N → 1",
-      cls: "bg-indigo-50 text-indigo-700 ring-indigo-200",
+      cls: "bg-[var(--brand-bg)] text-[var(--brand-fg)] ring-[var(--brand-border)]",
     },
     many_to_many: {
       label: "N → N",
-      cls: "bg-blue-50 text-blue-700 ring-blue-200",
+      cls: "bg-[var(--info-bg)] text-[var(--info-fg)] ring-[var(--info-border)]",
     },
   };
   return <Pill className={map[type].cls}>{map[type].label}</Pill>;
@@ -165,17 +165,17 @@ const COMPONENT_TYPE_LABELS: Record<ArchitectureComponentType, string> = {
 };
 
 const COMPONENT_TYPE_CLASSES: Record<ArchitectureComponentType, string> = {
-  frontend: "bg-sky-50 text-sky-700 ring-sky-200",
-  backend: "bg-indigo-50 text-indigo-700 ring-indigo-200",
-  database: "bg-emerald-50 text-emerald-700 ring-emerald-200",
-  authentication: "bg-rose-50 text-rose-700 ring-rose-200",
-  storage: "bg-amber-50 text-amber-700 ring-amber-200",
-  external_service: "bg-orange-50 text-orange-700 ring-orange-200",
-  infrastructure: "bg-slate-50 text-slate-700 ring-slate-200",
-  worker: "bg-violet-50 text-violet-700 ring-violet-200",
-  queue: "bg-fuchsia-50 text-fuchsia-700 ring-fuchsia-200",
-  cache: "bg-cyan-50 text-cyan-700 ring-cyan-200",
-  other: "bg-zinc-50 text-zinc-700 ring-zinc-200",
+  frontend: "bg-[var(--info-bg)] text-[var(--info-fg)] ring-[var(--info-border)]",
+  backend: "bg-[var(--brand-bg)] text-[var(--brand-fg)] ring-[var(--brand-border)]",
+  database: "bg-[var(--success-bg)] text-[var(--success-fg)] ring-[var(--success-border)]",
+  authentication: "bg-[var(--danger-bg)] text-[var(--danger-fg)] ring-[var(--danger-border)]",
+  storage: "bg-[var(--warning-bg)] text-[var(--warning-fg)] ring-[var(--warning-border)]",
+  external_service: "bg-[var(--warning-bg)] text-[var(--warning-fg)] ring-[var(--warning-border)]",
+  infrastructure: "bg-[var(--neutral-bg)] text-[var(--neutral-fg)] ring-[var(--neutral-border)]",
+  worker: "bg-[var(--brand-bg)] text-[var(--brand-fg)] ring-[var(--brand-border)]",
+  queue: "bg-[var(--brand-bg)] text-[var(--brand-fg)] ring-[var(--brand-border)]",
+  cache: "bg-[var(--info-bg)] text-[var(--info-fg)] ring-[var(--info-border)]",
+  other: "bg-[var(--neutral-bg)] text-[var(--neutral-fg)] ring-[var(--neutral-border)]",
 };
 
 export function ArchitectureComponentTypeBadge({
@@ -204,16 +204,16 @@ const TECHNOLOGY_CATEGORY_LABELS: Record<ArchitectureTechnologyCategory, string>
 };
 
 const TECHNOLOGY_CATEGORY_CLASSES: Record<ArchitectureTechnologyCategory, string> = {
-  language: "bg-indigo-50 text-indigo-700 ring-indigo-200",
-  framework: "bg-violet-50 text-violet-700 ring-violet-200",
-  database: "bg-emerald-50 text-emerald-700 ring-emerald-200",
-  authentication: "bg-rose-50 text-rose-700 ring-rose-200",
-  hosting: "bg-sky-50 text-sky-700 ring-sky-200",
-  infrastructure: "bg-slate-50 text-slate-700 ring-slate-200",
-  testing: "bg-amber-50 text-amber-700 ring-amber-200",
-  package: "bg-cyan-50 text-cyan-700 ring-cyan-200",
-  external_service: "bg-orange-50 text-orange-700 ring-orange-200",
-  other: "bg-zinc-50 text-zinc-700 ring-zinc-200",
+  language: "bg-[var(--brand-bg)] text-[var(--brand-fg)] ring-[var(--brand-border)]",
+  framework: "bg-[var(--brand-bg)] text-[var(--brand-fg)] ring-[var(--brand-border)]",
+  database: "bg-[var(--success-bg)] text-[var(--success-fg)] ring-[var(--success-border)]",
+  authentication: "bg-[var(--danger-bg)] text-[var(--danger-fg)] ring-[var(--danger-border)]",
+  hosting: "bg-[var(--info-bg)] text-[var(--info-fg)] ring-[var(--info-border)]",
+  infrastructure: "bg-[var(--neutral-bg)] text-[var(--neutral-fg)] ring-[var(--neutral-border)]",
+  testing: "bg-[var(--warning-bg)] text-[var(--warning-fg)] ring-[var(--warning-border)]",
+  package: "bg-[var(--info-bg)] text-[var(--info-fg)] ring-[var(--info-border)]",
+  external_service: "bg-[var(--warning-bg)] text-[var(--warning-fg)] ring-[var(--warning-border)]",
+  other: "bg-[var(--neutral-bg)] text-[var(--neutral-fg)] ring-[var(--neutral-border)]",
 };
 
 export function ArchitectureTechnologyCategoryBadge({
@@ -236,15 +236,15 @@ export function ArchitectureDecisionStatusBadge({
   const map: Record<ArchitectureDecisionStatus, { label: string; cls: string }> = {
     proposed: {
       label: "Proposed",
-      cls: "bg-blue-50 text-blue-700 ring-blue-200",
+      cls: "bg-[var(--info-bg)] text-[var(--info-fg)] ring-[var(--info-border)]",
     },
     accepted: {
       label: "Accepted",
-      cls: "bg-emerald-50 text-emerald-700 ring-emerald-200",
+      cls: "bg-[var(--success-bg)] text-[var(--success-fg)] ring-[var(--success-border)]",
     },
     superseded: {
       label: "Superseded",
-      cls: "bg-zinc-50 text-zinc-500 ring-zinc-200",
+      cls: "bg-[var(--neutral-bg)] text-[var(--neutral-fg)] ring-[var(--neutral-border)]",
     },
   };
   return <Pill className={map[status].cls}>{map[status].label}</Pill>;
@@ -253,23 +253,23 @@ export function ArchitectureDecisionStatusBadge({
 const API_METHOD_LABELS: Record<ApiHttpMethod, { label: string; cls: string }> = {
   GET: {
     label: "GET",
-    cls: "bg-emerald-50 text-emerald-700 ring-emerald-200",
+    cls: "bg-[var(--success-bg)] text-[var(--success-fg)] ring-[var(--success-border)]",
   },
   POST: {
     label: "POST",
-    cls: "bg-blue-50 text-blue-700 ring-blue-200",
+    cls: "bg-[var(--info-bg)] text-[var(--info-fg)] ring-[var(--info-border)]",
   },
   PUT: {
     label: "PUT",
-    cls: "bg-amber-50 text-amber-700 ring-amber-200",
+    cls: "bg-[var(--warning-bg)] text-[var(--warning-fg)] ring-[var(--warning-border)]",
   },
   PATCH: {
     label: "PATCH",
-    cls: "bg-violet-50 text-violet-700 ring-violet-200",
+    cls: "bg-[var(--brand-bg)] text-[var(--brand-fg)] ring-[var(--brand-border)]",
   },
   DELETE: {
     label: "DELETE",
-    cls: "bg-red-50 text-red-700 ring-red-200",
+    cls: "bg-[var(--danger-bg)] text-[var(--danger-fg)] ring-[var(--danger-border)]",
   },
 };
 
@@ -287,11 +287,11 @@ export function ApiAuthBadge({
   required: boolean;
 }) {
   return required ? (
-    <Pill className="bg-amber-50 text-amber-700 ring-amber-200">
+    <Pill className="bg-[var(--warning-bg)] text-[var(--warning-fg)] ring-[var(--warning-border)]">
       Auth required
     </Pill>
   ) : (
-    <Pill className="bg-zinc-50 text-zinc-500 ring-zinc-200">Public</Pill>
+    <Pill className="bg-[var(--neutral-bg)] text-[var(--neutral-fg)] ring-[var(--neutral-border)]">Public</Pill>
   );
 }
 
@@ -300,15 +300,15 @@ export function ApiStatusCodeBadge({
 }: {
   statusCode: number;
 }) {
-  let cls = "bg-zinc-50 text-zinc-700 ring-zinc-200";
+  let cls = "bg-[var(--neutral-bg)] text-[var(--neutral-fg)] ring-[var(--neutral-border)]";
   if (statusCode >= 200 && statusCode < 300) {
-    cls = "bg-emerald-50 text-emerald-700 ring-emerald-200";
+    cls = "bg-[var(--success-bg)] text-[var(--success-fg)] ring-[var(--success-border)]";
   } else if (statusCode >= 300 && statusCode < 400) {
-    cls = "bg-amber-50 text-amber-700 ring-amber-200";
+    cls = "bg-[var(--warning-bg)] text-[var(--warning-fg)] ring-[var(--warning-border)]";
   } else if (statusCode >= 400 && statusCode < 500) {
-    cls = "bg-red-50 text-red-700 ring-red-200";
+    cls = "bg-[var(--danger-bg)] text-[var(--danger-fg)] ring-[var(--danger-border)]";
   } else if (statusCode >= 500) {
-    cls = "bg-rose-50 text-rose-700 ring-rose-200";
+    cls = "bg-[var(--danger-bg)] text-[var(--danger-fg)] ring-[var(--danger-border)]";
   }
   return (
     <Pill className={cn("font-mono", cls)}>{statusCode}</Pill>
@@ -321,19 +321,19 @@ const API_ENTITY_ROLE_LABELS: Record<
 > = {
   primary_resource: {
     label: "Primary",
-    cls: "bg-blue-50 text-blue-700 ring-blue-200",
+    cls: "bg-[var(--info-bg)] text-[var(--info-fg)] ring-[var(--info-border)]",
   },
   request_resource: {
     label: "Request",
-    cls: "bg-violet-50 text-violet-700 ring-violet-200",
+    cls: "bg-[var(--brand-bg)] text-[var(--brand-fg)] ring-[var(--brand-border)]",
   },
   response_resource: {
     label: "Response",
-    cls: "bg-emerald-50 text-emerald-700 ring-emerald-200",
+    cls: "bg-[var(--success-bg)] text-[var(--success-fg)] ring-[var(--success-border)]",
   },
   related_resource: {
     label: "Related",
-    cls: "bg-zinc-50 text-zinc-500 ring-zinc-200",
+    cls: "bg-[var(--neutral-bg)] text-[var(--neutral-fg)] ring-[var(--neutral-border)]",
   },
 };
 
@@ -355,29 +355,29 @@ export function ApiRequiredBadge({
   required: boolean;
 }) {
   return required ? (
-    <Pill className="bg-blue-50 text-blue-700 ring-blue-200">Required</Pill>
+    <Pill className="bg-[var(--info-bg)] text-[var(--info-fg)] ring-[var(--info-border)]">Required</Pill>
   ) : (
-    <Pill className="bg-zinc-50 text-zinc-500 ring-zinc-200">Optional</Pill>
+    <Pill className="bg-[var(--neutral-bg)] text-[var(--neutral-fg)] ring-[var(--neutral-border)]">Optional</Pill>
   );
 }
 
 const UI_SCREEN_TYPE_LABELS: Record<UiScreenType, { label: string; cls: string }> = {
-  page: { label: "Page", cls: "bg-blue-50 text-blue-700 ring-blue-200" },
-  modal: { label: "Modal", cls: "bg-violet-50 text-violet-700 ring-violet-200" },
-  drawer: { label: "Drawer", cls: "bg-violet-50 text-violet-700 ring-violet-200" },
-  dialog: { label: "Dialog", cls: "bg-violet-50 text-violet-700 ring-violet-200" },
-  wizard: { label: "Wizard", cls: "bg-indigo-50 text-indigo-700 ring-indigo-200" },
-  dashboard: { label: "Dashboard", cls: "bg-sky-50 text-sky-700 ring-sky-200" },
-  form: { label: "Form", cls: "bg-amber-50 text-amber-700 ring-amber-200" },
-  list: { label: "List", cls: "bg-emerald-50 text-emerald-700 ring-emerald-200" },
-  detail: { label: "Detail", cls: "bg-teal-50 text-teal-700 ring-teal-200" },
-  settings: { label: "Settings", cls: "bg-zinc-50 text-zinc-700 ring-zinc-200" },
+  page: { label: "Page", cls: "bg-[var(--info-bg)] text-[var(--info-fg)] ring-[var(--info-border)]" },
+  modal: { label: "Modal", cls: "bg-[var(--brand-bg)] text-[var(--brand-fg)] ring-[var(--brand-border)]" },
+  drawer: { label: "Drawer", cls: "bg-[var(--brand-bg)] text-[var(--brand-fg)] ring-[var(--brand-border)]" },
+  dialog: { label: "Dialog", cls: "bg-[var(--brand-bg)] text-[var(--brand-fg)] ring-[var(--brand-border)]" },
+  wizard: { label: "Wizard", cls: "bg-[var(--brand-bg)] text-[var(--brand-fg)] ring-[var(--brand-border)]" },
+  dashboard: { label: "Dashboard", cls: "bg-[var(--info-bg)] text-[var(--info-fg)] ring-[var(--info-border)]" },
+  form: { label: "Form", cls: "bg-[var(--warning-bg)] text-[var(--warning-fg)] ring-[var(--warning-border)]" },
+  list: { label: "List", cls: "bg-[var(--success-bg)] text-[var(--success-fg)] ring-[var(--success-border)]" },
+  detail: { label: "Detail", cls: "bg-[var(--success-bg)] text-[var(--success-fg)] ring-[var(--success-border)]" },
+  settings: { label: "Settings", cls: "bg-[var(--neutral-bg)] text-[var(--neutral-fg)] ring-[var(--neutral-border)]" },
   authentication: {
     label: "Authentication",
-    cls: "bg-red-50 text-red-700 ring-red-200",
+    cls: "bg-[var(--danger-bg)] text-[var(--danger-fg)] ring-[var(--danger-border)]",
   },
-  error: { label: "Error", cls: "bg-rose-50 text-rose-700 ring-rose-200" },
-  other: { label: "Other", cls: "bg-zinc-50 text-zinc-500 ring-zinc-200" },
+  error: { label: "Error", cls: "bg-[var(--danger-bg)] text-[var(--danger-fg)] ring-[var(--danger-border)]" },
+  other: { label: "Other", cls: "bg-[var(--neutral-bg)] text-[var(--neutral-fg)] ring-[var(--neutral-border)]" },
 };
 
 export function UiScreenTypeBadge({ type }: { type: UiScreenType }) {
@@ -392,34 +392,34 @@ const UI_COMPONENT_TYPE_LABELS: Record<
   UiComponentType,
   { label: string; cls: string }
 > = {
-  layout: { label: "Layout", cls: "bg-zinc-50 text-zinc-700 ring-zinc-200" },
-  navigation: { label: "Navigation", cls: "bg-blue-50 text-blue-700 ring-blue-200" },
-  header: { label: "Header", cls: "bg-sky-50 text-sky-700 ring-sky-200" },
-  footer: { label: "Footer", cls: "bg-sky-50 text-sky-700 ring-sky-200" },
-  sidebar: { label: "Sidebar", cls: "bg-sky-50 text-sky-700 ring-sky-200" },
-  card: { label: "Card", cls: "bg-emerald-50 text-emerald-700 ring-emerald-200" },
-  table: { label: "Table", cls: "bg-teal-50 text-teal-700 ring-teal-200" },
-  list: { label: "List", cls: "bg-emerald-50 text-emerald-700 ring-emerald-200" },
-  form: { label: "Form", cls: "bg-amber-50 text-amber-700 ring-amber-200" },
-  input: { label: "Input", cls: "bg-amber-50 text-amber-700 ring-amber-200" },
-  textarea: { label: "Textarea", cls: "bg-amber-50 text-amber-700 ring-amber-200" },
-  select: { label: "Select", cls: "bg-amber-50 text-amber-700 ring-amber-200" },
-  checkbox: { label: "Checkbox", cls: "bg-amber-50 text-amber-700 ring-amber-200" },
-  radio: { label: "Radio", cls: "bg-amber-50 text-amber-700 ring-amber-200" },
-  button: { label: "Button", cls: "bg-indigo-50 text-indigo-700 ring-indigo-200" },
-  modal: { label: "Modal", cls: "bg-violet-50 text-violet-700 ring-violet-200" },
-  dialog: { label: "Dialog", cls: "bg-violet-50 text-violet-700 ring-violet-200" },
-  drawer: { label: "Drawer", cls: "bg-violet-50 text-violet-700 ring-violet-200" },
-  tabs: { label: "Tabs", cls: "bg-blue-50 text-blue-700 ring-blue-200" },
-  badge: { label: "Badge", cls: "bg-zinc-50 text-zinc-500 ring-zinc-200" },
-  alert: { label: "Alert", cls: "bg-rose-50 text-rose-700 ring-rose-200" },
+  layout: { label: "Layout", cls: "bg-[var(--neutral-bg)] text-[var(--neutral-fg)] ring-[var(--neutral-border)]" },
+  navigation: { label: "Navigation", cls: "bg-[var(--info-bg)] text-[var(--info-fg)] ring-[var(--info-border)]" },
+  header: { label: "Header", cls: "bg-[var(--info-bg)] text-[var(--info-fg)] ring-[var(--info-border)]" },
+  footer: { label: "Footer", cls: "bg-[var(--info-bg)] text-[var(--info-fg)] ring-[var(--info-border)]" },
+  sidebar: { label: "Sidebar", cls: "bg-[var(--info-bg)] text-[var(--info-fg)] ring-[var(--info-border)]" },
+  card: { label: "Card", cls: "bg-[var(--success-bg)] text-[var(--success-fg)] ring-[var(--success-border)]" },
+  table: { label: "Table", cls: "bg-[var(--success-bg)] text-[var(--success-fg)] ring-[var(--success-border)]" },
+  list: { label: "List", cls: "bg-[var(--success-bg)] text-[var(--success-fg)] ring-[var(--success-border)]" },
+  form: { label: "Form", cls: "bg-[var(--warning-bg)] text-[var(--warning-fg)] ring-[var(--warning-border)]" },
+  input: { label: "Input", cls: "bg-[var(--warning-bg)] text-[var(--warning-fg)] ring-[var(--warning-border)]" },
+  textarea: { label: "Textarea", cls: "bg-[var(--warning-bg)] text-[var(--warning-fg)] ring-[var(--warning-border)]" },
+  select: { label: "Select", cls: "bg-[var(--warning-bg)] text-[var(--warning-fg)] ring-[var(--warning-border)]" },
+  checkbox: { label: "Checkbox", cls: "bg-[var(--warning-bg)] text-[var(--warning-fg)] ring-[var(--warning-border)]" },
+  radio: { label: "Radio", cls: "bg-[var(--warning-bg)] text-[var(--warning-fg)] ring-[var(--warning-border)]" },
+  button: { label: "Button", cls: "bg-[var(--brand-bg)] text-[var(--brand-fg)] ring-[var(--brand-border)]" },
+  modal: { label: "Modal", cls: "bg-[var(--brand-bg)] text-[var(--brand-fg)] ring-[var(--brand-border)]" },
+  dialog: { label: "Dialog", cls: "bg-[var(--brand-bg)] text-[var(--brand-fg)] ring-[var(--brand-border)]" },
+  drawer: { label: "Drawer", cls: "bg-[var(--brand-bg)] text-[var(--brand-fg)] ring-[var(--brand-border)]" },
+  tabs: { label: "Tabs", cls: "bg-[var(--info-bg)] text-[var(--info-fg)] ring-[var(--info-border)]" },
+  badge: { label: "Badge", cls: "bg-[var(--neutral-bg)] text-[var(--neutral-fg)] ring-[var(--neutral-border)]" },
+  alert: { label: "Alert", cls: "bg-[var(--danger-bg)] text-[var(--danger-fg)] ring-[var(--danger-border)]" },
   notification: {
     label: "Notification",
-    cls: "bg-rose-50 text-rose-700 ring-rose-200",
+    cls: "bg-[var(--danger-bg)] text-[var(--danger-fg)] ring-[var(--danger-border)]",
   },
-  chart: { label: "Chart", cls: "bg-fuchsia-50 text-fuchsia-700 ring-fuchsia-200" },
-  custom: { label: "Custom", cls: "bg-zinc-50 text-zinc-500 ring-zinc-200" },
-  other: { label: "Other", cls: "bg-zinc-50 text-zinc-500 ring-zinc-200" },
+  chart: { label: "Chart", cls: "bg-[var(--brand-bg)] text-[var(--brand-fg)] ring-[var(--brand-border)]" },
+  custom: { label: "Custom", cls: "bg-[var(--neutral-bg)] text-[var(--neutral-fg)] ring-[var(--neutral-border)]" },
+  other: { label: "Other", cls: "bg-[var(--neutral-bg)] text-[var(--neutral-fg)] ring-[var(--neutral-border)]" },
 };
 
 export function UiComponentTypeBadge({ type }: { type: UiComponentType }) {
@@ -431,19 +431,19 @@ export function UiComponentTypeBadge({ type }: { type: UiComponentType }) {
 }
 
 const UI_FIELD_TYPE_LABELS: Record<UiFieldType, { label: string; cls: string }> = {
-  text: { label: "Text", cls: "bg-zinc-50 text-zinc-700 ring-zinc-200" },
-  textarea: { label: "Textarea", cls: "bg-zinc-50 text-zinc-700 ring-zinc-200" },
-  email: { label: "Email", cls: "bg-blue-50 text-blue-700 ring-blue-200" },
-  password: { label: "Password", cls: "bg-red-50 text-red-700 ring-red-200" },
-  number: { label: "Number", cls: "bg-amber-50 text-amber-700 ring-amber-200" },
-  date: { label: "Date", cls: "bg-sky-50 text-sky-700 ring-sky-200" },
-  datetime: { label: "Datetime", cls: "bg-sky-50 text-sky-700 ring-sky-200" },
-  select: { label: "Select", cls: "bg-amber-50 text-amber-700 ring-amber-200" },
-  checkbox: { label: "Checkbox", cls: "bg-amber-50 text-amber-700 ring-amber-200" },
-  radio: { label: "Radio", cls: "bg-amber-50 text-amber-700 ring-amber-200" },
-  file: { label: "File", cls: "bg-violet-50 text-violet-700 ring-violet-200" },
-  hidden: { label: "Hidden", cls: "bg-zinc-50 text-zinc-500 ring-zinc-200" },
-  other: { label: "Other", cls: "bg-zinc-50 text-zinc-500 ring-zinc-200" },
+  text: { label: "Text", cls: "bg-[var(--neutral-bg)] text-[var(--neutral-fg)] ring-[var(--neutral-border)]" },
+  textarea: { label: "Textarea", cls: "bg-[var(--neutral-bg)] text-[var(--neutral-fg)] ring-[var(--neutral-border)]" },
+  email: { label: "Email", cls: "bg-[var(--info-bg)] text-[var(--info-fg)] ring-[var(--info-border)]" },
+  password: { label: "Password", cls: "bg-[var(--danger-bg)] text-[var(--danger-fg)] ring-[var(--danger-border)]" },
+  number: { label: "Number", cls: "bg-[var(--warning-bg)] text-[var(--warning-fg)] ring-[var(--warning-border)]" },
+  date: { label: "Date", cls: "bg-[var(--info-bg)] text-[var(--info-fg)] ring-[var(--info-border)]" },
+  datetime: { label: "Datetime", cls: "bg-[var(--info-bg)] text-[var(--info-fg)] ring-[var(--info-border)]" },
+  select: { label: "Select", cls: "bg-[var(--warning-bg)] text-[var(--warning-fg)] ring-[var(--warning-border)]" },
+  checkbox: { label: "Checkbox", cls: "bg-[var(--warning-bg)] text-[var(--warning-fg)] ring-[var(--warning-border)]" },
+  radio: { label: "Radio", cls: "bg-[var(--warning-bg)] text-[var(--warning-fg)] ring-[var(--warning-border)]" },
+  file: { label: "File", cls: "bg-[var(--brand-bg)] text-[var(--brand-fg)] ring-[var(--brand-border)]" },
+  hidden: { label: "Hidden", cls: "bg-[var(--neutral-bg)] text-[var(--neutral-fg)] ring-[var(--neutral-border)]" },
+  other: { label: "Other", cls: "bg-[var(--neutral-bg)] text-[var(--neutral-fg)] ring-[var(--neutral-border)]" },
 };
 
 export function UiFieldTypeBadge({ type }: { type: UiFieldType }) {
@@ -455,24 +455,24 @@ export function UiFieldTypeBadge({ type }: { type: UiFieldType }) {
 }
 
 const UI_STATE_TYPE_LABELS: Record<UiStateType, { label: string; cls: string }> = {
-  default: { label: "Default", cls: "bg-zinc-50 text-zinc-700 ring-zinc-200" },
-  loading: { label: "Loading", cls: "bg-blue-50 text-blue-700 ring-blue-200" },
-  empty: { label: "Empty", cls: "bg-zinc-50 text-zinc-500 ring-zinc-200" },
-  success: { label: "Success", cls: "bg-emerald-50 text-emerald-700 ring-emerald-200" },
-  error: { label: "Error", cls: "bg-red-50 text-red-700 ring-red-200" },
-  disabled: { label: "Disabled", cls: "bg-zinc-50 text-zinc-500 ring-zinc-200" },
+  default: { label: "Default", cls: "bg-[var(--neutral-bg)] text-[var(--neutral-fg)] ring-[var(--neutral-border)]" },
+  loading: { label: "Loading", cls: "bg-[var(--info-bg)] text-[var(--info-fg)] ring-[var(--info-border)]" },
+  empty: { label: "Empty", cls: "bg-[var(--neutral-bg)] text-[var(--neutral-fg)] ring-[var(--neutral-border)]" },
+  success: { label: "Success", cls: "bg-[var(--success-bg)] text-[var(--success-fg)] ring-[var(--success-border)]" },
+  error: { label: "Error", cls: "bg-[var(--danger-bg)] text-[var(--danger-fg)] ring-[var(--danger-border)]" },
+  disabled: { label: "Disabled", cls: "bg-[var(--neutral-bg)] text-[var(--neutral-fg)] ring-[var(--neutral-border)]" },
   unauthorized: {
     label: "Unauthorized",
-    cls: "bg-amber-50 text-amber-700 ring-amber-200",
+    cls: "bg-[var(--warning-bg)] text-[var(--warning-fg)] ring-[var(--warning-border)]",
   },
-  forbidden: { label: "Forbidden", cls: "bg-rose-50 text-rose-700 ring-rose-200" },
-  not_found: { label: "Not found", cls: "bg-rose-50 text-rose-700 ring-rose-200" },
+  forbidden: { label: "Forbidden", cls: "bg-[var(--danger-bg)] text-[var(--danger-fg)] ring-[var(--danger-border)]" },
+  not_found: { label: "Not found", cls: "bg-[var(--danger-bg)] text-[var(--danger-fg)] ring-[var(--danger-border)]" },
   validation_error: {
     label: "Validation",
-    cls: "bg-amber-50 text-amber-700 ring-amber-200",
+    cls: "bg-[var(--warning-bg)] text-[var(--warning-fg)] ring-[var(--warning-border)]",
   },
-  offline: { label: "Offline", cls: "bg-zinc-50 text-zinc-500 ring-zinc-200" },
-  custom: { label: "Custom", cls: "bg-violet-50 text-violet-700 ring-violet-200" },
+  offline: { label: "Offline", cls: "bg-[var(--neutral-bg)] text-[var(--neutral-fg)] ring-[var(--neutral-border)]" },
+  custom: { label: "Custom", cls: "bg-[var(--brand-bg)] text-[var(--brand-fg)] ring-[var(--brand-border)]" },
 };
 
 export function UiStateTypeBadge({ type }: { type: UiStateType }) {
@@ -487,13 +487,13 @@ const UI_ENTITY_ROLE_LABELS: Record<
   UiScreenEntityRole,
   { label: string; cls: string }
 > = {
-  displayed: { label: "Displayed", cls: "bg-blue-50 text-blue-700 ring-blue-200" },
-  created: { label: "Created", cls: "bg-emerald-50 text-emerald-700 ring-emerald-200" },
-  edited: { label: "Edited", cls: "bg-amber-50 text-amber-700 ring-amber-200" },
-  deleted: { label: "Deleted", cls: "bg-red-50 text-red-700 ring-red-200" },
-  filtered: { label: "Filtered", cls: "bg-violet-50 text-violet-700 ring-violet-200" },
-  selected: { label: "Selected", cls: "bg-indigo-50 text-indigo-700 ring-indigo-200" },
-  related: { label: "Related", cls: "bg-zinc-50 text-zinc-500 ring-zinc-200" },
+  displayed: { label: "Displayed", cls: "bg-[var(--info-bg)] text-[var(--info-fg)] ring-[var(--info-border)]" },
+  created: { label: "Created", cls: "bg-[var(--success-bg)] text-[var(--success-fg)] ring-[var(--success-border)]" },
+  edited: { label: "Edited", cls: "bg-[var(--warning-bg)] text-[var(--warning-fg)] ring-[var(--warning-border)]" },
+  deleted: { label: "Deleted", cls: "bg-[var(--danger-bg)] text-[var(--danger-fg)] ring-[var(--danger-border)]" },
+  filtered: { label: "Filtered", cls: "bg-[var(--brand-bg)] text-[var(--brand-fg)] ring-[var(--brand-border)]" },
+  selected: { label: "Selected", cls: "bg-[var(--brand-bg)] text-[var(--brand-fg)] ring-[var(--brand-border)]" },
+  related: { label: "Related", cls: "bg-[var(--neutral-bg)] text-[var(--neutral-fg)] ring-[var(--neutral-border)]" },
 };
 
 export function UiScreenEntityRoleBadge({
@@ -509,16 +509,16 @@ export function UiScreenEntityRoleBadge({
 }
 
 const TASK_STATUS_LABELS: Record<TaskStatus, { label: string; cls: string }> = {
-  todo: { label: "Todo", cls: "bg-zinc-50 text-zinc-700 ring-zinc-200" },
-  ready: { label: "Ready", cls: "bg-blue-50 text-blue-700 ring-blue-200" },
+  todo: { label: "Todo", cls: "bg-[var(--neutral-bg)] text-[var(--neutral-fg)] ring-[var(--neutral-border)]" },
+  ready: { label: "Ready", cls: "bg-[var(--info-bg)] text-[var(--info-fg)] ring-[var(--info-border)]" },
   in_progress: {
     label: "In progress",
-    cls: "bg-amber-50 text-amber-700 ring-amber-200",
+    cls: "bg-[var(--warning-bg)] text-[var(--warning-fg)] ring-[var(--warning-border)]",
   },
-  blocked: { label: "Blocked", cls: "bg-red-50 text-red-700 ring-red-200" },
-  review: { label: "Review", cls: "bg-violet-50 text-violet-700 ring-violet-200" },
-  done: { label: "Done", cls: "bg-emerald-50 text-emerald-700 ring-emerald-200" },
-  cancelled: { label: "Cancelled", cls: "bg-zinc-50 text-zinc-500 ring-zinc-200" },
+  blocked: { label: "Blocked", cls: "bg-[var(--danger-bg)] text-[var(--danger-fg)] ring-[var(--danger-border)]" },
+  review: { label: "Review", cls: "bg-[var(--brand-bg)] text-[var(--brand-fg)] ring-[var(--brand-border)]" },
+  done: { label: "Done", cls: "bg-[var(--success-bg)] text-[var(--success-fg)] ring-[var(--success-border)]" },
+  cancelled: { label: "Cancelled", cls: "bg-[var(--neutral-bg)] text-[var(--neutral-fg)] ring-[var(--neutral-border)]" },
 };
 
 export function TaskStatusBadge({ status }: { status: TaskStatus }) {
@@ -530,10 +530,10 @@ export function TaskStatusBadge({ status }: { status: TaskStatus }) {
 }
 
 const TASK_PRIORITY_LABELS: Record<TaskPriority, { label: string; cls: string }> = {
-  low: { label: "Low", cls: "bg-zinc-50 text-zinc-700 ring-zinc-200" },
-  medium: { label: "Medium", cls: "bg-blue-50 text-blue-700 ring-blue-200" },
-  high: { label: "High", cls: "bg-amber-50 text-amber-700 ring-amber-200" },
-  critical: { label: "Critical", cls: "bg-red-50 text-red-700 ring-red-200" },
+  low: { label: "Low", cls: "bg-[var(--neutral-bg)] text-[var(--neutral-fg)] ring-[var(--neutral-border)]" },
+  medium: { label: "Medium", cls: "bg-[var(--info-bg)] text-[var(--info-fg)] ring-[var(--info-border)]" },
+  high: { label: "High", cls: "bg-[var(--warning-bg)] text-[var(--warning-fg)] ring-[var(--warning-border)]" },
+  critical: { label: "Critical", cls: "bg-[var(--danger-bg)] text-[var(--danger-fg)] ring-[var(--danger-border)]" },
 };
 
 export function TaskPriorityBadge({ priority }: { priority: TaskPriority }) {
@@ -545,29 +545,29 @@ export function TaskPriorityBadge({ priority }: { priority: TaskPriority }) {
 }
 
 const TASK_TYPE_LABELS: Record<TaskType, { label: string; cls: string }> = {
-  feature: { label: "Feature", cls: "bg-blue-50 text-blue-700 ring-blue-200" },
-  bug: { label: "Bug", cls: "bg-red-50 text-red-700 ring-red-200" },
-  refactor: { label: "Refactor", cls: "bg-amber-50 text-amber-700 ring-amber-200" },
-  database: { label: "Database", cls: "bg-emerald-50 text-emerald-700 ring-emerald-200" },
-  backend: { label: "Backend", cls: "bg-sky-50 text-sky-700 ring-sky-200" },
-  frontend: { label: "Frontend", cls: "bg-violet-50 text-violet-700 ring-violet-200" },
+  feature: { label: "Feature", cls: "bg-[var(--info-bg)] text-[var(--info-fg)] ring-[var(--info-border)]" },
+  bug: { label: "Bug", cls: "bg-[var(--danger-bg)] text-[var(--danger-fg)] ring-[var(--danger-border)]" },
+  refactor: { label: "Refactor", cls: "bg-[var(--warning-bg)] text-[var(--warning-fg)] ring-[var(--warning-border)]" },
+  database: { label: "Database", cls: "bg-[var(--success-bg)] text-[var(--success-fg)] ring-[var(--success-border)]" },
+  backend: { label: "Backend", cls: "bg-[var(--info-bg)] text-[var(--info-fg)] ring-[var(--info-border)]" },
+  frontend: { label: "Frontend", cls: "bg-[var(--brand-bg)] text-[var(--brand-fg)] ring-[var(--brand-border)]" },
   infrastructure: {
     label: "Infrastructure",
-    cls: "bg-indigo-50 text-indigo-700 ring-indigo-200",
+    cls: "bg-[var(--brand-bg)] text-[var(--brand-fg)] ring-[var(--brand-border)]",
   },
   testing: {
     label: "Testing",
-    cls: "bg-teal-50 text-teal-700 ring-teal-200",
+    cls: "bg-[var(--success-bg)] text-[var(--success-fg)] ring-[var(--success-border)]",
   },
   documentation: {
     label: "Documentation",
-    cls: "bg-zinc-50 text-zinc-700 ring-zinc-200",
+    cls: "bg-[var(--neutral-bg)] text-[var(--neutral-fg)] ring-[var(--neutral-border)]",
   },
   security: {
     label: "Security",
-    cls: "bg-rose-50 text-rose-700 ring-rose-200",
+    cls: "bg-[var(--danger-bg)] text-[var(--danger-fg)] ring-[var(--danger-border)]",
   },
-  other: { label: "Other", cls: "bg-zinc-50 text-zinc-500 ring-zinc-200" },
+  other: { label: "Other", cls: "bg-[var(--neutral-bg)] text-[var(--neutral-fg)] ring-[var(--neutral-border)]" },
 };
 
 export function TaskTypeBadge({ type }: { type: TaskType }) {
@@ -579,11 +579,11 @@ export function TaskTypeBadge({ type }: { type: TaskType }) {
 }
 
 const TASK_EFFORT_LABELS: Record<TaskEffort, { label: string; cls: string }> = {
-  xs: { label: "XS", cls: "bg-zinc-50 text-zinc-500 ring-zinc-200" },
-  s: { label: "S", cls: "bg-zinc-50 text-zinc-600 ring-zinc-200" },
-  m: { label: "M", cls: "bg-amber-50 text-amber-600 ring-amber-200" },
-  l: { label: "L", cls: "bg-amber-50 text-amber-700 ring-amber-200" },
-  xl: { label: "XL", cls: "bg-red-50 text-red-700 ring-red-200" },
+  xs: { label: "XS", cls: "bg-[var(--neutral-bg)] text-[var(--neutral-fg)] ring-[var(--neutral-border)]" },
+  s: { label: "S", cls: "bg-[var(--neutral-bg)] text-[var(--neutral-fg)] ring-[var(--neutral-border)]" },
+  m: { label: "M", cls: "bg-[var(--warning-bg)] text-[var(--warning-fg)] ring-[var(--warning-border)]" },
+  l: { label: "L", cls: "bg-[var(--warning-bg)] text-[var(--warning-fg)] ring-[var(--warning-border)]" },
+  xl: { label: "XL", cls: "bg-[var(--danger-bg)] text-[var(--danger-fg)] ring-[var(--danger-border)]" },
 };
 
 export function TaskEffortBadge({ effort }: { effort: TaskEffort }) {
@@ -595,10 +595,10 @@ export function TaskEffortBadge({ effort }: { effort: TaskEffort }) {
 }
 
 const TASK_DEP_LABELS: Record<TaskDependencyType, { label: string; cls: string }> = {
-  blocks: { label: "Blocks", cls: "bg-red-50 text-red-700 ring-red-200" },
+  blocks: { label: "Blocks", cls: "bg-[var(--danger-bg)] text-[var(--danger-fg)] ring-[var(--danger-border)]" },
   related: {
     label: "Related",
-    cls: "bg-violet-50 text-violet-700 ring-violet-200",
+    cls: "bg-[var(--brand-bg)] text-[var(--brand-fg)] ring-[var(--brand-border)]",
   },
 };
 
@@ -616,7 +616,7 @@ export function TaskDependencyTypeBadge({
 
 export function TaskBlockedBadge() {
   return (
-    <Pill className="bg-red-50 text-red-700 ring-red-200">
+    <Pill className="bg-[var(--danger-bg)] text-[var(--danger-fg)] ring-[var(--danger-border)]">
       Blocked
     </Pill>
   );
