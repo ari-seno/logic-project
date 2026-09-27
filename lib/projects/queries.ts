@@ -46,3 +46,18 @@ export async function getProject(
   }
   return data ?? null;
 }
+
+export async function countProjects(
+  client?: SupabaseServerClient,
+): Promise<number> {
+  const supabase = client ?? (await createClient());
+  const { count, error } = await supabase
+    .from("projects")
+    .select("id", { count: "exact", head: true });
+
+  if (error) {
+    console.error("countProjects failed:", error.message);
+    return 0;
+  }
+  return count ?? 0;
+}

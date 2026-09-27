@@ -1,6 +1,7 @@
 "use client";
 
 import { useTransition } from "react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
@@ -29,7 +30,7 @@ export function AttachEntityForm({
     startTransition(async () => {
       const result = await attachEntityToEndpoint(formData);
       if (result && "error" in result) {
-        alert(result.error);
+        toast.error(result.error);
       }
     });
   }
@@ -90,7 +91,7 @@ export function AttachRequirementForm({
     startTransition(async () => {
       const result = await attachRequirementToEndpoint(formData);
       if (result && "error" in result) {
-        alert(result.error);
+        toast.error(result.error);
       }
     });
   }
@@ -141,7 +142,7 @@ export function DetachEntityButton({
     fd.set("endpointId", endpointId);
     startTransition(async () => {
       const result = await detachEntityFromEndpoint(fd);
-      if (result && "error" in result) alert(result.error);
+      if (result && "error" in result) toast.error(result.error);
     });
   }
   return (
@@ -166,7 +167,7 @@ export function DetachRequirementButton({
     fd.set("endpointId", endpointId);
     startTransition(async () => {
       const result = await detachRequirementFromEndpoint(fd);
-      if (result && "error" in result) alert(result.error);
+      if (result && "error" in result) toast.error(result.error);
     });
   }
   return (

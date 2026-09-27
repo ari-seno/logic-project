@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 
 import { ButtonLink } from "@/components/ui/button";
 import { formatDate } from "@/lib/utils";
-import { listProjects } from "@/lib/projects/queries";
+import { listProjects, countProjects } from "@/lib/projects/queries";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function DashboardPage() {
@@ -14,8 +14,8 @@ export default async function DashboardPage() {
   if (!user) redirect("/login");
 
   const [projects, count] = await Promise.all([
-    listProjects({ limit: 5 }),
-    listProjects({ limit: 1000 }).then((p) => p.length),
+    listProjects({ limit: 5, client: supabase }),
+    countProjects(supabase),
   ]);
 
   const email = user.email ?? "";

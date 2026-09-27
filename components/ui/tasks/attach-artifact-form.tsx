@@ -1,6 +1,7 @@
 "use client";
 
 import { useTransition } from "react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
@@ -76,7 +77,7 @@ export function AttachArtifactForm({
       })();
       const r = await action(formData);
       if (r && "error" in r && r.error) {
-        alert(r.error);
+        toast.error(r.error);
       }
     });
   }

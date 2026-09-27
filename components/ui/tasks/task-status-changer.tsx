@@ -1,8 +1,8 @@
 "use client";
 
 import { useTransition } from "react";
+import { toast } from "sonner";
 
-import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
 import {
   TASK_STATUSES,
@@ -25,7 +25,7 @@ export function TaskStatusChanger({
     startTransition(async () => {
       const r = await updateTaskStatus(fd);
       if (r && "error" in r && r.error) {
-        alert(r.error);
+        toast.error(r.error);
       }
     });
   }
@@ -43,12 +43,4 @@ export function TaskStatusChanger({
       ))}
     </Select>
   );
-}
-
-export function QuickActions({ children }: { children: React.ReactNode }) {
-  return <div className="flex flex-wrap gap-2">{children}</div>;
-}
-
-export function ButtonLinkStub() {
-  return <Button>Link</Button>;
 }

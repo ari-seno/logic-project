@@ -1,6 +1,7 @@
 "use client";
 
 import { useTransition } from "react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { createTaskFromArtifact } from "@/lib/tasks/template-actions";
@@ -23,7 +24,7 @@ export function CreateTaskFromArtifactButton({
     startTransition(async () => {
       const r = await createTaskFromArtifact(formData);
       if (r && "error" in r && r.error) {
-        alert(r.error);
+        toast.error(r.error);
       }
     });
   }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useTransition } from "react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
@@ -30,7 +31,7 @@ export function AttachEndpointForm({
   function handleAction(formData: FormData) {
     startTransition(async () => {
       const r = await attachEndpointToInteraction(formData);
-      if (r && "error" in r) alert(r.error);
+      if (r && "error" in r) toast.error(r.error);
     });
   }
   if (endpoints.length === 0) {
@@ -78,7 +79,7 @@ export function DetachEndpointButton({
     fd.set("interactionId", interactionId);
     startTransition(async () => {
       const r = await detachEndpointFromInteraction(fd);
-      if (r && "error" in r) alert(r.error);
+      if (r && "error" in r) toast.error(r.error);
     });
   }
   return (
@@ -99,7 +100,7 @@ export function AttachRequirementForm({
   function handleAction(formData: FormData) {
     startTransition(async () => {
       const r = await attachRequirementToScreen(formData);
-      if (r && "error" in r) alert(r.error);
+      if (r && "error" in r) toast.error(r.error);
     });
   }
   if (requirements.length === 0) {
@@ -143,7 +144,7 @@ export function AttachEntityForm({
   function handleAction(formData: FormData) {
     startTransition(async () => {
       const r = await attachEntityToScreen(formData);
-      if (r && "error" in r) alert(r.error);
+      if (r && "error" in r) toast.error(r.error);
     });
   }
   if (entities.length === 0) {
@@ -207,7 +208,7 @@ export function DetachRequirementButton({
     fd.set("screenId", screenId);
     startTransition(async () => {
       const r = await detachRequirementFromScreen(fd);
-      if (r && "error" in r) alert(r.error);
+      if (r && "error" in r) toast.error(r.error);
     });
   }
   return (
@@ -232,7 +233,7 @@ export function DetachEntityButton({
     fd.set("screenId", screenId);
     startTransition(async () => {
       const r = await detachEntityFromScreen(fd);
-      if (r && "error" in r) alert(r.error);
+      if (r && "error" in r) toast.error(r.error);
     });
   }
   return (
