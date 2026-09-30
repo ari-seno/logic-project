@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   buildTaskDependencyRow,
   buildTaskRow,
+  buildTasksBundle,
   taskDependencyDedupeKey,
 } from "@/lib/ai/apply";
 
@@ -122,5 +123,58 @@ describe("ai/apply task row builders", () => {
     expect(taskDependencyDedupeKey(TASK_ID, OTHER_ID)).not.toBe(
       taskDependencyDedupeKey(OTHER_ID, TASK_ID),
     );
+  });
+});
+
+describe("ai/apply tasks bundle builder", () => {
+  const item = {
+    title: "Build login",
+    task_type: "feature" as const,
+    priority: "high" as const,
+    estimated_effort: "m" as const,
+    description: "A login form",
+    acceptance_criteria: "- works",
+    implementation_notes: "",
+    parent_title: "Auth work",
+    depends_on: ["Schema", "  "],
+    links: [{ kind: "requirement" as const, name: "Borrowers can apply" }],
+  };
+
+  it("shapes selected items into the SQL payload and keeps their indices", () => {
+    const { tasks, skipped } = buildTasksBundle([item], [0]);
+
+    expect(skipped).toEqual([]);
+    expect(tasks).toHaveLength(1);
+    expect(tasks[0]?.index).toBe(0);
+    expect(tasks[0]?.title).toBe("Build login");
+    expect(tasks[0]?.estimated_effort).toBe("m");
+    expect(tasks[0]?.parent_title).toBe("Auth work");
+    expect(tasks[0]?.depends_on).toEqual(["Schema"]);
+    expect(tasks[0]?.links[0]?.kind).toBe("requirement");
+  });
+
+  it("ignores out-of-range, negative, and non-integer indices", () => {
+    const { tasks, skipped } = buildTasksBundle([item], [0, 9, -1, 2.5]);
+    expect(tasks).toHaveLength(1);
+    expect(skipped).toEqual([]);
+  });
+
+  it("reports an invalid task as skipped rather than including it", () => {
+    const { tasks, skipped } = buildTasksBundle(
+      [{ ...item, title: "" }],
+      [0],
+    );
+
+    expect(tasks).toEqual([]);
+    expect(skipped).toHaveLength(1);
+    expect(skipped[0]?.kind).toBe("skipped");
+    expect(
+      skipped[0]?.kind === "skipped" ? skipped[0].reason : null,
+    ).toBe("invalid");
+  });
+
+  it("de-duplicates repeated indices", () => {
+    const { tasks } = buildTasksBundle([item], [0, 0, 0]);
+    expect(tasks).toHaveLength(1);
   });
 });

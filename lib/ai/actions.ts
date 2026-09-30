@@ -2,7 +2,7 @@
 
 import {
   applyApiBundleToProject,
-  applyTasksToProject,
+  applyTasksBundleToProject,
   applyUiBundleToProject,
   applyArchitectureBundleToProject,
   applyDecisionsToProject,
@@ -399,6 +399,6 @@ export async function aiApplyTasks(
 ): Promise<AiApplyResult> {
   return runAiApply<AiTaskItem>(input, {
     stage: "tasks",
-    apply: applyTasksToProject,
+    apply: applyTasksBundleToProject,
   });
 }
