@@ -24,8 +24,10 @@ export async function signUp(
     // The auth round-trip can be slow against a remote backend. Before failing,
     // check whether the session was actually established by loading the
     // dashboard directly; an unauthenticated visit redirects back to /login.
+    // The retry budget is generous because a slow signup can leave the session
+    // cookie unset for a while even when the account was created.
     await page.goto("/dashboard");
-    await page.waitForURL(/\/dashboard$/, { timeout: 10_000 });
+    await page.waitForURL(/\/dashboard$/, { timeout: 30_000 });
   }
 }
 

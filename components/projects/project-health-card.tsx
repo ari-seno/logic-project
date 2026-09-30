@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { loadProjectBundle } from "@/lib/export/bundle";
 import { computeProjectHealth, type HealthStatus } from "@/lib/projects/health";
 import { cn } from "@/lib/utils";
@@ -6,6 +8,17 @@ const STATUS_LABELS: Record<HealthStatus, string> = {
   complete: "Complete",
   partial: "Needs work",
   empty: "Not started",
+};
+
+// Where a user goes to act on an issue in each section.
+const SECTION_HREFS: Record<string, (projectId: string) => string> = {
+  requirements: (id) => `/projects/${id}/requirements`,
+  decisions: (id) => `/projects/${id}/decisions`,
+  domain: (id) => `/projects/${id}/domains/erd`,
+  architecture: (id) => `/projects/${id}/architecture`,
+  api: (id) => `/projects/${id}/api`,
+  ui: (id) => `/projects/${id}/ui`,
+  tasks: (id) => `/projects/${id}/tasks`,
 };
 
 const STATUS_BADGE_CLASSES: Record<HealthStatus, string> = {
@@ -94,23 +107,41 @@ export async function ProjectHealthCard({ projectId }: { projectId: string }) {
 
       {health.issues.length > 0 ? (
         <ul className="mt-4 flex flex-col gap-2 border-t border-[var(--border)] pt-4">
-          {health.issues.map((issue) => (
-            <li key={issue.id} className="flex items-start gap-2 text-xs">
-              <span
-                aria-hidden
-                className={cn(
-                  "mt-1 h-1.5 w-1.5 shrink-0 rounded-full",
-                  issue.severity === "warning" ? "bg-amber-500" : "bg-zinc-300",
-                )}
-              />
-              <span>
-                <span className="font-medium">{issue.section}:</span>{" "}
-                <span className="text-[var(--muted-foreground)]">
-                  {issue.message}
+          {health.issues.map((issue) => {
+            const sectionId = issue.id.split(":")[0] ?? "";
+            const href = SECTION_HREFS[sectionId]?.(projectId);
+
+            return (
+              <li key={issue.id} className="flex items-start gap-2 text-xs">
+                <span
+                  aria-hidden
+                  className={cn(
+                    "mt-1 h-1.5 w-1.5 shrink-0 rounded-full",
+                    issue.severity === "warning"
+                      ? "bg-amber-500"
+                      : "bg-zinc-300",
+                  )}
+                />
+                <span>
+                  <span className="font-medium">{issue.section}:</span>{" "}
+                  <span className="text-[var(--muted-foreground)]">
+                    {issue.message}
+                  </span>
+                  {href ? (
+                    <>
+                      {" "}
+                      <Link
+                        href={href}
+                        className="font-medium text-[var(--brand)] hover:underline"
+                      >
+                        Fix this
+                      </Link>
+                    </>
+                  ) : null}
                 </span>
-              </span>
-            </li>
-          ))}
+              </li>
+            );
+          })}
         </ul>
       ) : null}
     </div>
