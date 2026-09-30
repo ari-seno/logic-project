@@ -2,22 +2,9 @@ import { createClient } from "@/lib/supabase/server";
 import { UI_COMPONENT_TYPES, UI_SCREEN_TYPES } from "@/lib/supabase/types";
 import { listRequirements } from "@/lib/requirements/queries";
 import { listDecisions } from "@/lib/decisions/queries";
-import { listEntitiesByProject } from "@/lib/entities/queries";
-import { listArchitectureComponentsByProject } from "@/lib/architecture/components/queries";
-import { listArchitectureTechnologiesByProject } from "@/lib/architecture/technologies/queries";
-import { listArchitectureDecisionsByProject } from "@/lib/architecture/decisions/queries";
-import { listArchitectureComponentDependenciesByProject } from "@/lib/architecture/dependencies/queries";
-import { loadProjectApiContract } from "@/lib/api/endpoints/queries";
 import { listTasksByProject } from "@/lib/tasks/queries";
 import { listDependenciesByProject } from "@/lib/tasks/dependencies/queries";
 import { listAvailableArtifacts } from "@/lib/tasks/traceability/queries";
-import { listUiScreensByProject } from "@/lib/ui/screens/queries";
-import { listUiComponentsByProject } from "@/lib/ui/components/queries";
-import { listScreenComponents } from "@/lib/ui/screen-components/queries";
-import {
-  listScreenEntities,
-  listScreenRequirements,
-} from "@/lib/ui/traceability/queries";
 import { requirementInputSchema } from "@/lib/validation/requirements";
 import { decisionInputSchema } from "@/lib/validation/decisions";
 import { domainInputSchema } from "@/lib/validation/domains";
@@ -55,7 +42,6 @@ import type {
   AiUiScreenItem,
 } from "@/lib/ai/schema";
 import type {
-  ApiEndpointEntityRole,
   ApiHttpMethod,
   ApiParameterDataType,
   ApiParameterLocation,
@@ -760,75 +746,62 @@ export function architectureDependencyDedupeKey(
   return `${sourceComponentId}|${targetComponentId}`;
 }
 
-type PendingArchitectureDependency = {
+
+// Normalised payloads handed to apply_architecture_bundle. Each entry carries
+// its original flat index so the SQL can echo it back with created/skipped.
+type ArchitectureComponentBundle = {
   index: number;
-  label: string;
-  sourceComponentId: string;
-  item: AiArchitectureDependencyItem;
+  name: string;
+  type: string;
+  description: string;
+  depends_on: Array<{ target_component: string; description: string }>;
+};
+type ArchitectureTechnologyBundle = {
+  index: number;
+  name: string;
+  category: string;
+  description: string;
+};
+type ArchitectureDecisionBundle = {
+  index: number;
+  title: string;
+  context: string;
+  decision: string;
+  rationale: string;
+  status: string;
 };
 
-export async function applyArchitectureToProject(
-  options: ApplyArchitectureOptions,
-): Promise<ApplySummary> {
-  const supabase = await createClient();
-  const out: ApplySummary = { created: [], skipped: [], failed: [] };
+type ArchitectureBundleParts = {
+  components: ArchitectureComponentBundle[];
+  technologies: ArchitectureTechnologyBundle[];
+  decisions: ArchitectureDecisionBundle[];
+  skipped: ApplyItemOutcome[];
+};
 
-  const chosen = [...new Set(options.indices)]
-    .filter((n) => Number.isInteger(n) && n >= 0 && n < options.items.length)
+export function buildArchitectureBundle(
+  items: AiArchitectureItem[],
+  indices: number[],
+): ArchitectureBundleParts {
+  const chosen = [...new Set(indices)]
+    .filter((n) => Number.isInteger(n) && n >= 0 && n < items.length)
     .sort((a, b) => a - b);
 
-  const [components, technologies, decisions, dependencies] = await Promise.all([
-    listArchitectureComponentsByProject({ projectId: options.projectId }),
-    listArchitectureTechnologiesByProject({ projectId: options.projectId }),
-    listArchitectureDecisionsByProject({ projectId: options.projectId }),
-    listArchitectureComponentDependenciesByProject({
-      projectId: options.projectId,
-    }),
-  ]);
-
-  const componentIdByKey = new Map<string, string>();
-  const componentIdByName = new Map<string, string>();
-  let position = components.reduce(
-    (max, component) => Math.max(max, component.position),
-    -1,
-  );
-  position += 1;
-  for (const component of components) {
-    const key = component.name.trim().toLowerCase();
-    componentIdByKey.set(key, component.id);
-    if (!componentIdByName.has(key)) {
-      componentIdByName.set(key, component.id);
-    }
-  }
-
-  const technologyNames = new Set(
-    technologies.map((technology) => technology.name.trim().toLowerCase()),
-  );
-  const decisionTitles = new Set(
-    decisions.map((decision) => decision.title.trim().toLowerCase()),
-  );
-  const dependencyKeys = new Set(
-    dependencies.map((dependency) =>
-      architectureDependencyDedupeKey(
-        dependency.source_component_id,
-        dependency.target_component_id,
-      ),
-    ),
-  );
-
-  const pending: PendingArchitectureDependency[] = [];
+  const components: ArchitectureComponentBundle[] = [];
+  const technologies: ArchitectureTechnologyBundle[] = [];
+  const decisions: ArchitectureDecisionBundle[] = [];
+  const skipped: ApplyItemOutcome[] = [];
 
   for (const index of chosen) {
-    const item = options.items[index];
+    const item = items[index];
     if (!item) {
-      out.skipped.push({ kind: "skipped", index, title: "", reason: "invalid" });
+      skipped.push({ kind: "skipped", index, title: "", reason: "invalid" });
       continue;
     }
 
     if (item.kind === "component") {
       const row = buildArchitectureComponentRow(item);
       if (!row) {
-        out.skipped.push({
+        skipped.push({
           kind: "skipped",
           index,
           title: item.name,
@@ -836,70 +809,23 @@ export async function applyArchitectureToProject(
         });
         continue;
       }
-
-      const key = row.name.toLowerCase();
-      let componentId = componentIdByKey.get(key) ?? null;
-
-      if (!componentId) {
-        const { data, error } = await supabase
-          .from("architecture_components")
-          .insert({
-            project_id: options.projectId,
-            name: row.name,
-            description: row.description,
-            type: row.type,
-            position,
-          })
-          .select("id, name")
-          .single();
-
-        if (error || !data) {
-          out.failed.push({
-            kind: "failed",
-            index,
-            title: row.name,
-            error: error?.message ?? "Could not insert component.",
-          });
-          continue;
-        }
-
-        componentId = data.id;
-        componentIdByKey.set(key, data.id);
-        position += 1;
-        out.created.push({
-          kind: "created",
-          index,
-          id: data.id,
-          title: data.name,
-        });
-      } else {
-        out.skipped.push({
-          kind: "skipped",
-          index,
-          title: row.name,
-          reason: "duplicate",
-        });
-      }
-
-      if (!componentIdByName.has(key)) {
-        componentIdByName.set(key, componentId);
-      }
-
-      for (const dependencyItem of item.depends_on) {
-        pending.push({
-          index,
-          label: row.name,
-          sourceComponentId: componentId,
-          item: dependencyItem,
-        });
-      }
+      components.push({
+        index,
+        name: row.name,
+        type: row.type,
+        description: row.description ?? "",
+        depends_on: item.depends_on.map((dependency) => ({
+          target_component: dependency.target_component,
+          description: dependency.description ?? "",
+        })),
+      });
       continue;
     }
 
     if (item.kind === "technology") {
       const row = buildArchitectureTechnologyRow(item);
       if (!row) {
-        out.skipped.push({
+        skipped.push({
           kind: "skipped",
           index,
           title: item.name,
@@ -907,52 +833,18 @@ export async function applyArchitectureToProject(
         });
         continue;
       }
-
-      const key = row.name.toLowerCase();
-      if (technologyNames.has(key)) {
-        out.skipped.push({
-          kind: "skipped",
-          index,
-          title: row.name,
-          reason: "duplicate",
-        });
-        continue;
-      }
-
-      const { data, error } = await supabase
-        .from("architecture_technologies")
-        .insert({
-          project_id: options.projectId,
-          name: row.name,
-          category: row.category,
-          description: row.description,
-        })
-        .select("id, name")
-        .single();
-
-      if (error || !data) {
-        out.failed.push({
-          kind: "failed",
-          index,
-          title: row.name,
-          error: error?.message ?? "Could not insert technology.",
-        });
-        continue;
-      }
-
-      technologyNames.add(key);
-      out.created.push({
-        kind: "created",
+      technologies.push({
         index,
-        id: data.id,
-        title: data.name,
+        name: row.name,
+        category: row.category,
+        description: row.description ?? "",
       });
       continue;
     }
 
     const row = buildArchitectureDecisionRow(item);
     if (!row) {
-      out.skipped.push({
+      skipped.push({
         kind: "skipped",
         index,
         title: item.title,
@@ -960,110 +852,79 @@ export async function applyArchitectureToProject(
       });
       continue;
     }
-
-    const key = row.title.toLowerCase();
-    if (decisionTitles.has(key)) {
-      out.skipped.push({
-        kind: "skipped",
-        index,
-        title: row.title,
-        reason: "duplicate",
-      });
-      continue;
-    }
-
-    const { data, error } = await supabase
-      .from("architecture_decisions")
-      .insert({
-        project_id: options.projectId,
-        title: row.title,
-        context: row.context,
-        decision: row.decision,
-        rationale: row.rationale,
-        status: row.status,
-      })
-      .select("id, title")
-      .single();
-
-    if (error || !data) {
-      out.failed.push({
-        kind: "failed",
-        index,
-        title: row.title,
-        error: error?.message ?? "Could not insert architecture decision.",
-      });
-      continue;
-    }
-
-    decisionTitles.add(key);
-    out.created.push({ kind: "created", index, id: data.id, title: data.title });
+    decisions.push({
+      index,
+      title: row.title,
+      context: row.context ?? "",
+      decision: row.decision,
+      rationale: row.rationale ?? "",
+      status: row.status,
+    });
   }
 
-  for (const entry of pending) {
-    const label = `${entry.label} → ${entry.item.target_component}`;
-    const targetComponentId =
-      componentIdByName.get(entry.item.target_component.trim().toLowerCase()) ??
-      null;
+  return { components, technologies, decisions, skipped };
+}
 
-    if (!targetComponentId || targetComponentId === entry.sourceComponentId) {
-      out.skipped.push({
-        kind: "skipped",
-        index: entry.index,
-        title: label,
-        reason: "invalid",
-      });
-      continue;
-    }
+// Transactional variant: the whole bundle is applied inside a single database
+// transaction by apply_architecture_bundle, so a failure no longer leaves
+// partial rows.
+export async function applyArchitectureBundleToProject(
+  options: ApplyArchitectureOptions,
+): Promise<ApplySummary> {
+  const supabase = await createClient();
+  const out: ApplySummary = { created: [], skipped: [], failed: [] };
 
-    const row = buildArchitectureDependencyRow(
-      entry.item,
-      entry.sourceComponentId,
-      targetComponentId,
-    );
-    if (!row) {
-      out.skipped.push({
-        kind: "skipped",
-        index: entry.index,
-        title: label,
-        reason: "invalid",
-      });
-      continue;
-    }
+  const { components, technologies, decisions, skipped } =
+    buildArchitectureBundle(options.items, options.indices);
+  out.skipped.push(...skipped);
 
-    const key = architectureDependencyDedupeKey(
-      row.source_component_id,
-      row.target_component_id,
-    );
-    if (dependencyKeys.has(key)) {
-      out.skipped.push({
-        kind: "skipped",
-        index: entry.index,
-        title: label,
-        reason: "duplicate",
-      });
-      continue;
-    }
+  if (
+    components.length === 0 &&
+    technologies.length === 0 &&
+    decisions.length === 0
+  ) {
+    return out;
+  }
 
-    const { error } = await supabase
-      .from("architecture_component_dependencies")
-      .insert({
-        project_id: options.projectId,
-        source_component_id: row.source_component_id,
-        target_component_id: row.target_component_id,
-        description: row.description,
-      });
+  const rpc = supabase.rpc as unknown as (
+    fn: string,
+    args: Record<string, unknown>,
+  ) => Promise<{ data: unknown; error: { message: string } | null }>;
 
-    if (error) {
-      out.failed.push({
-        kind: "failed",
-        index: entry.index,
-        title: label,
-        error: error.message,
-      });
-      continue;
-    }
+  const { data, error } = await rpc("apply_architecture_bundle", {
+    p_project_id: options.projectId,
+    p_components: components,
+    p_technologies: technologies,
+    p_decisions: decisions,
+  });
 
-    dependencyKeys.add(key);
+  if (error) {
+    out.failed.push({
+      kind: "failed",
+      index: -1,
+      title: "",
+      error: error.message,
+    });
+    return out;
+  }
+
+  const result = (data ?? {}) as ErdBundleResult;
+
+  for (const entry of result.created ?? []) {
+    out.created.push({
+      kind: "created",
+      index: entry.index,
+      id: entry.id,
+      title: entry.title,
+    });
+  }
+  for (const entry of result.skipped ?? []) {
+    out.skipped.push({
+      kind: "skipped",
+      index: entry.index,
+      title: entry.title,
+      reason: entry.reason,
+    });
   }
 
   return out;
@@ -1236,168 +1097,94 @@ export function buildApiErrorRow(item: AiApiErrorItem): ApiErrorRow | null {
   };
 }
 
-export function apiEndpointDedupeKey(
-  method: ApiHttpMethod,
-  path: string,
-): string {
-  return `${method}|${path}`;
-}
 
-export function apiParameterDedupeKey(
-  endpointId: string,
-  location: ApiParameterLocation,
-  name: string,
-): string {
-  return `${endpointId}|${location}|${name.trim().toLowerCase()}`;
-}
 
-export function apiResponseDedupeKey(
-  endpointId: string,
-  statusCode: number,
-): string {
-  return `${endpointId}|${statusCode}`;
-}
 
-export function apiErrorDedupeKey(endpointId: string, code: string): string {
-  return `${endpointId}|${code.trim().toLowerCase()}`;
-}
 
-export function apiEntityLinkDedupeKey(
-  endpointId: string,
-  entityId: string,
-  role: ApiEndpointEntityRole,
-): string {
-  return `${endpointId}|${entityId}|${role}`;
-}
 
-export function apiRequirementLinkDedupeKey(
-  endpointId: string,
-  requirementId: string,
-): string {
-  return `${endpointId}|${requirementId}`;
-}
 
 function toJson(value: unknown): Json | null {
   if (value === null || value === undefined) return null;
   return value as Json;
 }
 
-function nextPositionByParent(
-  rows: Array<{ endpoint_id: string; position: number }>,
-): Map<string, number> {
-  const map = new Map<string, number>();
-  for (const row of rows) {
-    map.set(
-      row.endpoint_id,
-      Math.max(map.get(row.endpoint_id) ?? -1, row.position),
-    );
-  }
-  for (const [key, value] of map) {
-    map.set(key, value + 1);
-  }
-  return map;
-}
 
-export async function applyApiToProject(
-  options: ApplyApiOptions,
-): Promise<ApplySummary> {
-  const supabase = await createClient();
-  const out: ApplySummary = { created: [], skipped: [], failed: [] };
+type ApiBundleGroup = {
+  index: number;
+  name: string;
+  prefix: string;
+  description: string;
+};
 
-  const chosen = [...new Set(options.indices)]
-    .filter((n) => Number.isInteger(n) && n >= 0 && n < options.items.length)
+type ApiBundleEndpoint = {
+  index: number;
+  group_name: string;
+  name: string;
+  method: string;
+  path: string;
+  summary: string;
+  description: string;
+  authentication_required: boolean;
+  parameters: Array<{
+    name: string;
+    location: string;
+    data_type: string;
+    required: boolean;
+    description: string;
+    example: string;
+  }>;
+  request_body: {
+    content_type: string;
+    description: string;
+    schema: Json | null;
+    example: Json | null;
+  } | null;
+  responses: Array<{
+    status_code: number;
+    content_type: string;
+    description: string;
+    schema: Json | null;
+    example: Json | null;
+  }>;
+  errors: Array<{
+    code: string;
+    message: string;
+    http_status: number | null;
+    description: string;
+  }>;
+  entities: Array<{ entity_name: string; role: string }>;
+  requirement_titles: string[];
+};
+
+// Pure builder: filters and validates the model output into the JSONB shape the
+// apply_api_bundle function consumes. Invalid entries are recorded as skipped.
+export function buildApiBundle(
+  items: AiApiItem[],
+  indices: number[],
+): {
+  groups: ApiBundleGroup[];
+  endpoints: ApiBundleEndpoint[];
+  skipped: ApplyItemOutcome[];
+} {
+  const groups: ApiBundleGroup[] = [];
+  const endpoints: ApiBundleEndpoint[] = [];
+  const skipped: ApplyItemOutcome[] = [];
+
+  const chosen = [...new Set(indices)]
+    .filter((n) => Number.isInteger(n) && n >= 0 && n < items.length)
     .sort((a, b) => a - b);
 
-  const [contract, entities, requirements] = await Promise.all([
-    loadProjectApiContract(options.projectId),
-    listEntitiesByProject(options.projectId),
-    listRequirements({ projectId: options.projectId }),
-  ]);
-
-  const groupIdByKey = new Map<string, string>();
-  let groupPosition =
-    contract.groups.reduce((max, group) => Math.max(max, group.position), -1) + 1;
-  for (const group of contract.groups) {
-    groupIdByKey.set(group.name.trim().toLowerCase(), group.id);
-  }
-
-  const endpointIdByKey = new Map<string, string>();
-  let endpointPosition =
-    contract.endpoints.reduce(
-      (max, endpoint) => Math.max(max, endpoint.position),
-      -1,
-    ) + 1;
-  for (const endpoint of contract.endpoints) {
-    endpointIdByKey.set(
-      apiEndpointDedupeKey(endpoint.method, endpoint.path),
-      endpoint.id,
-    );
-  }
-
-  const parameterKeys = new Set(
-    contract.parameters.map((parameter) =>
-      apiParameterDedupeKey(
-        parameter.endpoint_id,
-        parameter.location,
-        parameter.name,
-      ),
-    ),
-  );
-  const parameterPosition = nextPositionByParent(contract.parameters);
-
-  const requestBodyEndpointIds = new Set(
-    contract.requestBodies.map((body) => body.endpoint_id),
-  );
-
-  const responseKeys = new Set(
-    contract.responses.map((response) =>
-      apiResponseDedupeKey(response.endpoint_id, response.status_code),
-    ),
-  );
-  const responsePosition = nextPositionByParent(contract.responses);
-
-  const errorKeys = new Set(
-    contract.errors.map((error) =>
-      apiErrorDedupeKey(error.endpoint_id, error.code),
-    ),
-  );
-
-  const entityLinkKeys = new Set(
-    contract.endpointEntities.map((link) =>
-      apiEntityLinkDedupeKey(link.endpoint_id, link.entity_id, link.role),
-    ),
-  );
-  const requirementLinkKeys = new Set(
-    contract.endpointRequirements.map((link) =>
-      apiRequirementLinkDedupeKey(link.endpoint_id, link.requirement_id),
-    ),
-  );
-
-  const entityIdByName = new Map<string, string>();
-  for (const entity of entities) {
-    const key = entity.name.trim().toLowerCase();
-    if (!entityIdByName.has(key)) entityIdByName.set(key, entity.id);
-  }
-
-  const requirementIdByTitle = new Map<string, string>();
-  for (const requirement of requirements) {
-    const key = requirement.title.trim().toLowerCase();
-    if (!requirementIdByTitle.has(key)) {
-      requirementIdByTitle.set(key, requirement.id);
-    }
-  }
-
   for (const index of chosen) {
-    const item = options.items[index];
+    const item = items[index];
     if (!item) {
-      out.skipped.push({ kind: "skipped", index, title: "", reason: "invalid" });
+      skipped.push({ kind: "skipped", index, title: "", reason: "invalid" });
       continue;
     }
 
     if (item.kind === "group") {
       const row = buildApiGroupRow(item);
       if (!row) {
-        out.skipped.push({
+        skipped.push({
           kind: "skipped",
           index,
           title: item.name,
@@ -1405,410 +1192,180 @@ export async function applyApiToProject(
         });
         continue;
       }
-
-      const key = row.name.toLowerCase();
-      if (groupIdByKey.has(key)) {
-        out.skipped.push({
-          kind: "skipped",
-          index,
-          title: row.name,
-          reason: "duplicate",
-        });
-        continue;
-      }
-
-      const { data, error } = await supabase
-        .from("api_groups")
-        .insert({
-          project_id: options.projectId,
-          name: row.name,
-          prefix: row.prefix,
-          description: row.description,
-          position: groupPosition,
-        })
-        .select("id, name")
-        .single();
-
-      if (error || !data) {
-        out.failed.push({
-          kind: "failed",
-          index,
-          title: row.name,
-          error: error?.message ?? "Could not insert API group.",
-        });
-        continue;
-      }
-
-      groupIdByKey.set(key, data.id);
-      groupPosition += 1;
-      out.created.push({ kind: "created", index, id: data.id, title: data.name });
+      groups.push({
+        index,
+        name: row.name,
+        prefix: row.prefix ?? "",
+        description: row.description ?? "",
+      });
       continue;
     }
 
     const label = `${item.method} ${item.path}`;
     const row = buildApiEndpointRow(item);
     if (!row) {
-      out.skipped.push({ kind: "skipped", index, title: label, reason: "invalid" });
+      skipped.push({ kind: "skipped", index, title: label, reason: "invalid" });
       continue;
     }
 
-    const endpointKey = apiEndpointDedupeKey(row.method, row.path);
-    let endpointId = endpointIdByKey.get(endpointKey) ?? null;
-    let createdEndpoint = false;
-
-    if (!endpointId) {
-      let groupId: string | null = null;
-
-      if (row.group_name) {
-        const groupKey = row.group_name.toLowerCase();
-        groupId = groupIdByKey.get(groupKey) ?? null;
-
-        if (!groupId) {
-          const { data: group, error: groupError } = await supabase
-            .from("api_groups")
-            .insert({
-              project_id: options.projectId,
-              name: row.group_name,
-              position: groupPosition,
-            })
-            .select("id")
-            .single();
-
-          if (groupError || !group) {
-            out.failed.push({
-              kind: "failed",
-              index,
-              title: label,
-              error: groupError?.message ?? "Could not insert API group.",
-            });
-            continue;
-          }
-
-          groupId = group.id;
-          groupIdByKey.set(groupKey, group.id);
-          groupPosition += 1;
-        }
-      }
-
-      const { data, error } = await supabase
-        .from("api_endpoints")
-        .insert({
-          project_id: options.projectId,
-          group_id: groupId,
-          name: row.name,
-          method: row.method,
-          path: row.path,
-          summary: row.summary,
-          description: row.description,
-          authentication_required: row.authentication_required,
-          position: endpointPosition,
-        })
-        .select("id, path")
-        .single();
-
-      if (error || !data) {
-        out.failed.push({
-          kind: "failed",
-          index,
-          title: label,
-          error: error?.message ?? "Could not insert API endpoint.",
-        });
-        continue;
-      }
-
-      endpointId = data.id;
-      endpointIdByKey.set(endpointKey, data.id);
-      endpointPosition += 1;
-      createdEndpoint = true;
-    }
-
+    const parameters: ApiBundleEndpoint["parameters"] = [];
     for (const parameterItem of item.parameters) {
-      const parameterLabel = `${label} → ${parameterItem.name}`;
       const parameterRow = buildApiParameterRow(parameterItem);
       if (!parameterRow) {
-        out.skipped.push({
+        skipped.push({
           kind: "skipped",
           index,
-          title: parameterLabel,
+          title: `${label} → ${parameterItem.name}`,
           reason: "invalid",
         });
         continue;
       }
-
-      const key = apiParameterDedupeKey(
-        endpointId,
-        parameterRow.location,
-        parameterRow.name,
-      );
-      if (parameterKeys.has(key)) {
-        out.skipped.push({
-          kind: "skipped",
-          index,
-          title: parameterLabel,
-          reason: "duplicate",
-        });
-        continue;
-      }
-
-      const position = parameterPosition.get(endpointId) ?? 0;
-      const { error } = await supabase.from("api_parameters").insert({
-        endpoint_id: endpointId,
+      parameters.push({
         name: parameterRow.name,
         location: parameterRow.location,
         data_type: parameterRow.data_type,
         required: parameterRow.required,
-        description: parameterRow.description,
-        example: parameterRow.example,
-        position,
+        description: parameterRow.description ?? "",
+        example: parameterRow.example ?? "",
       });
-
-      if (error) {
-        out.failed.push({
-          kind: "failed",
-          index,
-          title: parameterLabel,
-          error: error.message,
-        });
-        continue;
-      }
-
-      parameterKeys.add(key);
-      parameterPosition.set(endpointId, position + 1);
     }
 
+    let requestBody: ApiBundleEndpoint["request_body"] = null;
     if (item.request_body) {
-      const bodyLabel = `${label} → request body`;
       const bodyRow = buildApiRequestBodyRow(item.request_body);
-
       if (!bodyRow) {
-        out.skipped.push({
+        skipped.push({
           kind: "skipped",
           index,
-          title: bodyLabel,
+          title: `${label} → request body`,
           reason: "invalid",
-        });
-      } else if (requestBodyEndpointIds.has(endpointId)) {
-        out.skipped.push({
-          kind: "skipped",
-          index,
-          title: bodyLabel,
-          reason: "duplicate",
         });
       } else {
-        const { error } = await supabase.from("api_request_bodies").insert({
-          endpoint_id: endpointId,
+        requestBody = {
           content_type: bodyRow.content_type,
-          description: bodyRow.description,
-          schema_definition: bodyRow.schema_definition,
+          description: bodyRow.description ?? "",
+          schema: bodyRow.schema_definition,
           example: bodyRow.example,
-        });
-
-        if (error) {
-          out.failed.push({
-            kind: "failed",
-            index,
-            title: bodyLabel,
-            error: error.message,
-          });
-        } else {
-          requestBodyEndpointIds.add(endpointId);
-        }
+        };
       }
     }
 
+    const responses: ApiBundleEndpoint["responses"] = [];
     for (const responseItem of item.responses) {
-      const responseLabel = `${label} → ${responseItem.status_code}`;
       const responseRow = buildApiResponseRow(responseItem);
       if (!responseRow) {
-        out.skipped.push({
+        skipped.push({
           kind: "skipped",
           index,
-          title: responseLabel,
+          title: `${label} → ${responseItem.status_code}`,
           reason: "invalid",
         });
         continue;
       }
-
-      const key = apiResponseDedupeKey(endpointId, responseRow.status_code);
-      if (responseKeys.has(key)) {
-        out.skipped.push({
-          kind: "skipped",
-          index,
-          title: responseLabel,
-          reason: "duplicate",
-        });
-        continue;
-      }
-
-      const position = responsePosition.get(endpointId) ?? 0;
-      const { error } = await supabase.from("api_responses").insert({
-        endpoint_id: endpointId,
+      responses.push({
         status_code: responseRow.status_code,
-        content_type: responseRow.content_type,
-        description: responseRow.description,
-        schema_definition: responseRow.schema_definition,
+        content_type: responseRow.content_type ?? "",
+        description: responseRow.description ?? "",
+        schema: responseRow.schema_definition,
         example: responseRow.example,
-        position,
       });
-
-      if (error) {
-        out.failed.push({
-          kind: "failed",
-          index,
-          title: responseLabel,
-          error: error.message,
-        });
-        continue;
-      }
-
-      responseKeys.add(key);
-      responsePosition.set(endpointId, position + 1);
     }
 
+    const errors: ApiBundleEndpoint["errors"] = [];
     for (const errorItem of item.errors) {
-      const errorLabel = `${label} → ${errorItem.code}`;
       const errorRow = buildApiErrorRow(errorItem);
       if (!errorRow) {
-        out.skipped.push({
+        skipped.push({
           kind: "skipped",
           index,
-          title: errorLabel,
+          title: `${label} → ${errorItem.code}`,
           reason: "invalid",
         });
         continue;
       }
-
-      const key = apiErrorDedupeKey(endpointId, errorRow.code);
-      if (errorKeys.has(key)) {
-        out.skipped.push({
-          kind: "skipped",
-          index,
-          title: errorLabel,
-          reason: "duplicate",
-        });
-        continue;
-      }
-
-      const { error } = await supabase.from("api_errors").insert({
-        endpoint_id: endpointId,
+      errors.push({
         code: errorRow.code,
         message: errorRow.message,
-        description: errorRow.description,
         http_status: errorRow.http_status,
+        description: errorRow.description ?? "",
       });
-
-      if (error) {
-        out.failed.push({
-          kind: "failed",
-          index,
-          title: errorLabel,
-          error: error.message,
-        });
-        continue;
-      }
-
-      errorKeys.add(key);
     }
 
-    for (const link of item.entities) {
-      const linkLabel = `${label} → ${link.entity_name}`;
-      const entityId =
-        entityIdByName.get(link.entity_name.trim().toLowerCase()) ?? null;
-
-      if (!entityId) {
-        out.skipped.push({
-          kind: "skipped",
-          index,
-          title: linkLabel,
-          reason: "invalid",
-        });
-        continue;
-      }
-
-      const key = apiEntityLinkDedupeKey(endpointId, entityId, link.role);
-      if (entityLinkKeys.has(key)) {
-        out.skipped.push({
-          kind: "skipped",
-          index,
-          title: linkLabel,
-          reason: "duplicate",
-        });
-        continue;
-      }
-
-      const { error } = await supabase.from("api_endpoint_entities").insert({
-        endpoint_id: endpointId,
-        entity_id: entityId,
+    endpoints.push({
+      index,
+      group_name: row.group_name,
+      name: row.name,
+      method: row.method,
+      path: row.path,
+      summary: row.summary ?? "",
+      description: row.description ?? "",
+      authentication_required: row.authentication_required,
+      parameters,
+      request_body: requestBody,
+      responses,
+      errors,
+      entities: item.entities.map((link) => ({
+        entity_name: link.entity_name,
         role: link.role,
-      });
+      })),
+      requirement_titles: item.requirement_titles,
+    });
+  }
 
-      if (error) {
-        out.failed.push({
-          kind: "failed",
-          index,
-          title: linkLabel,
-          error: error.message,
-        });
-        continue;
-      }
+  return { groups, endpoints, skipped };
+}
 
-      entityLinkKeys.add(key);
-    }
+export async function applyApiBundleToProject(
+  options: ApplyApiOptions,
+): Promise<ApplySummary> {
+  const supabase = await createClient();
+  const out: ApplySummary = { created: [], skipped: [], failed: [] };
 
-    for (const requirementTitle of item.requirement_titles) {
-      const linkLabel = `${label} → ${requirementTitle}`;
-      const requirementId =
-        requirementIdByTitle.get(requirementTitle.trim().toLowerCase()) ?? null;
+  const built = buildApiBundle(options.items, options.indices);
+  out.skipped.push(...built.skipped);
 
-      if (!requirementId) {
-        out.skipped.push({
-          kind: "skipped",
-          index,
-          title: linkLabel,
-          reason: "invalid",
-        });
-        continue;
-      }
+  if (built.groups.length === 0 && built.endpoints.length === 0) {
+    return out;
+  }
 
-      const key = apiRequirementLinkDedupeKey(endpointId, requirementId);
-      if (requirementLinkKeys.has(key)) {
-        out.skipped.push({
-          kind: "skipped",
-          index,
-          title: linkLabel,
-          reason: "duplicate",
-        });
-        continue;
-      }
+  const rpc = supabase.rpc as unknown as (
+    fn: string,
+    args: Record<string, unknown>,
+  ) => Promise<{ data: unknown; error: { message: string } | null }>;
 
-      const { error } = await supabase.from("api_endpoint_requirements").insert({
-        endpoint_id: endpointId,
-        requirement_id: requirementId,
-      });
+  const { data, error } = await rpc("apply_api_bundle", {
+    p_project_id: options.projectId,
+    p_groups: built.groups,
+    p_endpoints: built.endpoints,
+  });
 
-      if (error) {
-        out.failed.push({
-          kind: "failed",
-          index,
-          title: linkLabel,
-          error: error.message,
-        });
-        continue;
-      }
+  if (error) {
+    out.failed.push({
+      kind: "failed",
+      index: -1,
+      title: "",
+      error: error.message,
+    });
+    return out;
+  }
 
-      requirementLinkKeys.add(key);
-    }
+  const result = (data ?? {}) as ErdBundleResult;
 
-    if (createdEndpoint) {
-      out.created.push({ kind: "created", index, id: endpointId, title: label });
-    } else {
-      out.skipped.push({
-        kind: "skipped",
-        index,
-        title: label,
-        reason: "duplicate",
-      });
-    }
+  for (const entry of result.created ?? []) {
+    out.created.push({
+      kind: "created",
+      index: entry.index,
+      id: entry.id,
+      title: entry.title,
+    });
+  }
+  for (const entry of result.skipped ?? []) {
+    out.skipped.push({
+      kind: "skipped",
+      index: entry.index,
+      title: entry.title,
+      reason: entry.reason,
+    });
   }
 
   return out;
@@ -1940,129 +1497,63 @@ export function uiScreenRequirementLinkDedupeKey(
   return `${screenId}|${requirementId}`;
 }
 
-type UiPlacementCache = {
-  keys: Set<string>;
-  labelToId: Map<string, string>;
-  position: number;
+type UiBundleComponent = {
+  index: number;
+  name: string;
+  component_type: string;
+  description: string;
+  purpose: string;
+  technology: string;
 };
 
-export async function applyUiToProject(
-  options: ApplyUiOptions,
-): Promise<ApplySummary> {
-  const supabase = await createClient();
-  const out: ApplySummary = { created: [], skipped: [], failed: [] };
+type UiBundleScreen = {
+  index: number;
+  name: string;
+  route: string;
+  screen_type: string;
+  description: string;
+  purpose: string;
+  authentication_required: boolean;
+  placements: Array<{
+    component_name: string;
+    label: string;
+    description: string;
+    required: boolean;
+    parent_label: string;
+  }>;
+  entities: Array<{ entity_name: string; role: string }>;
+  requirement_titles: string[];
+};
 
-  const chosen = [...new Set(options.indices)]
-    .filter((n) => Number.isInteger(n) && n >= 0 && n < options.items.length)
+export type UiBundleParts = {
+  components: UiBundleComponent[];
+  screens: UiBundleScreen[];
+  skipped: ApplyItemOutcome[];
+};
+
+export function buildUiBundle(
+  items: AiUiItem[],
+  indices: number[],
+): UiBundleParts {
+  const skipped: ApplyItemOutcome[] = [];
+  const components: UiBundleComponent[] = [];
+  const screens: UiBundleScreen[] = [];
+
+  const chosen = [...new Set(indices)]
+    .filter((n) => Number.isInteger(n) && n >= 0 && n < items.length)
     .sort((a, b) => a - b);
 
-  const [screens, components, entities, requirements] = await Promise.all([
-    listUiScreensByProject({ projectId: options.projectId }),
-    listUiComponentsByProject({ projectId: options.projectId }),
-    listEntitiesByProject(options.projectId),
-    listRequirements({ projectId: options.projectId }),
-  ]);
-
-  const screenIdByKey = new Map<string, string>();
-  let screenPosition =
-    screens.reduce((max, screen) => Math.max(max, screen.position), -1) + 1;
-  for (const screen of screens) {
-    screenIdByKey.set(uiScreenDedupeKey(screen.name), screen.id);
-  }
-
-  const componentIdByKey = new Map<string, string>();
-  const componentIdByName = new Map<string, string>();
-  let componentPosition =
-    components.reduce((max, component) => Math.max(max, component.position), -1) +
-    1;
-  for (const component of components) {
-    const key = uiComponentDedupeKey(component.name);
-    componentIdByKey.set(key, component.id);
-    if (!componentIdByName.has(key)) {
-      componentIdByName.set(key, component.id);
-    }
-  }
-
-  const entityIdByName = new Map<string, string>();
-  for (const entity of entities) {
-    const key = entity.name.trim().toLowerCase();
-    if (!entityIdByName.has(key)) entityIdByName.set(key, entity.id);
-  }
-
-  const requirementIdByTitle = new Map<string, string>();
-  for (const requirement of requirements) {
-    const key = requirement.title.trim().toLowerCase();
-    if (!requirementIdByTitle.has(key)) {
-      requirementIdByTitle.set(key, requirement.id);
-    }
-  }
-
-  const placementCacheByScreen = new Map<string, UiPlacementCache>();
-  const placementCacheFor = async (
-    screenId: string,
-  ): Promise<UiPlacementCache> => {
-    const cached = placementCacheByScreen.get(screenId);
-    if (cached) return cached;
-    const rows = await listScreenComponents(screenId);
-    const keys = new Set<string>();
-    const labelToId = new Map<string, string>();
-    let position = -1;
-    for (const row of rows) {
-      keys.add(
-        uiScreenComponentDedupeKey(row.screen_id, row.component_id, row.label ?? ""),
-      );
-      const labelKey = (row.label ?? "").trim().toLowerCase();
-      if (labelKey && !labelToId.has(labelKey)) {
-        labelToId.set(labelKey, row.id);
-      }
-      position = Math.max(position, row.position);
-    }
-    const cache: UiPlacementCache = { keys, labelToId, position: position + 1 };
-    placementCacheByScreen.set(screenId, cache);
-    return cache;
-  };
-
-  const entityLinkKeysByScreen = new Map<string, Set<string>>();
-  const entityLinkKeysFor = async (screenId: string): Promise<Set<string>> => {
-    const cached = entityLinkKeysByScreen.get(screenId);
-    if (cached) return cached;
-    const rows = await listScreenEntities(screenId);
-    const keys = new Set<string>();
-    for (const row of rows) {
-      keys.add(uiScreenEntityLinkDedupeKey(row.screen_id, row.entity_id, row.role));
-    }
-    entityLinkKeysByScreen.set(screenId, keys);
-    return keys;
-  };
-
-  const requirementLinkKeysByScreen = new Map<string, Set<string>>();
-  const requirementLinkKeysFor = async (
-    screenId: string,
-  ): Promise<Set<string>> => {
-    const cached = requirementLinkKeysByScreen.get(screenId);
-    if (cached) return cached;
-    const rows = await listScreenRequirements(screenId);
-    const keys = new Set<string>();
-    for (const row of rows) {
-      keys.add(
-        uiScreenRequirementLinkDedupeKey(row.screen_id, row.requirement_id),
-      );
-    }
-    requirementLinkKeysByScreen.set(screenId, keys);
-    return keys;
-  };
-
   for (const index of chosen) {
-    const item = options.items[index];
+    const item = items[index];
     if (!item) {
-      out.skipped.push({ kind: "skipped", index, title: "", reason: "invalid" });
+      skipped.push({ kind: "skipped", index, title: "", reason: "invalid" });
       continue;
     }
 
     if (item.kind === "component") {
       const row = buildUiComponentRow(item);
       if (!row) {
-        out.skipped.push({
+        skipped.push({
           kind: "skipped",
           index,
           title: item.name,
@@ -2070,52 +1561,20 @@ export async function applyUiToProject(
         });
         continue;
       }
-
-      const key = uiComponentDedupeKey(row.name);
-      if (componentIdByKey.has(key)) {
-        out.skipped.push({
-          kind: "skipped",
-          index,
-          title: row.name,
-          reason: "duplicate",
-        });
-        continue;
-      }
-
-      const { data, error } = await supabase
-        .from("ui_components")
-        .insert({
-          project_id: options.projectId,
-          name: row.name,
-          component_type: row.component_type,
-          description: row.description,
-          purpose: row.purpose,
-          technology: row.technology,
-          position: componentPosition,
-        })
-        .select("id, name")
-        .single();
-
-      if (error || !data) {
-        out.failed.push({
-          kind: "failed",
-          index,
-          title: row.name,
-          error: error?.message ?? "Could not insert UI component.",
-        });
-        continue;
-      }
-
-      componentIdByKey.set(key, data.id);
-      componentIdByName.set(key, data.id);
-      componentPosition += 1;
-      out.created.push({ kind: "created", index, id: data.id, title: data.name });
+      components.push({
+        index,
+        name: row.name,
+        component_type: row.component_type,
+        description: row.description ?? "",
+        purpose: row.purpose ?? "",
+        technology: row.technology ?? "",
+      });
       continue;
     }
 
     const row = buildUiScreenRow(item);
     if (!row) {
-      out.skipped.push({
+      skipped.push({
         kind: "skipped",
         index,
         title: item.name,
@@ -2124,258 +1583,90 @@ export async function applyUiToProject(
       continue;
     }
 
-    const screenKey = uiScreenDedupeKey(row.name);
-    let screenId = screenIdByKey.get(screenKey) ?? null;
-    let createdScreen = false;
+    const placements = item.placements.map((placement) => ({
+      component_name: placement.component_name,
+      label: placement.label ?? "",
+      description: placement.description ?? "",
+      required: placement.required,
+      parent_label: placement.parent_label ?? "",
+    }));
 
-    if (!screenId) {
-      const { data, error } = await supabase
-        .from("ui_screens")
-        .insert({
-          project_id: options.projectId,
-          name: row.name,
-          route: row.route,
-          screen_type: row.screen_type,
-          description: row.description,
-          purpose: row.purpose,
-          authentication_required: row.authentication_required,
-          position: screenPosition,
-        })
-        .select("id, name")
-        .single();
-
-      if (error || !data) {
-        out.failed.push({
-          kind: "failed",
-          index,
-          title: row.name,
-          error: error?.message ?? "Could not insert UI screen.",
-        });
-        continue;
-      }
-
-      screenId = data.id;
-      screenIdByKey.set(screenKey, data.id);
-      screenPosition += 1;
-      createdScreen = true;
-    }
-
-    const cache = await placementCacheFor(screenId);
-
-    type PendingParent = {
-      placementId: string;
-      parentLabel: string;
-      label: string;
-    };
-    const pendingParents: PendingParent[] = [];
-
-    for (const placementItem of item.placements) {
-      const placementLabel = `${row.name} → ${placementItem.component_name}`;
-      const componentId =
-        componentIdByName.get(
-          uiComponentDedupeKey(placementItem.component_name),
-        ) ?? null;
-
-      if (!componentId) {
-        out.skipped.push({
-          kind: "skipped",
-          index,
-          title: placementLabel,
-          reason: "invalid",
-        });
-        continue;
-      }
-
-      const placementRow = buildUiPlacementRow(
-        placementItem,
-        screenId,
-        componentId,
-        null,
-      );
-      if (!placementRow) {
-        out.skipped.push({
-          kind: "skipped",
-          index,
-          title: placementLabel,
-          reason: "invalid",
-        });
-        continue;
-      }
-
-      const key = uiScreenComponentDedupeKey(
-        screenId,
-        componentId,
-        placementItem.label,
-      );
-      if (cache.keys.has(key)) {
-        out.skipped.push({
-          kind: "skipped",
-          index,
-          title: placementLabel,
-          reason: "duplicate",
-        });
-        continue;
-      }
-
-      const { data, error } = await supabase
-        .from("ui_screen_components")
-        .insert({
-          screen_id: screenId,
-          component_id: componentId,
-          parent_id: null,
-          label: placementRow.label,
-          description: placementRow.description,
-          required: placementRow.required,
-          position: cache.position,
-        })
-        .select("id")
-        .single();
-
-      if (error || !data) {
-        out.failed.push({
-          kind: "failed",
-          index,
-          title: placementLabel,
-          error: error?.message ?? "Could not insert screen component.",
-        });
-        continue;
-      }
-
-      cache.keys.add(key);
-      cache.position += 1;
-
-      const labelKey = placementItem.label.trim().toLowerCase();
-      if (labelKey && !cache.labelToId.has(labelKey)) {
-        cache.labelToId.set(labelKey, data.id);
-      }
-      if (placementItem.parent_label.trim()) {
-        pendingParents.push({
-          placementId: data.id,
-          parentLabel: placementItem.parent_label.trim(),
-          label: placementLabel,
-        });
-      }
-    }
-
-    for (const pending of pendingParents) {
-      const parentId =
-        cache.labelToId.get(pending.parentLabel.toLowerCase()) ?? null;
-      if (!parentId || parentId === pending.placementId) continue;
-      const { error } = await supabase
-        .from("ui_screen_components")
-        .update({ parent_id: parentId })
-        .eq("id", pending.placementId);
-      if (error) {
-        out.failed.push({
-          kind: "failed",
-          index,
-          title: pending.label,
-          error: error.message,
-        });
-      }
-    }
-
-    for (const link of item.entities) {
-      const linkLabel = `${row.name} → ${link.entity_name}`;
-      const entityId =
-        entityIdByName.get(link.entity_name.trim().toLowerCase()) ?? null;
-
-      if (!entityId) {
-        out.skipped.push({
-          kind: "skipped",
-          index,
-          title: linkLabel,
-          reason: "invalid",
-        });
-        continue;
-      }
-
-      const keys = await entityLinkKeysFor(screenId);
-      const key = uiScreenEntityLinkDedupeKey(screenId, entityId, link.role);
-      if (keys.has(key)) {
-        out.skipped.push({
-          kind: "skipped",
-          index,
-          title: linkLabel,
-          reason: "duplicate",
-        });
-        continue;
-      }
-
-      const { error } = await supabase.from("ui_screen_entities").insert({
-        screen_id: screenId,
-        entity_id: entityId,
+    screens.push({
+      index,
+      name: row.name,
+      route: row.route ?? "",
+      screen_type: row.screen_type,
+      description: row.description ?? "",
+      purpose: row.purpose ?? "",
+      authentication_required: row.authentication_required,
+      placements,
+      entities: item.entities.map((link) => ({
+        entity_name: link.entity_name,
         role: link.role,
-      });
+      })),
+      requirement_titles: item.requirement_titles,
+    });
+  }
 
-      if (error) {
-        out.failed.push({
-          kind: "failed",
-          index,
-          title: linkLabel,
-          error: error.message,
-        });
-        continue;
-      }
+  return { components, screens, skipped };
+}
 
-      keys.add(key);
-    }
+// Transactional variant: components, screens, placements, and links are all
+// applied inside a single database transaction by apply_ui_bundle.
+export async function applyUiBundleToProject(
+  options: ApplyUiOptions,
+): Promise<ApplySummary> {
+  const supabase = await createClient();
+  const out: ApplySummary = { created: [], skipped: [], failed: [] };
 
-    for (const requirementTitle of item.requirement_titles) {
-      const linkLabel = `${row.name} → ${requirementTitle}`;
-      const requirementId =
-        requirementIdByTitle.get(requirementTitle.trim().toLowerCase()) ?? null;
+  const { components, screens, skipped } = buildUiBundle(
+    options.items,
+    options.indices,
+  );
+  out.skipped.push(...skipped);
 
-      if (!requirementId) {
-        out.skipped.push({
-          kind: "skipped",
-          index,
-          title: linkLabel,
-          reason: "invalid",
-        });
-        continue;
-      }
+  if (components.length === 0 && screens.length === 0) {
+    return out;
+  }
 
-      const keys = await requirementLinkKeysFor(screenId);
-      const key = uiScreenRequirementLinkDedupeKey(screenId, requirementId);
-      if (keys.has(key)) {
-        out.skipped.push({
-          kind: "skipped",
-          index,
-          title: linkLabel,
-          reason: "duplicate",
-        });
-        continue;
-      }
+  const rpc = supabase.rpc as unknown as (
+    fn: string,
+    args: Record<string, unknown>,
+  ) => Promise<{ data: unknown; error: { message: string } | null }>;
 
-      const { error } = await supabase.from("ui_screen_requirements").insert({
-        screen_id: screenId,
-        requirement_id: requirementId,
-      });
+  const { data, error } = await rpc("apply_ui_bundle", {
+    p_project_id: options.projectId,
+    p_components: components,
+    p_screens: screens,
+  });
 
-      if (error) {
-        out.failed.push({
-          kind: "failed",
-          index,
-          title: linkLabel,
-          error: error.message,
-        });
-        continue;
-      }
+  if (error) {
+    out.failed.push({
+      kind: "failed",
+      index: -1,
+      title: "",
+      error: error.message,
+    });
+    return out;
+  }
 
-      keys.add(key);
-    }
+  const result = (data ?? {}) as ErdBundleResult;
 
-    if (createdScreen) {
-      out.created.push({ kind: "created", index, id: screenId, title: row.name });
-    } else {
-      out.skipped.push({
-        kind: "skipped",
-        index,
-        title: row.name,
-        reason: "duplicate",
-      });
-    }
+  for (const entry of result.created ?? []) {
+    out.created.push({
+      kind: "created",
+      index: entry.index,
+      id: entry.id,
+      title: entry.title,
+    });
+  }
+  for (const entry of result.skipped ?? []) {
+    out.skipped.push({
+      kind: "skipped",
+      index: entry.index,
+      title: entry.title,
+      reason: entry.reason,
+    });
   }
 
   return out;

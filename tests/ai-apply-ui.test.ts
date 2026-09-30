@@ -7,6 +7,7 @@ import {
   uiScreenEntityLinkDedupeKey,
   uiScreenRequirementLinkDedupeKey,
   buildUiComponentRow,
+  buildUiBundle,
   buildUiPlacementRow,
   buildUiScreenRow,
 } from "@/lib/ai/apply";
@@ -134,5 +135,76 @@ describe("ai/apply ui row builders", () => {
     expect(
       uiScreenRequirementLinkDedupeKey(SCREEN_ID, REQUIREMENT_ID),
     ).toBe(`${SCREEN_ID}|${REQUIREMENT_ID}`);
+  });
+});
+
+describe("ai/apply UI bundle builder", () => {
+  const screen = {
+    kind: "screen" as const,
+    name: "Loan List",
+    route: "/loans",
+    screen_type: "list" as const,
+    description: "All loans",
+    purpose: "Browse loans",
+    authentication_required: true,
+    placements: [
+      {
+        component_name: "Loan Table",
+        label: "Loans",
+        description: "",
+        required: true,
+        parent_label: "",
+      },
+    ],
+    entities: [{ entity_name: "Loan", role: "displayed" as const }],
+    requirement_titles: ["Borrowers can apply"],
+  };
+  const component = {
+    kind: "component" as const,
+    name: "Loan Table",
+    component_type: "table" as const,
+    description: "",
+    purpose: "",
+    technology: "",
+  };
+
+  it("splits items by kind and keeps their original indices", () => {
+    const { components, screens, skipped } = buildUiBundle(
+      [component, screen],
+      [0, 1],
+    );
+
+    expect(skipped).toEqual([]);
+    expect(components[0]?.index).toBe(0);
+    expect(components[0]?.name).toBe("Loan Table");
+    expect(screens[0]?.index).toBe(1);
+    expect(screens[0]?.name).toBe("Loan List");
+    expect(screens[0]?.placements[0]?.component_name).toBe("Loan Table");
+    expect(screens[0]?.entities[0]?.entity_name).toBe("Loan");
+    expect(screens[0]?.requirement_titles).toEqual(["Borrowers can apply"]);
+  });
+
+  it("ignores out-of-range, duplicate and non-integer indices", () => {
+    const { components, screens } = buildUiBundle(
+      [component, screen],
+      [0, 5, -1, 1.5, 1, 1],
+    );
+
+    expect(components).toHaveLength(1);
+    expect(screens).toHaveLength(1);
+  });
+
+  it("reports an invalid item as skipped", () => {
+    const { screens, skipped } = buildUiBundle(
+      [{ ...screen, name: "   " }],
+      [0],
+    );
+
+    expect(screens).toEqual([]);
+    expect(skipped).toHaveLength(1);
+    expect(skipped[0]?.kind).toBe("skipped");
+    expect(skipped[0]?.kind === "skipped" ? skipped[0].reason : null).toBe(
+      "invalid",
+    );
   });
 });

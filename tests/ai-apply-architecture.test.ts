@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   architectureDependencyDedupeKey,
+  buildArchitectureBundle,
   buildArchitectureComponentRow,
   buildArchitectureDecisionRow,
   buildArchitectureDependencyRow,
@@ -126,6 +127,85 @@ describe("ai/apply architecture row builders", () => {
     );
     expect(architectureDependencyDedupeKey(SOURCE_ID, TARGET_ID)).not.toBe(
       architectureDependencyDedupeKey(TARGET_ID, SOURCE_ID),
+    );
+  });
+});
+
+describe("ai/apply architecture bundle builder", () => {
+  it("splits items by kind and keeps each original index", () => {
+    const items = [
+      {
+        kind: "component" as const,
+        name: "Payments API",
+        type: "backend" as const,
+        description: "Handles payments",
+        depends_on: [{ target_component: "Database", description: "" }],
+      },
+      {
+        kind: "technology" as const,
+        name: "Postgres",
+        category: "database" as const,
+        description: "",
+      },
+      {
+        kind: "decision" as const,
+        title: "Use Postgres",
+        context: "",
+        decision: "We will use Postgres.",
+        rationale: "",
+      },
+    ];
+
+    const { components, technologies, decisions, skipped } =
+      buildArchitectureBundle(items, [0, 1, 2]);
+
+    expect(skipped).toEqual([]);
+    expect(components).toEqual([
+      {
+        index: 0,
+        name: "Payments API",
+        type: "backend",
+        description: "Handles payments",
+        depends_on: [{ target_component: "Database", description: "" }],
+      },
+    ]);
+    expect(technologies[0]?.index).toBe(1);
+    expect(technologies[0]?.category).toBe("database");
+    expect(decisions[0]?.index).toBe(2);
+    expect(decisions[0]?.status).toBe("proposed");
+  });
+
+  it("ignores out-of-range and duplicate indices", () => {
+    const items = [
+      {
+        kind: "technology" as const,
+        name: "Redis",
+        category: "infrastructure" as const,
+        description: "",
+      },
+    ];
+
+    const { technologies } = buildArchitectureBundle(items, [0, 0, 9, -1, 1.5]);
+    expect(technologies).toHaveLength(1);
+  });
+
+  it("reports an invalid item as skipped", () => {
+    const items = [
+      {
+        kind: "component" as const,
+        name: "   ",
+        type: "backend" as const,
+        description: "",
+        depends_on: [],
+      },
+    ];
+
+    const { components, skipped } = buildArchitectureBundle(items, [0]);
+    expect(components).toEqual([]);
+    expect(skipped).toHaveLength(1);
+    expect(skipped[0]?.kind).toBe("skipped");
+    expect(skipped[0]?.kind === "skipped" ? skipped[0].reason : null).toBe(
+      "invalid",
     );
   });
 });

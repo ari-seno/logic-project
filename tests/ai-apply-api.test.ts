@@ -1,12 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  apiEndpointDedupeKey,
-  apiEntityLinkDedupeKey,
-  apiErrorDedupeKey,
-  apiParameterDedupeKey,
-  apiRequirementLinkDedupeKey,
-  apiResponseDedupeKey,
+  buildApiBundle,
   buildApiEndpointRow,
   buildApiErrorRow,
   buildApiGroupRow,
@@ -14,10 +9,6 @@ import {
   buildApiRequestBodyRow,
   buildApiResponseRow,
 } from "@/lib/ai/apply";
-
-const ENDPOINT_ID = "11111111-1111-4111-8111-111111111111";
-const ENTITY_ID = "22222222-2222-4222-8222-222222222222";
-const REQUIREMENT_ID = "33333333-3333-4333-8333-333333333333";
 
 describe("ai/apply api row builders", () => {
   it("maps a group item and turns empty text into null", () => {
@@ -162,23 +153,90 @@ describe("ai/apply api row builders", () => {
     expect(invalid).toBeNull();
   });
 
-  it("builds stable de-duplication keys", () => {
-    expect(apiEndpointDedupeKey("GET", "/users")).toBe("GET|/users");
-    expect(apiEndpointDedupeKey("POST", "/users")).not.toBe(
-      apiEndpointDedupeKey("GET", "/users"),
-    );
-    expect(apiParameterDedupeKey(ENDPOINT_ID, "query", "  Limit ")).toBe(
-      `${ENDPOINT_ID}|query|limit`,
-    );
-    expect(apiResponseDedupeKey(ENDPOINT_ID, 404)).toBe(`${ENDPOINT_ID}|404`);
-    expect(apiErrorDedupeKey(ENDPOINT_ID, " Not_Found ")).toBe(
-      `${ENDPOINT_ID}|not_found`,
-    );
-    expect(apiEntityLinkDedupeKey(ENDPOINT_ID, ENTITY_ID, "primary_resource")).toBe(
-      `${ENDPOINT_ID}|${ENTITY_ID}|primary_resource`,
-    );
-    expect(apiRequirementLinkDedupeKey(ENDPOINT_ID, REQUIREMENT_ID)).toBe(
-      `${ENDPOINT_ID}|${REQUIREMENT_ID}`,
+  it("builds a bundle that splits groups and endpoints by kind", () => {
+    const items = [
+      {
+        kind: "group" as const,
+        name: "Users",
+        prefix: "/users",
+        description: "",
+      },
+      {
+        kind: "endpoint" as const,
+        group_name: "Users",
+        method: "GET" as const,
+        path: "/users",
+        name: "List users",
+        summary: "",
+        description: "",
+        authentication_required: true,
+        parameters: [
+          {
+            name: "limit",
+            location: "query" as const,
+            data_type: "integer" as const,
+            required: false,
+            description: "",
+            example: "",
+          },
+        ],
+        request_body: null,
+        responses: [],
+        errors: [],
+        entities: [{ entity_name: "User", role: "primary_resource" as const }],
+        requirement_titles: ["List users"],
+      },
+    ];
+
+    const { groups, endpoints, skipped } = buildApiBundle(items, [0, 1]);
+
+    expect(skipped).toEqual([]);
+    expect(groups).toHaveLength(1);
+    expect(groups[0]?.index).toBe(0);
+    expect(endpoints).toHaveLength(1);
+    expect(endpoints[0]?.index).toBe(1);
+    expect(endpoints[0]?.parameters[0]?.name).toBe("limit");
+    expect(endpoints[0]?.entities[0]?.role).toBe("primary_resource");
+  });
+
+  it("ignores out-of-range and duplicate indices", () => {
+    const items = [
+      { kind: "group" as const, name: "Users", prefix: "", description: "" },
+    ];
+
+    const { groups, skipped } = buildApiBundle(items, [0, 0, 7, -1, 1.5]);
+
+    expect(groups).toHaveLength(1);
+    expect(skipped).toEqual([]);
+  });
+
+  it("reports an invalid endpoint as skipped", () => {
+    const items = [
+      {
+        kind: "endpoint" as const,
+        group_name: "",
+        method: "GET" as const,
+        path: "users",
+        name: "List users",
+        summary: "",
+        description: "",
+        authentication_required: false,
+        parameters: [],
+        request_body: null,
+        responses: [],
+        errors: [],
+        entities: [],
+        requirement_titles: [],
+      },
+    ];
+
+    const { endpoints, skipped } = buildApiBundle(items, [0]);
+
+    expect(endpoints).toEqual([]);
+    expect(skipped).toHaveLength(1);
+    expect(skipped[0]?.kind).toBe("skipped");
+    expect(skipped[0]?.kind === "skipped" ? skipped[0].reason : null).toBe(
+      "invalid",
     );
   });
 });

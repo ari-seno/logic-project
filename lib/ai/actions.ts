@@ -1,10 +1,10 @@
 "use server";
 
 import {
-  applyApiToProject,
+  applyApiBundleToProject,
   applyTasksToProject,
-  applyUiToProject,
-  applyArchitectureToProject,
+  applyUiBundleToProject,
+  applyArchitectureBundleToProject,
   applyDecisionsToProject,
   applyErdBundleToProject,
   applyRequirementsToProject,
@@ -258,7 +258,7 @@ export async function aiApplyArchitecture(
 ): Promise<AiApplyResult> {
   return runAiApply<AiArchitectureItem>(input, {
     stage: "architecture",
-    apply: applyArchitectureToProject,
+    apply: applyArchitectureBundleToProject,
   });
 }
 
@@ -303,7 +303,7 @@ export async function aiSuggestApi(
 export async function aiApplyApi(input: ApplyApiInput): Promise<AiApplyResult> {
   return runAiApply<AiApiItem>(input, {
     stage: "api",
-    apply: applyApiToProject,
+    apply: applyApiBundleToProject,
   });
 }
 
@@ -350,7 +350,7 @@ export async function aiSuggestUi(
 export async function aiApplyUi(input: ApplyUiInput): Promise<AiApplyResult> {
   return runAiApply<AiUiItem>(input, {
     stage: "ui",
-    apply: applyUiToProject,
+    apply: applyUiBundleToProject,
   });
 }
 
