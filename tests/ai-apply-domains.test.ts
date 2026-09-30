@@ -4,6 +4,7 @@ import {
   buildAttributeRow,
   buildDomainRow,
   buildEntityRow,
+  buildErdBundle,
   buildRelationshipRow,
   relationshipDedupeKey,
 } from "@/lib/ai/apply";
@@ -103,5 +104,75 @@ describe("ai/apply ERD row builders", () => {
     expect(
       relationshipDedupeKey(SOURCE_ID, TARGET_ID, "one_to_many"),
     ).not.toBe(relationshipDedupeKey(SOURCE_ID, TARGET_ID, "many_to_one"));
+  });
+});
+
+describe("ai/apply ERD bundle builder", () => {
+  const item = {
+    name: "Billing",
+    description: "Invoices",
+    entities: [
+      {
+        name: "Invoice",
+        description: "A bill",
+        attributes: [
+          {
+            name: "id",
+            data_type: "uuid" as const,
+            is_required: true,
+            is_primary_key: true,
+            description: "",
+          },
+        ],
+        relationships: [
+          {
+            target_entity: "Customer",
+            relationship_type: "many_to_one" as const,
+            name: "",
+            description: "",
+          },
+        ],
+      },
+    ],
+  };
+
+  it("shapes the selected items into the payload the SQL function expects", () => {
+    const { domains, skipped } = buildErdBundle([item], [0]);
+
+    expect(skipped).toEqual([]);
+    expect(domains).toHaveLength(1);
+    expect(domains[0]?.index).toBe(0);
+    expect(domains[0]?.name).toBe("Billing");
+    expect(domains[0]?.entities[0]?.name).toBe("Invoice");
+    expect(domains[0]?.entities[0]?.attributes[0]?.data_type).toBe("uuid");
+    expect(domains[0]?.entities[0]?.relationships[0]?.target_entity).toBe(
+      "Customer",
+    );
+  });
+
+  it("ignores indices that are out of range or not integers", () => {
+    const { domains, skipped } = buildErdBundle([item], [0, 5, -1, 1.5]);
+
+    expect(domains).toHaveLength(1);
+    expect(skipped).toEqual([]);
+  });
+
+  it("reports an item with a blank domain name as skipped, not included", () => {
+    const { domains, skipped } = buildErdBundle(
+      [{ ...item, name: "   " }],
+      [0],
+    );
+
+    expect(domains).toEqual([]);
+    expect(skipped).toHaveLength(1);
+    expect(skipped[0]?.kind).toBe("skipped");
+    expect(
+      skipped[0]?.kind === "skipped" ? skipped[0].reason : null,
+    ).toBe("invalid");
+  });
+
+  it("de-duplicates repeated indices", () => {
+    const { domains } = buildErdBundle([item], [0, 0, 0]);
+    expect(domains).toHaveLength(1);
   });
 });

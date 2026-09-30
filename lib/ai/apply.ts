@@ -2,13 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { UI_COMPONENT_TYPES, UI_SCREEN_TYPES } from "@/lib/supabase/types";
 import { listRequirements } from "@/lib/requirements/queries";
 import { listDecisions } from "@/lib/decisions/queries";
-import { listDomains } from "@/lib/domains/queries";
 import { listEntitiesByProject } from "@/lib/entities/queries";
-import {
-  listAttributes,
-  nextAttributePosition,
-} from "@/lib/attributes/queries";
-import { listRelationships } from "@/lib/relationships/queries";
 import { listArchitectureComponentsByProject } from "@/lib/architecture/components/queries";
 import { listArchitectureTechnologiesByProject } from "@/lib/architecture/technologies/queries";
 import { listArchitectureDecisionsByProject } from "@/lib/architecture/decisions/queries";
@@ -465,92 +459,66 @@ export function relationshipDedupeKey(
   return `${sourceEntityId}|${targetEntityId}|${relationshipType}`;
 }
 
-type PendingRelationship = {
+
+// Normalised payload handed to the apply_erd_bundle function. Everything here
+// has already passed the row builders above, so the SQL can trust the shapes.
+type ErdBundleDomain = {
   index: number;
-  label: string;
-  sourceEntityId: string;
-  item: AiErdRelationshipItem;
+  name: string;
+  description: string;
+  entities: Array<{
+    name: string;
+    description: string;
+    attributes: Array<{
+      name: string;
+      data_type: string;
+      is_required: boolean;
+      is_primary_key: boolean;
+      description: string;
+    }>;
+    relationships: Array<{
+      target_entity: string;
+      relationship_type: string;
+      name: string;
+      description: string;
+    }>;
+  }>;
 };
 
-export async function applyErdToProject(
-  options: ApplyErdOptions,
-): Promise<ApplySummary> {
-  const supabase = await createClient();
-  const out: ApplySummary = { created: [], skipped: [], failed: [] };
+type ErdBundleResult = {
+  created?: Array<{ index: number; id: string; title: string }>;
+  skipped?: Array<{ index: number; title: string; reason: "duplicate" | "invalid" }>;
+};
 
-  const chosen = [...new Set(options.indices)]
-    .filter((n) => Number.isInteger(n) && n >= 0 && n < options.items.length)
+// Transactional variant: the whole bundle is applied inside a single database
+// transaction by apply_erd_bundle, so a failure no longer leaves partial rows.
+// Invalid entries become skipped entries rather than aborting the apply.
+// Pure transformation from the selected suggestion items into the JSONB
+// payload apply_erd_bundle consumes. Invalid entries are recorded as skipped
+// results instead of aborting; the returned payload has passed the row
+// builders so the SQL can trust every shape.
+export function buildErdBundle(
+  items: AiErdDomainItem[],
+  indices: number[],
+): { domains: ErdBundleDomain[]; skipped: ApplyItemOutcome[] } {
+  const skipped: ApplyItemOutcome[] = [];
+
+  const chosen = [...new Set(indices)]
+    .filter((n) => Number.isInteger(n) && n >= 0 && n < items.length)
     .sort((a, b) => a - b);
 
-  const [existingDomains, existingEntities, existingRelationships] =
-    await Promise.all([
-      listDomains({ projectId: options.projectId }),
-      listEntitiesByProject(options.projectId),
-      listRelationships({ projectId: options.projectId }),
-    ]);
-
-  const domainIdByKey = new Map<string, string>();
-  const domainNameById = new Map<string, string>();
-  for (const domain of existingDomains) {
-    domainIdByKey.set(domain.name.trim().toLowerCase(), domain.id);
-    domainNameById.set(domain.id, domain.name);
-  }
-
-  const entityIdByDomainKey = new Map<string, string>();
-  const entityIdByName = new Map<string, string>();
-  for (const entity of existingEntities) {
-    entityIdByDomainKey.set(
-      `${entity.domain_id}|${entity.name.trim().toLowerCase()}`,
-      entity.id,
-    );
-    const nameKey = entity.name.trim().toLowerCase();
-    if (!entityIdByName.has(nameKey)) {
-      entityIdByName.set(nameKey, entity.id);
-    }
-  }
-
-  const relationshipKeys = new Set(
-    existingRelationships.map((rel) =>
-      relationshipDedupeKey(
-        rel.source_entity_id,
-        rel.target_entity_id,
-        rel.relationship_type,
-      ),
-    ),
-  );
-
-  const attributeNamesByEntity = new Map<string, Set<string>>();
-  const nextPositionByEntity = new Map<string, number>();
-
-  const attributeNamesFor = async (entityId: string): Promise<Set<string>> => {
-    const cached = attributeNamesByEntity.get(entityId);
-    if (cached) return cached;
-    const rows = await listAttributes({ entityId });
-    const names = new Set(rows.map((row) => row.name.trim().toLowerCase()));
-    attributeNamesByEntity.set(entityId, names);
-    return names;
-  };
-
-  const positionFor = async (entityId: string): Promise<number> => {
-    const cached = nextPositionByEntity.get(entityId);
-    if (typeof cached === "number") return cached;
-    const position = await nextAttributePosition(entityId);
-    nextPositionByEntity.set(entityId, position);
-    return position;
-  };
-
-  const pending: PendingRelationship[] = [];
+  const domains: ErdBundleDomain[] = [];
 
   for (const index of chosen) {
-    const item = options.items[index];
+    const item = items[index];
     if (!item) {
-      out.skipped.push({ kind: "skipped", index, title: "", reason: "invalid" });
+      skipped.push({ kind: "skipped", index, title: "", reason: "invalid" });
       continue;
     }
 
     const domainRow = buildDomainRow(item);
     if (!domainRow) {
-      out.skipped.push({
+      skipped.push({
         kind: "skipped",
         index,
         title: typeof item.name === "string" ? item.name : "",
@@ -559,41 +527,12 @@ export async function applyErdToProject(
       continue;
     }
 
-    const domainKey = domainRow.name.toLowerCase();
-    let domainId = domainIdByKey.get(domainKey) ?? null;
-    let createdInItem = 0;
-
-    if (!domainId) {
-      const { data, error } = await supabase
-        .from("domains")
-        .insert({
-          project_id: options.projectId,
-          name: domainRow.name,
-          description: domainRow.description,
-        })
-        .select("id, name")
-        .single();
-
-      if (error || !data) {
-        out.failed.push({
-          kind: "failed",
-          index,
-          title: domainRow.name,
-          error: error?.message ?? "Could not insert domain.",
-        });
-        continue;
-      }
-
-      domainId = data.id;
-      domainIdByKey.set(domainKey, data.id);
-      domainNameById.set(data.id, data.name);
-      createdInItem += 1;
-    }
+    const entities: ErdBundleDomain["entities"] = [];
 
     for (const entityItem of item.entities) {
       const entityRow = buildEntityRow(entityItem);
       if (!entityRow) {
-        out.skipped.push({
+        skipped.push({
           kind: "skipped",
           index,
           title: `${domainRow.name} / ${entityItem.name}`,
@@ -602,46 +541,11 @@ export async function applyErdToProject(
         continue;
       }
 
-      const entityKey = `${domainId}|${entityRow.name.toLowerCase()}`;
-      let entityId = entityIdByDomainKey.get(entityKey) ?? null;
-
-      if (!entityId) {
-        const { data, error } = await supabase
-          .from("entities")
-          .insert({
-            domain_id: domainId,
-            name: entityRow.name,
-            description: entityRow.description,
-          })
-          .select("id, name")
-          .single();
-
-        if (error || !data) {
-          out.failed.push({
-            kind: "failed",
-            index,
-            title: `${domainRow.name} / ${entityRow.name}`,
-            error: error?.message ?? "Could not insert entity.",
-          });
-          continue;
-        }
-
-        entityId = data.id;
-        entityIdByDomainKey.set(entityKey, data.id);
-        createdInItem += 1;
-      }
-
-      const nameKey = entityRow.name.toLowerCase();
-      if (!entityIdByName.has(nameKey)) {
-        entityIdByName.set(nameKey, entityId);
-      }
-
-      const existingAttributeNames = await attributeNamesFor(entityId);
-
+      const attributes: ErdBundleDomain["entities"][number]["attributes"] = [];
       for (const attributeItem of entityItem.attributes) {
         const attributeRow = buildAttributeRow(attributeItem);
         if (!attributeRow) {
-          out.skipped.push({
+          skipped.push({
             kind: "skipped",
             index,
             title: `${domainRow.name} / ${entityRow.name} / ${attributeItem.name}`,
@@ -649,133 +553,101 @@ export async function applyErdToProject(
           });
           continue;
         }
-
-        const attributeKey = attributeRow.name.toLowerCase();
-        if (existingAttributeNames.has(attributeKey)) {
-          continue;
-        }
-
-        const position = await positionFor(entityId);
-        const { error } = await supabase
-          .from("entity_attributes")
-          .insert({
-            entity_id: entityId,
-            name: attributeRow.name,
-            data_type: attributeRow.data_type,
-            is_required: attributeRow.is_required,
-            is_primary_key: attributeRow.is_primary_key,
-            default_value: null,
-            description: attributeRow.description,
-            position,
-          });
-
-        if (error) {
-          out.failed.push({
-            kind: "failed",
-            index,
-            title: `${domainRow.name} / ${entityRow.name} / ${attributeRow.name}`,
-            error: error.message,
-          });
-          continue;
-        }
-
-        existingAttributeNames.add(attributeKey);
-        nextPositionByEntity.set(entityId, position + 1);
-        createdInItem += 1;
-      }
-
-      for (const relationshipItem of entityItem.relationships) {
-        pending.push({
-          index,
-          label: `${domainRow.name} / ${entityRow.name}`,
-          sourceEntityId: entityId,
-          item: relationshipItem,
+        attributes.push({
+          name: attributeRow.name,
+          data_type: attributeRow.data_type,
+          is_required: attributeRow.is_required,
+          is_primary_key: attributeRow.is_primary_key,
+          description: attributeRow.description ?? "",
         });
       }
+
+      const relationships: ErdBundleDomain["entities"][number]["relationships"] =
+        [];
+      for (const relationshipItem of entityItem.relationships) {
+        relationships.push({
+          target_entity: relationshipItem.target_entity,
+          relationship_type: relationshipItem.relationship_type,
+          name: relationshipItem.name ?? "",
+          description: relationshipItem.description ?? "",
+        });
+      }
+
+      entities.push({
+        name: entityRow.name,
+        description: entityRow.description ?? "",
+        attributes,
+        relationships,
+      });
     }
 
-    if (createdInItem > 0) {
-      out.created.push({
-        kind: "created",
-        index,
-        id: domainId,
-        title: domainRow.name,
-      });
-    } else {
-      out.skipped.push({
-        kind: "skipped",
-        index,
-        title: domainRow.name,
-        reason: "duplicate",
-      });
-    }
+    domains.push({
+      index,
+      name: domainRow.name,
+      description: domainRow.description ?? "",
+      entities,
+    });
   }
 
-  for (const entry of pending) {
-    const label = `${entry.label} → ${entry.item.target_entity}`;
-    const targetEntityId =
-      entityIdByName.get(entry.item.target_entity.trim().toLowerCase()) ?? null;
+  return { domains, skipped };
+}
 
-    if (!targetEntityId || targetEntityId === entry.sourceEntityId) {
-      out.skipped.push({
-        kind: "skipped",
-        index: entry.index,
-        title: label,
-        reason: "invalid",
-      });
-      continue;
-    }
+// Transactional variant: the whole bundle is applied inside a single database
+// transaction by apply_erd_bundle, so a failure no longer leaves partial rows.
+// Invalid entries become skipped entries rather than aborting the apply.
+export async function applyErdBundleToProject(
+  options: ApplyErdOptions,
+): Promise<ApplySummary> {
+  const supabase = await createClient();
+  const out: ApplySummary = { created: [], skipped: [], failed: [] };
 
-    const relationshipRow = buildRelationshipRow(
-      entry.item,
-      entry.sourceEntityId,
-      targetEntityId,
-    );
-    if (!relationshipRow) {
-      out.skipped.push({
-        kind: "skipped",
-        index: entry.index,
-        title: label,
-        reason: "invalid",
-      });
-      continue;
-    }
+  const { domains, skipped } = buildErdBundle(options.items, options.indices);
+  out.skipped.push(...skipped);
 
-    const key = relationshipDedupeKey(
-      relationshipRow.source_entity_id,
-      relationshipRow.target_entity_id,
-      relationshipRow.relationship_type,
-    );
-    if (relationshipKeys.has(key)) {
-      out.skipped.push({
-        kind: "skipped",
-        index: entry.index,
-        title: label,
-        reason: "duplicate",
-      });
-      continue;
-    }
+  if (domains.length === 0) {
+    return out;
+  }
 
-    const { error } = await supabase.from("entity_relationships").insert({
-      project_id: options.projectId,
-      source_entity_id: relationshipRow.source_entity_id,
-      target_entity_id: relationshipRow.target_entity_id,
-      relationship_type: relationshipRow.relationship_type,
-      name: relationshipRow.name,
-      description: relationshipRow.description,
+  // The generated Database type declares no functions, so the rpc call is
+  // typed through a narrow local cast; the SQL contract lives in the
+  // apply_erd_bundle migration.
+  const rpc = supabase.rpc as unknown as (
+    fn: string,
+    args: Record<string, unknown>,
+  ) => Promise<{ data: unknown; error: { message: string } | null }>;
+
+  const { data, error } = await rpc("apply_erd_bundle", {
+    p_project_id: options.projectId,
+    p_domains: domains,
+  });
+
+  if (error) {
+    out.failed.push({
+      kind: "failed",
+      index: -1,
+      title: "",
+      error: error.message,
     });
+    return out;
+  }
 
-    if (error) {
-      out.failed.push({
-        kind: "failed",
-        index: entry.index,
-        title: label,
-        error: error.message,
-      });
-      continue;
-    }
+  const result = (data ?? {}) as ErdBundleResult;
 
-    relationshipKeys.add(key);
+  for (const entry of result.created ?? []) {
+    out.created.push({
+      kind: "created",
+      index: entry.index,
+      id: entry.id,
+      title: entry.title,
+    });
+  }
+  for (const entry of result.skipped ?? []) {
+    out.skipped.push({
+      kind: "skipped",
+      index: entry.index,
+      title: entry.title,
+      reason: entry.reason,
+    });
   }
 
   return out;

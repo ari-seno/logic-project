@@ -6,7 +6,7 @@ import {
   applyUiToProject,
   applyArchitectureToProject,
   applyDecisionsToProject,
-  applyErdToProject,
+  applyErdBundleToProject,
   applyRequirementsToProject,
 } from "@/lib/ai/apply";
 import { runAiApply, runAiSuggest, safeJsonParse } from "@/lib/ai/suggest";
@@ -221,7 +221,7 @@ export async function aiApplyDomains(
 ): Promise<AiApplyResult> {
   return runAiApply<AiErdDomainItem>(input, {
     stage: "domains",
-    apply: applyErdToProject,
+    apply: applyErdBundleToProject,
   });
 }
 
