@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { ProjectTabs } from "@/components/projects/project-tabs";
+import { Breadcrumb } from "@/components/ui/page-header";
 import { ButtonLink } from "@/components/ui/button";
 import { CreateTaskFromArtifactButton } from "@/components/ui/tasks/create-task-from-artifact-button";
 import {
@@ -187,12 +188,14 @@ export default async function UiScreenDetailPage({
       <ProjectTabs projectId={project.id} active="ui" />
 
       <div>
-        <Link
-          href={`/projects/${project.id}/ui`}
-          className="text-sm text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
-        >
-          ← Back to UI
-        </Link>
+        <Breadcrumb
+          items={[
+            { label: "Projects", href: "/projects" },
+            { label: project.name, href: `/projects/${project.id}` },
+            { label: "UI", href: `/projects/${project.id}/ui` },
+            { label: screen.name },
+          ]}
+        />
         <div className="mt-2 flex flex-wrap items-start justify-between gap-3">
           <div>
             <div className="flex flex-wrap items-center gap-2">

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { ProjectTabs } from "@/components/projects/project-tabs";
+import { Breadcrumb } from "@/components/ui/page-header";
 import { ButtonLink } from "@/components/ui/button";
 import {
   TaskEffortBadge,
@@ -102,12 +103,14 @@ export default async function TaskDetailPage({
 
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <Link
-            href={`/projects/${project.id}/tasks`}
-            className="text-sm text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
-          >
-            ← Back to Tasks
-          </Link>
+          <Breadcrumb
+            items={[
+              { label: "Projects", href: "/projects" },
+              { label: project.name, href: `/projects/${project.id}` },
+              { label: "Tasks", href: `/projects/${project.id}/tasks` },
+              { label: task.title },
+            ]}
+          />
           <div className="mt-2 flex flex-wrap items-center gap-2">
             <TaskTypeBadge type={task.task_type} />
             <TaskStatusBadge status={task.status} />

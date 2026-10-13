@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { ProjectTabs } from "@/components/projects/project-tabs";
+import { Breadcrumb } from "@/components/ui/page-header";
 import { ButtonLink } from "@/components/ui/button";
 import { formatDate } from "@/lib/utils";
 import { getProject } from "@/lib/projects/queries";
@@ -32,15 +33,16 @@ export default async function DomainsListPage({
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <Link
-          href={`/projects/${project.id}`}
-          className="text-sm text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
-        >
-          ← Back to overview
-        </Link>
+        <Breadcrumb
+          items={[
+            { label: "Projects", href: "/projects" },
+            { label: project.name, href: `/projects/${project.id}` },
+            { label: "Domains" },
+          ]}
+        />
         <div className="mt-3 flex items-start justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-semibold tracking-tight">Domains</h1>
+            <h1 className="text-2xl font-semibold tracking-tight">Domains</h1>
             <p className="mt-1 text-sm text-[var(--muted-foreground)]">
               {project.name}
             </p>

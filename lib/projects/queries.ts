@@ -61,3 +61,23 @@ export async function countProjects(
   }
   return count ?? 0;
 }
+
+export async function countProjectsUpdatedWithinDays(
+  days: number,
+  client?: SupabaseServerClient,
+): Promise<number> {
+  const supabase = client ?? (await createClient());
+  const since = new Date(
+    Date.now() - days * 24 * 60 * 60 * 1000,
+  ).toISOString();
+  const { count, error } = await supabase
+    .from("projects")
+    .select("id", { count: "exact", head: true })
+    .gte("updated_at", since);
+
+  if (error) {
+    console.error("countProjectsUpdatedWithinDays failed:", error.message);
+    return 0;
+  }
+  return count ?? 0;
+}

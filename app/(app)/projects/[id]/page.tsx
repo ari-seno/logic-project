@@ -2,10 +2,11 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { Alert } from "@/components/ui/alert";
-import { DeleteProjectButton } from "@/components/projects/delete-project-button";
 import { ExportMenu } from "@/components/projects/export-menu";
 import { ProjectHealthCard } from "@/components/projects/project-health-card";
 import { ProjectTabs } from "@/components/projects/project-tabs";
+import { ProjectHeaderMenu } from "@/components/projects/project-header-menu";
+import { StageCard } from "@/components/projects/stage-card";
 import {
   DecisionStatusBadge,
   PriorityBadge,
@@ -13,6 +14,8 @@ import {
   TypeBadge,
 } from "@/components/projects/badges";
 import { ButtonLink } from "@/components/ui/button";
+import { PageHeader } from "@/components/ui/page-header";
+import { SectionCard, SectionHeader } from "@/components/ui/section-card";
 import { formatDate, formatDateTime } from "@/lib/utils";
 import { getProject } from "@/lib/projects/queries";
 import { createClient } from "@/lib/supabase/server";
@@ -99,56 +102,44 @@ export default async function ProjectOverviewPage({
 
   return (
     <div className="flex flex-col gap-8">
-      <div>
-        <Link
-          href="/projects"
-          className="text-sm text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
-        >
-          ← Back to projects
-        </Link>
-        <div className="mt-3 flex items-start justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-semibold tracking-tight">
-              {project.name}
-            </h1>
-            <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-[var(--muted-foreground)]">
+      <div className="flex flex-col gap-4">
+        <PageHeader
+          title={project.name}
+          breadcrumb={[
+            { label: "Projects", href: "/projects" },
+            { label: project.name },
+          ]}
+          description={
+            <span className="flex flex-wrap gap-x-4 gap-y-1">
               <span>Created {formatDateTime(project.created_at)}</span>
               <span>Updated {formatDateTime(project.updated_at)}</span>
-            </div>
-          </div>
-          <div className="flex shrink-0 flex-wrap items-center gap-2">
-            <AiCredentialPicker
-              projectId={project.id}
-              currentLabel={aiCredentialSummary?.label ?? null}
-            />
-            <ExportMenu projectId={project.id} />
-            <ButtonLink
-              href={`/projects/${project.id}/edit`}
-              variant="secondary"
-              size="sm"
-            >
-              Edit project
-            </ButtonLink>
-            <DeleteProjectButton
-              projectId={project.id}
-              projectName={project.name}
-            />
-          </div>
-        </div>
-        <div className="mt-4">
-          <ProjectTabs projectId={project.id} active="overview" />
-        </div>
+            </span>
+          }
+          actions={
+            <>
+              <AiCredentialPicker
+                projectId={project.id}
+                currentLabel={aiCredentialSummary?.label ?? null}
+              />
+              <ExportMenu projectId={project.id} />
+              <ProjectHeaderMenu
+                projectId={project.id}
+                projectName={project.name}
+              />
+            </>
+          }
+        />
+        <ProjectTabs projectId={project.id} active="overview" />
       </div>
 
       {sp.updated === "1" ? (
         <Alert variant="success">Project updated.</Alert>
       ) : null}
 
-      <section className="card-glass p-6">
-        <div className="flex items-end justify-between gap-3">
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-[var(--muted-foreground)]">
-            Description
-          </h2>
+      <SectionCard
+        title="Description"
+        variant="flat"
+        action={
           <ButtonLink
             href={`/projects/${project.id}/edit`}
             variant="ghost"
@@ -156,51 +147,74 @@ export default async function ProjectOverviewPage({
           >
             Edit
           </ButtonLink>
-        </div>
+        }
+      >
         {project.description ? (
-          <p className="mt-4 whitespace-pre-wrap text-sm leading-7">
+          <p className="whitespace-pre-wrap text-sm leading-7">
             {project.description}
           </p>
         ) : (
-          <p className="mt-4 italic text-sm text-[var(--muted-foreground)]">
+          <p className="italic text-sm text-[var(--muted-foreground)]">
             No description yet.
           </p>
         )}
-      </section>
+      </SectionCard>
 
-      <section>
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-[var(--muted-foreground)]">
-          Project Context
-        </h2>
-        <div className="mt-3 card-glass p-6">
-          <div className="grid grid-cols-2 gap-4 sm:max-w-2xl sm:grid-cols-5">
-            <Stat label="Requirements" value={requirementCount} />
-            <Stat label="Decisions" value={decisionCount} />
-            <Stat label="Domains" value={domainCount} />
-            <Stat label="Entities" value={entityCount} />
-            <Stat label="Relationships" value={relationshipCount} />
-            <Stat label="Components" value={componentCount} />
-            <Stat label="Technologies" value={technologyCount} />
-            <Stat label="Arch decisions" value={archDecisionCount} />
-            <Stat label="Dependencies" value={dependencyCount} />
-            <Stat label="API groups" value={apiGroupCount} />
-            <Stat label="API endpoints" value={apiEndpointCount} />
-            <Stat label="UI screens" value={uiScreenCount} />
-            <Stat label="UI components" value={uiComponentCount} />
-            <Stat label="Tasks" value={taskCounts.total} />
-            <Stat label="In progress" value={taskCounts.in_progress} />
-            <Stat label="Done" value={taskCounts.done} />
-          </div>
-          <div className="mt-5 border-t border-[var(--border)] pt-4 text-xs text-[var(--muted-foreground)]">
-            <p>
-              Last updated:{" "}
-              <span className="text-[var(--foreground)]">
-                {formatDate(project.updated_at)}
-              </span>
-            </p>
-          </div>
-          <ProjectHealthCard projectId={project.id} />
+      <section className="flex flex-col gap-3">
+        <SectionHeader title="Workflow" />
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <StageCard
+            title="Discover"
+            subtitle="Requirements and decisions"
+            href={`/projects/${project.id}/requirements`}
+            done={requirementCount > 0 || decisionCount > 0}
+            metrics={[
+              { label: "Requirements", value: requirementCount },
+              { label: "Decisions", value: decisionCount },
+            ]}
+          />
+          <StageCard
+            title="Model"
+            subtitle="Domains, entities, and relationships"
+            href={`/projects/${project.id}/domains/erd`}
+            done={domainCount > 0}
+            metrics={[
+              { label: "Domains", value: domainCount },
+              { label: "Entities", value: entityCount },
+              { label: "Relations", value: relationshipCount },
+            ]}
+          />
+          <StageCard
+            title="Architect"
+            subtitle="Components, technologies, and decisions"
+            href={`/projects/${project.id}/architecture`}
+            done={componentCount > 0}
+            metrics={[
+              { label: "Components", value: componentCount },
+              { label: "Technologies", value: technologyCount },
+              { label: "Decisions", value: archDecisionCount },
+              { label: "Dependencies", value: dependencyCount },
+            ]}
+          />
+          <StageCard
+            title="Ship"
+            subtitle="API, UI, and tasks"
+            href={`/projects/${project.id}/tasks`}
+            done={taskCounts.total > 0}
+            metrics={[
+              { label: "API groups", value: apiGroupCount },
+              { label: "API endpoints", value: apiEndpointCount },
+              { label: "Screens", value: uiScreenCount },
+              { label: "UI components", value: uiComponentCount },
+              { label: "Tasks", value: taskCounts.total },
+              { label: "In progress", value: taskCounts.in_progress },
+              { label: "Done", value: taskCounts.done },
+            ]}
+          />
         </div>
+        <SectionCard variant="flat" padding="lg">
+          <ProjectHealthCard projectId={project.id} />
+        </SectionCard>
       </section>
 
       <section className="grid grid-cols-1 gap-6 lg:grid-cols-2">
@@ -217,7 +231,7 @@ export default async function ProjectOverviewPage({
             </Link>
           </header>
           {recentRequirements.length === 0 ? (
-            <div className="card-glass p-8 text-center">
+            <div className="rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--surface-1)] p-8 text-center">
               <p className="text-sm text-[var(--muted-foreground)]">
                 No requirements yet.
               </p>
@@ -235,7 +249,7 @@ export default async function ProjectOverviewPage({
               {recentRequirements.map((req) => (
                 <li
                   key={req.id}
-                  className="card-glass p-4 transition-shadow hover:shadow-md"
+                  className="rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--surface-1)] p-4 transition-colors hover:border-[var(--border-strong)]"
                 >
                   <Link
                     href={`/projects/${project.id}/requirements/${req.id}`}
@@ -270,7 +284,7 @@ export default async function ProjectOverviewPage({
             </Link>
           </header>
           {recentDecisions.length === 0 ? (
-            <div className="card-glass p-8 text-center">
+            <div className="rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--surface-1)] p-8 text-center">
               <p className="text-sm text-[var(--muted-foreground)]">
                 No decisions yet.
               </p>
@@ -288,7 +302,7 @@ export default async function ProjectOverviewPage({
               {recentDecisions.map((dec) => (
                 <li
                   key={dec.id}
-                  className="card-glass p-4 transition-shadow hover:shadow-md"
+                  className="rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--surface-1)] p-4 transition-colors hover:border-[var(--border-strong)]"
                 >
                   <Link
                     href={`/projects/${project.id}/decisions/${dec.id}`}
@@ -308,17 +322,6 @@ export default async function ProjectOverviewPage({
           )}
         </div>
       </section>
-    </div>
-  );
-}
-
-function Stat({ label, value }: { label: string; value: number }) {
-  return (
-    <div>
-      <p className="text-xs uppercase tracking-wide text-[var(--muted-foreground)]">
-        {label}
-      </p>
-      <p className="mt-1 text-2xl font-semibold tracking-tight">{value}</p>
     </div>
   );
 }

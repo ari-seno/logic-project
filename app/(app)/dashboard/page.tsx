@@ -1,9 +1,16 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import type { ReactNode } from "react";
 
 import { ButtonLink } from "@/components/ui/button";
+import { PageHeader } from "@/components/ui/page-header";
+import { SectionHeader } from "@/components/ui/section-card";
 import { formatDate } from "@/lib/utils";
-import { listProjects, countProjects } from "@/lib/projects/queries";
+import {
+  listProjects,
+  countProjects,
+  countProjectsUpdatedWithinDays,
+} from "@/lib/projects/queries";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function DashboardPage() {
@@ -13,9 +20,10 @@ export default async function DashboardPage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const [projects, count] = await Promise.all([
+  const [projects, count, activeThisWeek] = await Promise.all([
     listProjects({ limit: 5, client: supabase }),
     countProjects(supabase),
+    countProjectsUpdatedWithinDays(7, supabase),
   ]);
 
   const email = user.email ?? "";
@@ -23,54 +31,41 @@ export default async function DashboardPage() {
 
   return (
     <div className="flex flex-col gap-8">
-      <div className="hero-panel px-8 py-10 sm:px-10 sm:py-12">
-        <div className="relative flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center">
-          <div>
-            <p className="text-sm font-medium text-white/80">
-              Welcome back
-            </p>
-            <h1 className="mt-1 text-3xl font-semibold tracking-tight text-white sm:text-4xl">
-              {displayName}
-            </h1>
-            <p className="mt-2 text-sm text-white/80">
-              Here&apos;s an overview of your projects.
-            </p>
-          </div>
-          <div className="flex gap-2">
-            <ButtonLink
-              href="/projects/new"
-              size="md"
-              className="!bg-[var(--surface-1)] !text-[var(--brand)] hover:!bg-[var(--surface-1)]/90"
-            >
-              New project
-            </ButtonLink>
-            <ButtonLink
-              href="/projects"
-              size="md"
-              className="!bg-[var(--surface-1)]/10 !text-white !border !border-white/30 backdrop-blur hover:!bg-[var(--surface-1)]/20"
-            >
+      <PageHeader
+        title={`Welcome back, ${displayName}`}
+        description="Here's an overview of your work."
+        actions={
+          <>
+            <ButtonLink href="/projects/new">New project</ButtonLink>
+            <ButtonLink href="/projects" variant="secondary">
               View all
             </ButtonLink>
-          </div>
-        </div>
-      </div>
+          </>
+        }
+      />
 
       <section className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <div className="card-glass p-6">
-          <p className="text-xs uppercase tracking-wide text-[var(--muted-foreground)]">
-            Projects
-          </p>
-          <p className="mt-2 text-4xl font-semibold tracking-tight">
-            {count}
-          </p>
-        </div>
-        <div className="card-glass p-6 sm:col-span-2">
-          <p className="text-xs uppercase tracking-wide text-[var(--muted-foreground)]">
+        <StatCard
+          label="Projects"
+          value={count}
+          hint={
+            count === 0 ? "Create your first project" : "Total projects you own"
+          }
+        />
+        <StatCard
+          label="Active this week"
+          value={activeThisWeek}
+          hint="Projects updated in the last 7 days"
+        />
+        <div className="rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--surface-1)] p-5">
+          <p className="text-[length:var(--text-label)] font-semibold uppercase tracking-wide text-[var(--muted-foreground)]">
             Quick actions
           </p>
           <div className="mt-3 flex flex-wrap gap-2">
-            <ButtonLink href="/projects/new">Create project</ButtonLink>
-            <ButtonLink href="/projects" variant="secondary">
+            <ButtonLink href="/projects/new" size="sm">
+              Create project
+            </ButtonLink>
+            <ButtonLink href="/projects" size="sm" variant="secondary">
               View all projects
             </ButtonLink>
           </div>
@@ -78,45 +73,47 @@ export default async function DashboardPage() {
       </section>
 
       <section>
-        <header className="mb-3 flex items-end justify-between">
-          <h2 className="text-lg font-semibold tracking-tight">
-            Recent projects
-          </h2>
-          <Link
-            href="/projects"
-            className="text-sm font-medium text-[var(--brand)] hover:underline"
-          >
-            View all
-          </Link>
-        </header>
+        <SectionHeader
+          title="Continue"
+          className="mb-3"
+          action={
+            <Link
+              href="/projects"
+              className="text-sm font-medium text-[var(--brand)] hover:underline"
+            >
+              View all
+            </Link>
+          }
+        />
         {projects.length === 0 ? (
-          <div className="card-glass p-12 text-center">
+          <div className="rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--surface-1)] p-12 text-center">
             <p className="text-sm text-[var(--muted-foreground)]">
               You don&apos;t have any projects yet.
             </p>
             <div className="mt-4">
-              <ButtonLink href="/projects/new">Create your first project</ButtonLink>
+              <ButtonLink href="/projects/new">
+                Create your first project
+              </ButtonLink>
             </div>
           </div>
         ) : (
-          <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <ul className="flex flex-col gap-2">
             {projects.map((project) => (
-              <li
-                key={project.id}
-                className="card-glass p-5 transition-shadow hover:shadow-lg"
-              >
+              <li key={project.id}>
                 <Link
                   href={`/projects/${project.id}`}
-                  className="flex flex-col gap-2"
+                  className="flex flex-wrap items-center justify-between gap-3 rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--surface-1)] p-4 transition-colors hover:border-[var(--border-strong)] hover:shadow-[var(--shadow-2)]"
                 >
-                  <span className="text-base font-semibold tracking-tight">
-                    {project.name}
+                  <span className="min-w-0">
+                    <span className="block text-sm font-semibold tracking-tight">
+                      {project.name}
+                    </span>
+                    {project.description ? (
+                      <span className="mt-0.5 block truncate text-xs text-[var(--muted-foreground)]">
+                        {project.description}
+                      </span>
+                    ) : null}
                   </span>
-                  {project.description ? (
-                    <p className="line-clamp-2 text-sm text-[var(--muted-foreground)]">
-                      {project.description}
-                    </p>
-                  ) : null}
                   <span className="text-xs text-[var(--muted-foreground)]">
                     Updated {formatDate(project.updated_at)}
                   </span>
@@ -126,6 +123,30 @@ export default async function DashboardPage() {
           </ul>
         )}
       </section>
+    </div>
+  );
+}
+
+function StatCard({
+  label,
+  value,
+  hint,
+}: {
+  label: string;
+  value: ReactNode;
+  hint?: string;
+}) {
+  return (
+    <div className="rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--surface-1)] p-5">
+      <p className="text-[length:var(--text-label)] font-semibold uppercase tracking-wide text-[var(--muted-foreground)]">
+        {label}
+      </p>
+      <p className="mt-2 text-3xl font-semibold tracking-tight tabular-nums">
+        {value}
+      </p>
+      {hint ? (
+        <p className="mt-1 text-xs text-[var(--muted-foreground)]">{hint}</p>
+      ) : null}
     </div>
   );
 }

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { ProjectTabs } from "@/components/projects/project-tabs";
+import { Breadcrumb } from "@/components/ui/page-header";
 import {
   ApiAuthBadge,
   ApiEntityRoleBadge,
@@ -94,12 +95,14 @@ export default async function ApiEndpointDetailPage({
       <ProjectTabs projectId={project.id} active="api" />
 
       <div>
-        <Link
-          href={`/projects/${project.id}/api`}
-          className="text-sm text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
-        >
-          ← Back to API
-        </Link>
+        <Breadcrumb
+          items={[
+            { label: "Projects", href: "/projects" },
+            { label: project.name, href: `/projects/${project.id}` },
+            { label: "API", href: `/projects/${project.id}/api` },
+            { label: `${endpoint.method} ${endpoint.path}` },
+          ]}
+        />
         <div className="mt-2 flex flex-wrap items-start justify-between gap-3">
           <div>
             <div className="flex flex-wrap items-center gap-2">

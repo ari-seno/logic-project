@@ -12,7 +12,7 @@ export default async function ProjectsPage() {
     <div className="flex flex-col gap-6">
       <div className="flex items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-semibold tracking-tight">Projects</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">Projects</h1>
           <p className="mt-1 text-sm text-[var(--muted-foreground)]">
             Manage and open your projects.
           </p>

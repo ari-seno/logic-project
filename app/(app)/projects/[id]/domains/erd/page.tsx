@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { ProjectTabs } from "@/components/projects/project-tabs";
+import { Breadcrumb } from "@/components/ui/page-header";
 import { AiGeneratePanel } from "@/components/ai/ai-generate-panel";
 import { ErdDetails } from "@/components/erd/erd-details";
 import { ErdSourceButton } from "@/components/erd/erd-source-button";
@@ -72,15 +73,17 @@ export default async function ProjectErdPage({
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <Link
-          href={`/projects/${project.id}/domains`}
-          className="text-sm text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
-        >
-          ← Back to overview
-        </Link>
+        <Breadcrumb
+          items={[
+            { label: "Projects", href: "/projects" },
+            { label: project.name, href: `/projects/${project.id}` },
+            { label: "Domain", href: `/projects/${project.id}/domains` },
+            { label: "ERD" },
+          ]}
+        />
         <div className="mt-3 flex items-start justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-semibold tracking-tight">ERD</h1>
+            <h1 className="text-2xl font-semibold tracking-tight">ERD</h1>
             <p className="mt-1 text-sm text-[var(--muted-foreground)]">
               {project.name}
             </p>
