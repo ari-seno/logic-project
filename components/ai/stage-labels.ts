@@ -104,6 +104,21 @@ export const AI_STAGE_LABELS: Record<AiStage, AiStageLabels> = {
     selectionNoun: "item",
     suggestionsHeading: "Suggested UI design",
   },
+  "ui-detail": {
+    id: "ui-detail",
+    singular: "UI detail item",
+    plural: "UI details",
+    drawerTitle: "Generate UI details",
+    subtitleFallback: "AI assist for forms, states, interactions, and navigation",
+    setupCopy:
+      "Add an Ollama credential in Settings, then choose it for this project before generating UI details.",
+    promptPlaceholder:
+      "e.g. Add the forms, loading and error states, interactions, and navigation for the loan screens.",
+    autoPrompt:
+      "Detail the existing screens with forms, states, interactions, and navigation.",
+    selectionNoun: "item",
+    suggestionsHeading: "Suggested UI details",
+  },
   tasks: {
     id: "tasks",
     singular: "task",

@@ -5,4 +5,5 @@ export * from "./erd";
 export * from "./architecture";
 export * from "./api";
 export * from "./ui";
+export * from "./ui-detail";
 export * from "./tasks";

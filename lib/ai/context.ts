@@ -10,6 +10,7 @@ import { listApiGroupsByProject } from "@/lib/api/groups/queries";
 import { listApiEndpointsByProject } from "@/lib/api/endpoints/queries";
 import { listUiScreensByProject } from "@/lib/ui/screens/queries";
 import { listUiComponentsByProject } from "@/lib/ui/components/queries";
+import { listUiNavigationItemsByProject } from "@/lib/ui/navigation/queries";
 import { listTasksByProject } from "@/lib/tasks/queries";
 
 export type AiContextEntry = {
@@ -33,6 +34,7 @@ export type AiAssembledContext = {
   apiEndpoints: AiContextEntry[];
   uiScreens: AiContextEntry[];
   uiComponents: AiContextEntry[];
+  uiNavigation: AiContextEntry[];
   tasks: AiContextEntry[];
   requirementTitles: string[];
   decisionTitles: string[];
@@ -45,6 +47,7 @@ export type AiAssembledContext = {
   apiEndpointSummaries: string[];
   uiScreenNames: string[];
   uiComponentNames: string[];
+  uiNavigationNames: string[];
   taskTitles: string[];
 };
 
@@ -116,6 +119,7 @@ export async function assembleAiContext(
     apiEndpoints,
     uiScreens,
     uiComponents,
+    uiNavigation,
     tasks,
   ] = await Promise.all([
     listRequirements({ projectId }),
@@ -129,6 +133,7 @@ export async function assembleAiContext(
     listApiEndpointsByProject({ projectId }),
     listUiScreensByProject({ projectId }),
     listUiComponentsByProject({ projectId }),
+    listUiNavigationItemsByProject({ projectId }),
     listTasksByProject({ projectId }),
   ]);
 
@@ -151,6 +156,7 @@ export async function assembleAiContext(
     })),
     uiScreens: namesWithDescriptionOf(uiScreens),
     uiComponents: namesWithDescriptionOf(uiComponents),
+    uiNavigation: namesWithDescriptionOf(uiNavigation),
     tasks: titlesWithDescriptionOf(tasks),
     requirementTitles: titlesOf(requirements),
     decisionTitles: titlesOf(decisions),
@@ -165,6 +171,7 @@ export async function assembleAiContext(
     ),
     uiScreenNames: namesOf(uiScreens),
     uiComponentNames: namesOf(uiComponents),
+    uiNavigationNames: namesOf(uiNavigation),
     taskTitles: titlesOf(tasks),
   };
 }

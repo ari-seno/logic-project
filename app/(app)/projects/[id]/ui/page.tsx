@@ -121,6 +121,11 @@ export default async function UiOverviewPage({
             stage="ui"
             credential={credential}
           />
+          <AiGeneratePanel
+            projectId={project.id}
+            stage="ui-detail"
+            credential={credential}
+          />
           <ButtonLink
             href={`/projects/${project.id}/ui/screens/new`}
             variant="secondary"

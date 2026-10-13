@@ -4,6 +4,7 @@ import {
   applyApiBundleToProject,
   applyTasksBundleToProject,
   applyUiBundleToProject,
+  applyUiDetailBundleToProject,
   applyArchitectureBundleToProject,
   applyDecisionsToProject,
   applyErdBundleToProject,
@@ -39,6 +40,10 @@ import {
   buildUiUserPrompt,
 } from "@/lib/ai/prompts/ui";
 import {
+  buildUiDetailSystemPrompt,
+  buildUiDetailUserPrompt,
+} from "@/lib/ai/prompts/ui-detail";
+import {
   aiApiResponseSchema,
   aiArchitectureResponseSchema,
   aiDecisionsResponseSchema,
@@ -46,9 +51,11 @@ import {
   aiRequirementsResponseSchema,
   aiTasksResponseSchema,
   aiUiResponseSchema,
+  aiUiDetailResponseSchema,
   flattenApiResponse,
   flattenArchitectureResponse,
   flattenUiResponse,
+  flattenUiDetailResponse,
   type AiApiItem,
   type AiApplyResult,
   type AiArchitectureItem,
@@ -57,6 +64,7 @@ import {
   type AiRequirementItem,
   type AiTaskItem,
   type AiUiItem,
+  type AiUiDetailItem,
   type SuggestResult,
 } from "@/lib/ai/schema";
 
@@ -80,6 +88,9 @@ const API_SCHEMA_HINT =
 
 const UI_SCHEMA_HINT =
   "Schema: { components: [ { name, component_type, description, purpose, technology } ], screens: [ { name, route, screen_type, description, purpose, authentication_required, placements: [ { component_name, label, description, required, parent_label } ], entities: [ { entity_name, role } ], requirement_titles: [ string ] } ] }, up to 25 components, 25 screens.";
+
+const UI_DETAIL_SCHEMA_HINT =
+  "Schema: { screens: [ { screen_name, forms: [ { name, description, submit_label, success_behavior, fields: [ { name, label, field_type, required, placeholder, help_text, default_value } ] } ], states: [ { name, state_type, description, behavior } ], interactions: [ { name, trigger, action, description, endpoint_labels: [string] } ] } ], navigation: [ { name, label, route, description, parent_label, screen_names: [string] } ] }, up to 25 screens, 25 navigation items.";
 
 export type SuggestRequirementsInput = {
   projectId: string;
@@ -351,6 +362,52 @@ export async function aiApplyUi(input: ApplyUiInput): Promise<AiApplyResult> {
   return runAiApply<AiUiItem>(input, {
     stage: "ui",
     apply: applyUiBundleToProject,
+  });
+}
+
+export type SuggestUiDetailInput = {
+  projectId: string;
+  prompt: string;
+};
+
+export type ApplyUiDetailInput = {
+  suggestionId: string;
+  indices: number[];
+};
+
+export async function aiSuggestUiDetail(
+  input: SuggestUiDetailInput,
+): Promise<SuggestResult<AiUiDetailItem>> {
+  return runAiSuggest<AiUiDetailItem>(input, {
+    stage: "ui-detail",
+    buildSystemPrompt: buildUiDetailSystemPrompt,
+    buildUserPrompt: (ctx, userPrompt) =>
+      buildUiDetailUserPrompt({
+        projectName: ctx.projectName,
+        projectDescription: ctx.projectDescription,
+        requirements: ctx.requirements,
+        decisions: ctx.decisions,
+        apiEndpoints: ctx.apiEndpoints,
+        existingScreens: ctx.uiScreens,
+        existingNavigation: ctx.uiNavigation,
+        userPrompt,
+      }),
+    parse: (text) => {
+      const raw = safeJsonParse(text);
+      if (raw === null) return null;
+      const parsed = aiUiDetailResponseSchema.safeParse(raw);
+      return parsed.success ? flattenUiDetailResponse(parsed.data) : null;
+    },
+    parseErrorMessage: UI_DETAIL_SCHEMA_HINT,
+  });
+}
+
+export async function aiApplyUiDetail(
+  input: ApplyUiDetailInput,
+): Promise<AiApplyResult> {
+  return runAiApply<AiUiDetailItem>(input, {
+    stage: "ui-detail",
+    apply: applyUiDetailBundleToProject,
   });
 }
 

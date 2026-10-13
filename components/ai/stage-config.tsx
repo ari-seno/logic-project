@@ -9,6 +9,7 @@ import { ArchitectureSuggestion } from "@/components/ai/architecture-suggestion"
 import { ApiSuggestion } from "@/components/ai/api-suggestion";
 import { TasksSuggestion } from "@/components/ai/tasks-suggestion";
 import { UiSuggestion } from "@/components/ai/ui-suggestion";
+import { UiDetailSuggestion } from "@/components/ai/ui-detail-suggestion";
 import {
   AI_STAGE_LABELS,
   type AiStageLabels,
@@ -16,6 +17,7 @@ import {
 import {
   aiApplyApi,
   aiApplyUi,
+  aiApplyUiDetail,
   aiApplyArchitecture,
   aiApplyDecisions,
   aiApplyDomains,
@@ -23,6 +25,7 @@ import {
   aiApplyTasks,
   aiSuggestApi,
   aiSuggestUi,
+  aiSuggestUiDetail,
   aiSuggestArchitecture,
   aiSuggestDecisions,
   aiSuggestDomains,
@@ -38,6 +41,7 @@ import type {
   AiErdDomainItem,
   AiRequirementItem,
   AiUiItem,
+  AiUiDetailItem,
   SuggestResult,
 } from "@/lib/ai/schema";
 import type { AiStage } from "@/lib/ai/stages";
@@ -48,7 +52,8 @@ export type AiSuggestionItem =
   | AiErdDomainItem
   | AiArchitectureItem
   | AiApiItem
-  | AiUiItem;
+  | AiUiItem
+  | AiUiDetailItem;
 
 export type SuggestionListProps = {
   items: AiSuggestionItem[];
@@ -162,6 +167,21 @@ export const AI_STAGE_UI: Record<AiStage, AiStageUiConfig> = {
     ),
     suggest: aiSuggestUi,
     apply: aiApplyUi,
+  },
+  "ui-detail": {
+    labels: AI_STAGE_LABELS["ui-detail"],
+    renderItems: (props) => (
+      <UiDetailSuggestion
+        items={props.items as unknown as AiUiDetailItem[]}
+        selectedIndices={props.selectedIndices}
+        onToggle={props.onToggle}
+        onSelectAll={props.onSelectAll}
+        onSelectNone={props.onSelectNone}
+        showIndex={props.showIndex}
+      />
+    ),
+    suggest: aiSuggestUiDetail as unknown as AiStageUiConfig["suggest"],
+    apply: aiApplyUiDetail,
   },
   tasks: {
     labels: AI_STAGE_LABELS.tasks,

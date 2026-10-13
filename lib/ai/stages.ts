@@ -5,6 +5,7 @@ export const AI_STAGES = [
   "architecture",
   "api",
   "ui",
+  "ui-detail",
   "tasks",
 ] as const;
 
@@ -17,6 +18,7 @@ const STAGE_ROUTES: Record<AiStage, (projectId: string) => string> = {
   architecture: (projectId) => `/projects/${projectId}/architecture`,
   api: (projectId) => `/projects/${projectId}/api`,
   ui: (projectId) => `/projects/${projectId}/ui`,
+  "ui-detail": (projectId) => `/projects/${projectId}/ui`,
   tasks: (projectId) => `/projects/${projectId}/tasks`,
 };
 

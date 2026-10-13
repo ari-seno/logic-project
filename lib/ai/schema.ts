@@ -15,8 +15,10 @@ import {
   TASK_PRIORITIES,
   TASK_TYPES,
   UI_COMPONENT_TYPES,
+  UI_FIELD_TYPES,
   UI_SCREEN_ENTITY_ROLES,
   UI_SCREEN_TYPES,
+  UI_STATE_TYPES,
 } from "@/lib/supabase/types";
 
 export const aiTestStatusSchema = z.enum(AI_TEST_STATUSES);
@@ -603,6 +605,142 @@ export function flattenUiResponse(response: AiUiResponse): AiUiItem[] {
       (item): AiUiItem => ({ kind: "component", ...item }),
     ),
     ...response.screens.map((item): AiUiItem => ({ kind: "screen", ...item })),
+  ];
+}
+
+const aiUiDetailFieldTypeSchema = tolerantEnum(UI_FIELD_TYPES, {
+  fallback: "text",
+  synonyms: {
+    string: "text",
+    string_field: "text",
+    integer: "number",
+    decimal: "number",
+    int: "number",
+    float: "number",
+    bool: "checkbox",
+    boolean: "checkbox",
+    multiselect: "select",
+    dropdown: "select",
+    combobox: "select",
+    textarea_field: "textarea",
+    long_text: "textarea",
+    email_address: "email",
+    timestamp: "datetime",
+    date_time: "datetime",
+    upload: "file",
+  },
+});
+
+const aiUiDetailStateTypeSchema = tolerantEnum(UI_STATE_TYPES, {
+  fallback: "default",
+  synonyms: {
+    initial: "default",
+    normal: "default",
+    loading_state: "loading",
+    spinner: "loading",
+    no_data: "empty",
+    success_state: "success",
+    failure: "error",
+    error_state: "error",
+    validation: "validation_error",
+    invalid: "validation_error",
+    not_found_state: "not_found",
+    unauthorised: "unauthorized",
+    forbidden_state: "forbidden",
+    offline_state: "offline",
+  },
+});
+
+const aiUiDetailStateNameSchema = z.string().trim().min(1).max(200);
+
+export const aiUiDetailFieldSchema = z.object({
+  name: z.string().trim().min(1).max(200),
+  label: z.string().trim().min(1).max(200),
+  field_type: aiUiDetailFieldTypeSchema,
+  required: z.boolean().default(false),
+  placeholder: z.string().trim().max(500).default(""),
+  help_text: z.string().trim().max(2000).default(""),
+  default_value: z.string().trim().max(2000).default(""),
+});
+
+export const aiUiDetailFormSchema = z.object({
+  name: z.string().trim().min(1).max(200),
+  description: z.string().trim().max(5000).default(""),
+  submit_label: z.string().trim().max(100).default(""),
+  success_behavior: z.string().trim().max(2000).default(""),
+  fields: z.array(aiUiDetailFieldSchema).max(30).default([]),
+});
+
+export const aiUiDetailStateSchema = z.object({
+  name: aiUiDetailStateNameSchema,
+  state_type: aiUiDetailStateTypeSchema,
+  description: z.string().trim().max(3000).default(""),
+  behavior: z.string().trim().max(5000).default(""),
+});
+
+export const aiUiDetailInteractionSchema = z.object({
+  name: z.string().trim().min(1).max(200),
+  trigger: z.string().trim().min(1).max(500),
+  action: z.string().trim().min(1).max(2000),
+  description: z.string().trim().max(5000).default(""),
+  endpoint_labels: z
+    .array(z.string().trim().min(1).max(200))
+    .max(10)
+    .default([]),
+});
+
+export const aiUiDetailScreenItemSchema = z.object({
+  screen_name: aiUiNameSchema,
+  forms: z.array(aiUiDetailFormSchema).max(10).default([]),
+  states: z.array(aiUiDetailStateSchema).max(15).default([]),
+  interactions: z.array(aiUiDetailInteractionSchema).max(15).default([]),
+});
+
+export const aiUiDetailNavigationItemSchema = z.object({
+  name: z.string().trim().min(1).max(200),
+  label: z.string().trim().min(1).max(200),
+  route: z.string().trim().max(500).default(""),
+  description: z.string().trim().max(5000).default(""),
+  parent_label: z.string().trim().max(200).default(""),
+  screen_names: z.array(aiUiNameSchema).max(10).default([]),
+});
+
+export const aiUiDetailResponseSchema = z
+  .object({
+    screens: z.array(aiUiDetailScreenItemSchema).max(25).default([]),
+    navigation: z.array(aiUiDetailNavigationItemSchema).max(25).default([]),
+  })
+  .refine(
+    (value) => value.screens.length + value.navigation.length > 0,
+    { message: "At least one screen detail or navigation item is required." },
+  );
+
+export type AiUiDetailFieldItem = z.infer<typeof aiUiDetailFieldSchema>;
+export type AiUiDetailFormItem = z.infer<typeof aiUiDetailFormSchema>;
+export type AiUiDetailStateItem = z.infer<typeof aiUiDetailStateSchema>;
+export type AiUiDetailInteractionItem = z.infer<
+  typeof aiUiDetailInteractionSchema
+>;
+export type AiUiDetailScreenItem = z.infer<typeof aiUiDetailScreenItemSchema>;
+export type AiUiDetailNavigationItem = z.infer<
+  typeof aiUiDetailNavigationItemSchema
+>;
+export type AiUiDetailResponse = z.infer<typeof aiUiDetailResponseSchema>;
+
+export type AiUiDetailItem =
+  | ({ kind: "screen" } & AiUiDetailScreenItem)
+  | ({ kind: "navigation" } & AiUiDetailNavigationItem);
+
+export function flattenUiDetailResponse(
+  response: AiUiDetailResponse,
+): AiUiDetailItem[] {
+  return [
+    ...response.screens.map(
+      (item): AiUiDetailItem => ({ kind: "screen", ...item }),
+    ),
+    ...response.navigation.map(
+      (item): AiUiDetailItem => ({ kind: "navigation", ...item }),
+    ),
   ];
 }
 

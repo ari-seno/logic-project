@@ -17,6 +17,7 @@ describe("ai/stages", () => {
       "architecture",
       "api",
       "ui",
+      "ui-detail",
       "tasks",
     ]);
   });
@@ -29,6 +30,7 @@ describe("ai/stages", () => {
     expect(isAiStage("api")).toBe(true);
     expect(isAiStage("tasks")).toBe(true);
     expect(isAiStage("ui")).toBe(true);
+    expect(isAiStage("ui-detail")).toBe(true);
     expect(isAiStage("")).toBe(false);
     expect(isAiStage(null)).toBe(false);
     expect(isAiStage(3)).toBe(false);
@@ -46,6 +48,7 @@ describe("ai/stages", () => {
     expect(stageRevalidatePath("api", "p1")).toBe("/projects/p1/api");
     expect(stageRevalidatePath("tasks", "p1")).toBe("/projects/p1/tasks");
     expect(stageRevalidatePath("ui", "p1")).toBe("/projects/p1/ui");
+    expect(stageRevalidatePath("ui-detail", "p1")).toBe("/projects/p1/ui");
   });
 });
 
@@ -80,6 +83,7 @@ describe("ai stage labels registry", () => {
       "Generate architecture",
       "Generate API design",
       "Generate UI design",
+      "Generate UI details",
       "Generate tasks",
     ]);
   });
