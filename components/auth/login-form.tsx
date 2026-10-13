@@ -11,12 +11,15 @@ import type { AuthActionState } from "@/lib/validation/auth";
 
 const initialState: AuthActionState | null = null;
 
-export function LoginForm() {
+export function LoginForm({ notice }: { notice?: string }) {
   const [state, formAction, pending] = useActionState(signIn, initialState);
 
   return (
     <form action={formAction} className="flex flex-col gap-4" noValidate>
       {state?.error ? <Alert variant="error">{state.error}</Alert> : null}
+      {!state?.error && notice ? (
+        <Alert variant="error">{notice}</Alert>
+      ) : null}
 
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="email">Email</Label>

@@ -51,13 +51,29 @@ export async function signUp(
   }
 
   const supabase = await createClient();
-  const { error } = await supabase.auth.signUp({
+  const siteUrl =
+    process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ??
+    "http://localhost:3000";
+  const { data, error } = await supabase.auth.signUp({
     email: parsed.data.email,
     password: parsed.data.password,
+    options: {
+      emailRedirectTo: `${siteUrl}/auth/confirm`,
+    },
   });
 
   if (error) {
     return { error: error.message };
+  }
+
+  // When email confirmation is enabled Supabase returns no session, so the
+  // user has to confirm before they can sign in. Surface that instead of
+  // redirecting to a page that would immediately bounce back to /login.
+  if (!data.session) {
+    return {
+      message:
+        "Check your inbox to confirm your email address, then sign in.",
+    };
   }
 
   redirect("/dashboard");

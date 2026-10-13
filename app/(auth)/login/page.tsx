@@ -2,7 +2,18 @@ import Link from "next/link";
 
 import { LoginForm } from "@/components/auth/login-form";
 
-export default function LoginPage() {
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string; deleted?: string }>;
+}) {
+  const params = await searchParams;
+  const notice =
+    params.error ??
+    (params.deleted
+      ? "Your account is scheduled for deletion. Sign in to restore it."
+      : undefined);
+
   return (
     <main className="flex flex-1 items-center justify-center px-4 py-12">
       <div className="w-full max-w-sm">
@@ -19,7 +30,7 @@ export default function LoginPage() {
               Continue planning your project with Logic Project.
             </p>
           </div>
-          <LoginForm />
+          <LoginForm notice={notice} />
           <p className="mt-6 text-center text-sm text-[var(--muted-foreground)]">
             Don&apos;t have an account?{" "}
             <Link

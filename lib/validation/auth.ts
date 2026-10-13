@@ -27,5 +27,6 @@ export type RegisterInput = z.infer<typeof registerSchema>;
 
 export type AuthActionState = {
   error?: string;
+  message?: string;
   fieldErrors?: Partial<Record<"email" | "password" | "confirmPassword", string[]>>;
 };

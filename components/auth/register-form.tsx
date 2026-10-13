@@ -17,6 +17,7 @@ export function RegisterForm() {
   return (
     <form action={formAction} className="flex flex-col gap-4" noValidate>
       {state?.error ? <Alert variant="error">{state.error}</Alert> : null}
+      {state?.message ? <Alert variant="success">{state.message}</Alert> : null}
 
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="email">Email</Label>
