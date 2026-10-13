@@ -14,7 +14,7 @@ import {
   attachUiScreenToTask,
 } from "@/lib/tasks/traceability/actions";
 
-type ArtifactKind =
+export type ArtifactKind =
   | "requirement"
   | "decision"
   | "entity"
