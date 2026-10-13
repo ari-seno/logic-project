@@ -12,10 +12,15 @@ export type CredentialWithSecret = UserAiCredential & {
   apiKey: string;
 };
 
-function mask(credential: UserAiCredential): CredentialView {
-  const { api_key_encrypted, ...rest } = credential;
-  void api_key_encrypted;
-  return { ...rest, api_key_encrypted: null };
+// Read paths that only ever expose a masked credential never need the
+// ciphertext, so they select explicit columns and leave the secret in the DB.
+const CREDENTIAL_PUBLIC_COLUMNS =
+  "id, user_id, label, provider, base_url, model, enabled, last_tested_at, last_test_status, last_test_message, created_at, updated_at";
+
+function mask(
+  credential: Omit<UserAiCredential, "api_key_encrypted">,
+): CredentialView {
+  return { ...credential, api_key_encrypted: null };
 }
 
 export async function listUserCredentials(
@@ -24,7 +29,7 @@ export async function listUserCredentials(
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("user_ai_credentials")
-    .select("*")
+    .select(CREDENTIAL_PUBLIC_COLUMNS)
     .eq("user_id", userId)
     .order("created_at", { ascending: false });
 
@@ -42,7 +47,7 @@ export async function getCredential(
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("user_ai_credentials")
-    .select("*")
+    .select(CREDENTIAL_PUBLIC_COLUMNS)
     .eq("id", id)
     .eq("user_id", userId)
     .maybeSingle();
