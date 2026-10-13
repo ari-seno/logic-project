@@ -4,7 +4,12 @@ import { createClient } from "@/lib/supabase/server";
 import { getDecryptedCredential } from "@/lib/ai/credentials";
 import { assembleAiContext, type AiAssembledContext } from "@/lib/ai/context";
 import { AiError } from "@/lib/ai/errors";
-import { logAiUsage } from "@/lib/ai/meter";
+import {
+  AI_DAILY_GENERATION_LIMIT,
+  countAiUsageSince,
+  logAiUsage,
+  startOfUtcDay,
+} from "@/lib/ai/meter";
 import { completeOllamaJson } from "@/lib/ai/provider";
 import { stageRevalidatePath, type AiStage } from "@/lib/ai/stages";
 import type { ApplySummary } from "@/lib/ai/apply";
@@ -73,6 +78,14 @@ export async function runAiSuggest<TItem>(
     return fail(
       "ai_setup_required",
       "Pick an AI credential for this project before generating.",
+    );
+  }
+
+  const usedToday = await countAiUsageSince(ctx.userId, startOfUtcDay());
+  if (usedToday >= AI_DAILY_GENERATION_LIMIT) {
+    return fail(
+      "quota_exceeded",
+      `You have reached the daily limit of ${AI_DAILY_GENERATION_LIMIT} generations. Try again tomorrow.`,
     );
   }
 

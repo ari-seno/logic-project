@@ -22,6 +22,8 @@ const ERROR_COPY: Record<SuggestFailure["code"], string> = {
   zod_retry_failed:
     "Ollama output did not match the schema. Try again with a shorter prompt.",
   credential_test_failed: "Credential test failed. Update the credential.",
+  quota_exceeded:
+    "You have reached the daily generation limit. Try again tomorrow.",
   unknown: "Something went wrong. Try again.",
 };
 

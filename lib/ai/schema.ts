@@ -630,6 +630,7 @@ export type SuggestFailure = {
     | "ollama_timeout"
     | "zod_retry_failed"
     | "credential_test_failed"
+    | "quota_exceeded"
     | "unknown";
   message: string;
 };
