@@ -8,6 +8,7 @@ import {
   Boxes,
   FileText,
   Gauge,
+  History,
   LayoutGrid,
   ListChecks,
   ScrollText,
@@ -81,6 +82,12 @@ export function AppSidebar() {
         { key: "api", label: "API", href: `${base}/api`, icon: Server },
         { key: "ui", label: "UI", href: `${base}/ui`, icon: LayoutGrid },
         { key: "tasks", label: "Tasks", href: `${base}/tasks`, icon: ListChecks },
+        {
+          key: "ai-history",
+          label: "AI history",
+          href: `${base}/ai-history`,
+          icon: History,
+        },
       ],
     });
   }

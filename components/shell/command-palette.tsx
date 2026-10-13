@@ -7,6 +7,7 @@ import {
   Boxes,
   FileText,
   Gauge,
+  History,
   LayoutGrid,
   ListChecks,
   ScrollText,
@@ -30,6 +31,7 @@ const SECTIONS = [
   { label: "API", suffix: "api", icon: Server },
   { label: "UI", suffix: "ui", icon: LayoutGrid },
   { label: "Tasks", suffix: "tasks", icon: ListChecks },
+  { label: "AI history", suffix: "ai-history", icon: History },
 ];
 
 export function CommandPalette() {
