@@ -1,7 +1,15 @@
 import { redirect } from "next/navigation";
+import type { Metadata } from "next";
 
 import { ButtonLink } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/server";
+
+export const metadata: Metadata = {
+  title: "Plan projects, capture decisions",
+  description:
+    "An AI Project Planner that structures your requirements, decisions, architecture, tasks, and agent prompts while you stay in control.",
+  alternates: { canonical: "/" },
+};
 
 export default async function HomePage() {
   const supabase = await createClient();

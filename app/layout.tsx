@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
+import { siteUrl } from "@/lib/site";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -14,9 +15,21 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Logic Project",
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: "Logic Project",
+    template: "%s · Logic Project",
+  },
   description:
     "Logic Project — an AI Project Planner. Capture requirements, decisions, architecture, tasks, and prompts; the user remains the decision maker.",
+  openGraph: {
+    title: "Logic Project",
+    description:
+      "An AI Project Planner that structures requirements, decisions, architecture, tasks, and agent prompts.",
+    type: "website",
+    url: siteUrl,
+    siteName: "Logic Project",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

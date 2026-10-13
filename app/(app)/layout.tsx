@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import type { Metadata } from "next";
 
 import { LogoutButton } from "@/components/auth/logout-button";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
@@ -8,6 +9,11 @@ import { MobileNav } from "@/components/shell/mobile-nav";
 import { CommandPalette } from "@/components/shell/command-palette";
 import { Toaster } from "@/components/shell/toaster";
 import { createClient } from "@/lib/supabase/server";
+
+// The signed-in area is private; keep it out of search indexes.
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();

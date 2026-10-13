@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/server";
+import { siteUrl } from "@/lib/site";
 import {
   loginSchema,
   registerSchema,
@@ -51,9 +52,6 @@ export async function signUp(
   }
 
   const supabase = await createClient();
-  const siteUrl =
-    process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ??
-    "http://localhost:3000";
   const { data, error } = await supabase.auth.signUp({
     email: parsed.data.email,
     password: parsed.data.password,
