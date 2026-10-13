@@ -268,7 +268,7 @@ export async function applyArchitectureBundleToProject(
     return out;
   }
 
-  const rpc = supabase.rpc as unknown as (
+  const rpc = supabase.rpc.bind(supabase) as unknown as (
     fn: string,
     args: Record<string, unknown>,
   ) => Promise<{ data: unknown; error: { message: string } | null }>;

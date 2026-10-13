@@ -266,7 +266,7 @@ export async function applyErdBundleToProject(
   // The generated Database type declares no functions, so the rpc call is
   // typed through a narrow local cast; the SQL contract lives in the
   // apply_erd_bundle migration.
-  const rpc = supabase.rpc as unknown as (
+  const rpc = supabase.rpc.bind(supabase) as unknown as (
     fn: string,
     args: Record<string, unknown>,
   ) => Promise<{ data: unknown; error: { message: string } | null }>;
