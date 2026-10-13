@@ -42,9 +42,9 @@ export default async function LoginPage({
             Don&apos;t have an account?{" "}
             <Link
               href="/register"
-              className="font-medium text-[var(--brand)] hover:underline"
+              className="font-medium text-[var(--brand-strong)] hover:underline"
             >
-              Register
+              Create account
             </Link>
           </p>
         </div>

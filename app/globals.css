@@ -21,6 +21,7 @@
   --brand-foreground: #ffffff;
   --brand-accent: #7c3aed;
   --brand-soft: #eef2ff;
+  --brand-strong: #4338ca;
 
   /* States */
   --danger: #e11d48;
@@ -94,6 +95,7 @@
   --brand: #7c83ff;
   --brand-accent: #a78bfa;
   --brand-soft: #1e1b4b;
+  --brand-strong: #a5b4fc;
 
   --success-bg: #052e22;
   --success-fg: #6ee7b7;
@@ -144,6 +146,7 @@
   --color-brand-foreground: var(--brand-foreground);
   --color-brand-accent: var(--brand-accent);
   --color-brand-soft: var(--brand-soft);
+  --color-brand-strong: var(--brand-strong);
   --color-danger: var(--danger);
   --color-danger-foreground: var(--danger-foreground);
   --color-success: var(--success);
