@@ -11,6 +11,8 @@ import { formatDate } from "@/lib/utils";
 import { getProject } from "@/lib/projects/queries";
 import { getProjectCredentialAction } from "@/lib/ai/credentials-actions";
 import { AiGeneratePanel } from "@/components/ai/ai-generate-panel";
+import { SavedViews } from "@/components/projects/saved-views";
+import { listProjectViews } from "@/lib/views/queries";
 import { listTasksByProject } from "@/lib/tasks/queries";
 import {
   deriveBlockedByDependency,
@@ -84,9 +86,10 @@ export default async function TasksListPage({
   const project = await getProject(id);
   if (!project) notFound();
 
-  const [allTasks, allDeps] = await Promise.all([
+  const [allTasks, allDeps, views] = await Promise.all([
     listTasksByProject({ projectId: project.id }),
     listDependenciesByProject({ projectId: project.id }),
+    listProjectViews(project.id, "tasks"),
   ]);
 
   const credentialResult = await getProjectCredentialAction(project.id);
@@ -134,6 +137,13 @@ export default async function TasksListPage({
   });
 
   const typesAvailable = Array.from(new Set(allTasks.map((t) => t.task_type)));
+
+  const currentParams = new URLSearchParams();
+  if (status !== "all") currentParams.set("status", status);
+  if (type) currentParams.set("type", type);
+  if (query) currentParams.set("q", query);
+  if (sort !== "position") currentParams.set("sort", sort);
+  const currentQuery = currentParams.toString();
 
   const rows: TaskTableRow[] = sorted.map((t) => {
     const parent = allTasks.find((p) => p.id === t.parent_task_id);
@@ -248,6 +258,13 @@ export default async function TasksListPage({
             Apply
           </button>
         </form>
+
+        <SavedViews
+          projectId={project.id}
+          scope="tasks"
+          views={views}
+          currentQuery={currentQuery}
+        />
       </div>
 
       {sorted.length === 0 ? (

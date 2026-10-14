@@ -16,6 +16,8 @@ import { getProject } from "@/lib/projects/queries";
 import { listRequirements } from "@/lib/requirements/queries";
 import { REQUIREMENT_BULK_STATUSES } from "@/lib/requirements/bulk";
 import { getProjectCredentialAction } from "@/lib/ai/credentials-actions";
+import { SavedViews } from "@/components/projects/saved-views";
+import { listProjectViews } from "@/lib/views/queries";
 
 const STATUS_FILTERS = ["all", ...REQUIREMENT_BULK_STATUSES] as const;
 type StatusFilter = (typeof STATUS_FILTERS)[number];
@@ -48,9 +50,13 @@ export default async function RequirementsListPage({
   )
     ? (rawStatus as StatusFilter)
     : "all";
+  const currentQuery = status === "all" ? "" : `status=${status}`;
 
-  const requirements = await listRequirements({ projectId: project.id });
-  const credentialResult = await getProjectCredentialAction(project.id);
+  const [requirements, credentialResult, views] = await Promise.all([
+    listRequirements({ projectId: project.id }),
+    getProjectCredentialAction(project.id),
+    listProjectViews(project.id, "requirements"),
+  ]);
   const credential =
     credentialResult.ok && credentialResult.credential
       ? credentialResult.credential
@@ -151,6 +157,13 @@ export default async function RequirementsListPage({
                   ? requirements.length
                   : (counts.get(key) ?? 0),
             }))}
+          />
+
+          <SavedViews
+            projectId={project.id}
+            scope="requirements"
+            views={views}
+            currentQuery={currentQuery}
           />
 
           {filtered.length === 0 ? (

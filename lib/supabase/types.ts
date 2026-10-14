@@ -28,6 +28,16 @@ export type ProjectVersion = {
   created_at: string;
 };
 
+export type ProjectView = {
+  id: string;
+  project_id: string;
+  owner_id: string;
+  scope: string;
+  label: string;
+  query: string;
+  created_at: string;
+};
+
 export type Profile = {
   id: string;
   email: string;
@@ -814,6 +824,28 @@ type Tables = {
       item_count?: number;
       bundle?: Json;
       created_by?: string | null;
+      created_at?: string;
+    };
+    Relationships: [];
+  };
+  project_views: {
+    Row: ProjectView;
+    Insert: {
+      id?: string;
+      project_id: string;
+      owner_id: string;
+      scope: string;
+      label: string;
+      query?: string;
+      created_at?: string;
+    };
+    Update: {
+      id?: string;
+      project_id?: string;
+      owner_id?: string;
+      scope?: string;
+      label?: string;
+      query?: string;
       created_at?: string;
     };
     Relationships: [];
