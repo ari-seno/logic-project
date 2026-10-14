@@ -87,4 +87,12 @@ describe("ai stage labels registry", () => {
       "Generate tasks",
     ]);
   });
+
+  it("marks ui-detail as not undoable and every other stage undoable", () => {
+    expect(AI_STAGE_LABELS["ui-detail"].undoable).toBe(false);
+    for (const stage of AI_STAGES) {
+      if (stage === "ui-detail") continue;
+      expect(AI_STAGE_LABELS[stage].undoable).not.toBe(false);
+    }
+  });
 });

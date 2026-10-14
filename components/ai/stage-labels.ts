@@ -11,6 +11,9 @@ export type AiStageLabels = {
   autoPrompt: string;
   selectionNoun: string;
   suggestionsHeading: string;
+  // Set to false when apply attaches to pre-existing rows, so "undo" would
+  // destroy data the user already had (ui-detail).
+  undoable?: boolean;
 };
 
 export const AI_STAGE_LABELS: Record<AiStage, AiStageLabels> = {
@@ -106,6 +109,7 @@ export const AI_STAGE_LABELS: Record<AiStage, AiStageLabels> = {
   },
   "ui-detail": {
     id: "ui-detail",
+    undoable: false,
     singular: "UI detail item",
     plural: "UI details",
     drawerTitle: "Generate UI details",

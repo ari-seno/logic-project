@@ -10,7 +10,15 @@ import {
   applyErdBundleToProject,
   applyRequirementsToProject,
 } from "@/lib/ai/apply";
-import { runAiApply, runAiSuggest, safeJsonParse } from "@/lib/ai/suggest";
+import {
+  runAiApply,
+  runAiRejectSuggestion,
+  runAiSuggest,
+  runAiUndoApply,
+  safeJsonParse,
+  type AiRejectResult,
+  type AiUndoResult,
+} from "@/lib/ai/suggest";
 import {
   buildRequirementsSystemPrompt,
   buildRequirementsUserPrompt,
@@ -458,4 +466,31 @@ export async function aiApplyTasks(
     stage: "tasks",
     apply: applyTasksBundleToProject,
   });
+}
+
+export type RejectSuggestionInput = {
+  suggestionId: string;
+};
+
+export type RejectSuggestionResult = AiRejectResult;
+
+// Stage-agnostic: mark a pending suggestion as rejected.
+export async function aiRejectSuggestion(
+  input: RejectSuggestionInput,
+): Promise<RejectSuggestionResult> {
+  return runAiRejectSuggestion(input);
+}
+
+export type UndoApplyInput = {
+  suggestionId: string;
+  ids: string[];
+};
+
+export type UndoApplyResult = AiUndoResult;
+
+// Stage-agnostic: delete the rows an applied suggestion created.
+export async function aiUndoApply(
+  input: UndoApplyInput,
+): Promise<UndoApplyResult> {
+  return runAiUndoApply(input);
 }
