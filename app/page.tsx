@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 
 import { ButtonLink } from "@/components/ui/button";
-import { createClient } from "@/lib/supabase/server";
+import { getUser } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
   title: "Plan projects, capture decisions",
@@ -56,10 +56,7 @@ const STEPS = [
 ];
 
 export default async function HomePage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getUser();
 
   if (user) {
     redirect("/dashboard");

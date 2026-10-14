@@ -37,8 +37,10 @@ export default async function ProjectErdPage({
     notFound();
   }
 
-  const erd = await loadProjectErd(project.id);
-  const credentialResult = await getProjectCredentialAction(project.id);
+  const [erd, credentialResult] = await Promise.all([
+    loadProjectErd(project.id),
+    getProjectCredentialAction(project.id),
+  ]);
   const credential =
     credentialResult.ok && credentialResult.credential
       ? credentialResult.credential

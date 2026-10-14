@@ -86,13 +86,13 @@ export default async function TasksListPage({
   const project = await getProject(id);
   if (!project) notFound();
 
-  const [allTasks, allDeps, views] = await Promise.all([
+  const [allTasks, allDeps, views, credentialResult] = await Promise.all([
     listTasksByProject({ projectId: project.id }),
     listDependenciesByProject({ projectId: project.id }),
     listProjectViews(project.id, "tasks"),
+    getProjectCredentialAction(project.id),
   ]);
 
-  const credentialResult = await getProjectCredentialAction(project.id);
   const credential =
     credentialResult.ok && credentialResult.credential
       ? credentialResult.credential

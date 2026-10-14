@@ -43,14 +43,15 @@ export default async function ArchitectureOverviewPage({
     notFound();
   }
 
-  const [components, technologies, decisions, dependencies] = await Promise.all([
-    listArchitectureComponentsByProject({ projectId: project.id }),
-    listArchitectureTechnologiesByProject({ projectId: project.id }),
-    listArchitectureDecisionsByProject({ projectId: project.id, limit: 5 }),
-    listArchitectureComponentDependenciesByProject({ projectId: project.id }),
-  ]);
+  const [components, technologies, decisions, dependencies, credentialResult] =
+    await Promise.all([
+      listArchitectureComponentsByProject({ projectId: project.id }),
+      listArchitectureTechnologiesByProject({ projectId: project.id }),
+      listArchitectureDecisionsByProject({ projectId: project.id, limit: 5 }),
+      listArchitectureComponentDependenciesByProject({ projectId: project.id }),
+      getProjectCredentialAction(project.id),
+    ]);
 
-  const credentialResult = await getProjectCredentialAction(project.id);
   const credential =
     credentialResult.ok && credentialResult.credential
       ? credentialResult.credential

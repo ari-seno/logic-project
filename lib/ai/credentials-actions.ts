@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 
-import { createClient } from "@/lib/supabase/server";
+import { createClient, getUser } from "@/lib/supabase/server";
 import { encryptSecret } from "@/lib/ai/crypto";
 import { testConnection } from "@/lib/ai/credentials-test";
 
@@ -46,10 +46,7 @@ function formatError(err: unknown): string {
 }
 
 async function currentUserId(): Promise<string | null> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getUser();
   return user?.id ?? null;
 }
 

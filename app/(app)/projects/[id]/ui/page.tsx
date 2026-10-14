@@ -12,22 +12,13 @@ import { formatDate } from "@/lib/utils";
 import { getProject } from "@/lib/projects/queries";
 import { getProjectCredentialAction } from "@/lib/ai/credentials-actions";
 import { AiGeneratePanel } from "@/components/ai/ai-generate-panel";
-import {
-  countUiScreensByProject,
-  listUiScreensByProject,
-} from "@/lib/ui/screens/queries";
-import {
-  countUiComponentsByProject,
-  listUiComponentsByProject,
-} from "@/lib/ui/components/queries";
+import { listUiScreensByProject } from "@/lib/ui/screens/queries";
+import { listUiComponentsByProject } from "@/lib/ui/components/queries";
 import {
   countUiFormsByProject,
   countUiInteractionsByProject,
 } from "@/lib/ui/forms/queries";
-import {
-  countUiNavigationItemsByProject,
-  listUiNavigationItemsByProject,
-} from "@/lib/ui/navigation/queries";
+import { listUiNavigationItemsByProject } from "@/lib/ui/navigation/queries";
 import { UiScreenActions } from "@/components/ui/screens/screen-actions";
 import { UiComponentActions } from "@/components/ui/screens/component-actions";
 import { UiNavigationItemActions } from "@/components/ui/screens/navigation-actions";
@@ -77,26 +68,26 @@ export default async function UiOverviewPage({
   if (!project) notFound();
 
   const [
-    screenCount,
-    componentCount,
     formCount,
     interactionCount,
-    navigationCount,
     screens,
     components,
     navigationItems,
+    credentialResult,
   ] = await Promise.all([
-    countUiScreensByProject(project.id),
-    countUiComponentsByProject(project.id),
     countUiFormsByProject(project.id),
     countUiInteractionsByProject(project.id),
-    countUiNavigationItemsByProject(project.id),
     listUiScreensByProject({ projectId: project.id }),
     listUiComponentsByProject({ projectId: project.id }),
     listUiNavigationItemsByProject({ projectId: project.id }),
+    getProjectCredentialAction(project.id),
   ]);
 
-  const credentialResult = await getProjectCredentialAction(project.id);
+  // These are the full, unlimited lists, so their lengths are the totals.
+  const screenCount = screens.length;
+  const componentCount = components.length;
+  const navigationCount = navigationItems.length;
+
   const credential =
     credentialResult.ok && credentialResult.credential
       ? credentialResult.credential

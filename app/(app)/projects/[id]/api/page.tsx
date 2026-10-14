@@ -12,18 +12,19 @@ import { formatDate } from "@/lib/utils";
 import { getProject } from "@/lib/projects/queries";
 import { getProjectCredentialAction } from "@/lib/ai/credentials-actions";
 import { AiGeneratePanel } from "@/components/ai/ai-generate-panel";
-import {
-  listApiGroupsWithEndpointCount,
-  type ApiGroupWithEndpointCount,
-} from "@/lib/api/groups/queries";
-import {
-  listApiEndpointsByProjectWithGroupName,
-} from "@/lib/api/endpoints/queries";
+import { type ApiGroupWithEndpointCount } from "@/lib/api/groups/queries";
+import { loadProjectApiContract } from "@/lib/api/endpoints/queries";
 import { ApiGroupActions } from "@/components/api/group-actions";
 import { ApiEndpointActions } from "@/components/api/endpoint-actions";
 import { JsonBlock } from "@/components/ui/json-block";
-import { loadProjectApiContract } from "@/lib/api/endpoints/queries";
 import { jsonFilename, prepareJsonBlock } from "@/lib/export/api";
+
+function compareByPosition(
+  a: { position: number; created_at: string },
+  b: { position: number; created_at: string },
+): number {
+  return a.position - b.position || a.created_at.localeCompare(b.created_at);
+}
 
 export default async function ApiOverviewPage({
   params,
@@ -34,20 +35,30 @@ export default async function ApiOverviewPage({
   const project = await getProject(id);
   if (!project) notFound();
 
-  const [groups, endpoints, contract] = await Promise.all([
-    listApiGroupsWithEndpointCount({ projectId: project.id }),
-    listApiEndpointsByProjectWithGroupName({ projectId: project.id }),
+  const [contract, credentialResult] = await Promise.all([
     loadProjectApiContract(project.id),
+    getProjectCredentialAction(project.id),
   ]);
 
   const jsonStructure = prepareJsonBlock(contract);
   const filename = jsonFilename(project.name);
 
-  const credentialResult = await getProjectCredentialAction(project.id);
   const credential =
     credentialResult.ok && credentialResult.credential
       ? credentialResult.credential
       : null;
+
+  // The contract already contains the full groups and endpoints, so derive the
+  // page's lists from it instead of issuing two more queries (matching the
+  // position/created_at ordering the list helpers used).
+  const endpoints = [...contract.endpoints].sort(compareByPosition);
+  const groups: ApiGroupWithEndpointCount[] = contract.groups
+    .map((g) => ({
+      ...g,
+      endpoint_count: contract.endpoints.filter((e) => e.group_id === g.id)
+        .length,
+    }))
+    .sort(compareByPosition);
 
   const groupNameById = new Map<string, string>(
     groups.map((g) => [g.id, g.name]),

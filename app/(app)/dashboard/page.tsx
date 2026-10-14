@@ -11,13 +11,11 @@ import {
   countProjects,
   countProjectsUpdatedWithinDays,
 } from "@/lib/projects/queries";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, getUser } from "@/lib/supabase/server";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getUser();
   if (!user) redirect("/login");
 
   const [projects, count, activeThisWeek] = await Promise.all([

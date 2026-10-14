@@ -23,8 +23,10 @@ export default async function DecisionsListPage({
     notFound();
   }
 
-  const decisions = await listDecisions({ projectId: project.id });
-  const credentialResult = await getProjectCredentialAction(project.id);
+  const [decisions, credentialResult] = await Promise.all([
+    listDecisions({ projectId: project.id }),
+    getProjectCredentialAction(project.id),
+  ]);
   const credential =
     credentialResult.ok && credentialResult.credential
       ? credentialResult.credential

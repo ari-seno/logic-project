@@ -28,20 +28,29 @@ export async function updateSession(request: NextRequest) {
     },
   );
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data: claimsData, error: claimsError } = await supabase.auth.getClaims();
+  let isAuthed = !claimsError && Boolean(claimsData?.claims?.sub);
+
+  // `getClaims()` verifies the JWT locally (JWKS) when the project uses
+  // asymmetric signing keys and costs nothing for signed-out visitors. If it
+  // cannot verify (e.g. a JWKS fetch failure), fall back to the Auth server.
+  if (claimsError) {
+    const {
+      data: { user: fallbackUser },
+    } = await supabase.auth.getUser();
+    isAuthed = Boolean(fallbackUser);
+  }
 
   const pathname = request.nextUrl.pathname;
 
-  if (!user && isProtectedPath(pathname)) {
+  if (!isAuthed && isProtectedPath(pathname)) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     url.searchParams.set("next", pathname + request.nextUrl.search);
     return NextResponse.redirect(url);
   }
 
-  if (user && isAuthPath(pathname)) {
+  if (isAuthed && isAuthPath(pathname)) {
     const url = request.nextUrl.clone();
     url.pathname = "/dashboard";
     url.search = "";

@@ -8,7 +8,7 @@ import { AppSidebar } from "@/components/shell/app-sidebar";
 import { MobileNav } from "@/components/shell/mobile-nav";
 import { CommandPalette } from "@/components/shell/command-palette";
 import { Toaster } from "@/components/shell/toaster";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, getUser } from "@/lib/supabase/server";
 
 // The signed-in area is private; keep it out of search indexes.
 export const metadata: Metadata = {
@@ -17,9 +17,7 @@ export const metadata: Metadata = {
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getUser();
 
   if (!user) {
     redirect("/login");
