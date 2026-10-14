@@ -10,6 +10,7 @@ import {
   Gauge,
   History,
   LayoutGrid,
+  Layers,
   ListChecks,
   Loader2,
   ScrollText,
@@ -41,6 +42,7 @@ const SECTIONS = [
   { label: "Tasks", suffix: "tasks", icon: ListChecks },
   { label: "AI history", suffix: "ai-history", icon: History },
   { label: "Activity", suffix: "activity", icon: Activity },
+  { label: "Versions", suffix: "versions", icon: Layers },
 ];
 
 const RESULT_ICONS: Record<SearchResultKind, typeof FileText> = {

@@ -3,7 +3,7 @@
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import Link from "next/link";
 import { useState, useTransition } from "react";
-import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import { Layers, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
@@ -57,6 +57,26 @@ export function ProjectHeaderMenu({
                 <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
                 Edit project
               </Link>
+            </DropdownMenu.Item>
+            <DropdownMenu.Item
+              onSelect={(event) => {
+                event.preventDefault();
+                startTransition(async () => {
+                  const { saveProjectVersion } = await import(
+                    "@/lib/versions/actions"
+                  );
+                  const result = await saveProjectVersion({ projectId });
+                  if (!result.ok) {
+                    toast.error(result.error);
+                    return;
+                  }
+                  toast.success("Version saved.");
+                });
+              }}
+              className="flex cursor-pointer items-center gap-2 rounded-[var(--radius)] px-2.5 py-2 text-sm outline-none data-[highlighted]:bg-[var(--muted)]"
+            >
+              <Layers className="h-3.5 w-3.5" aria-hidden="true" />
+              Save version
             </DropdownMenu.Item>
             <DropdownMenu.Item
               onSelect={(event) => {

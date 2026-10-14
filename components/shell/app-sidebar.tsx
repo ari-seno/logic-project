@@ -11,6 +11,7 @@ import {
   Gauge,
   History,
   LayoutGrid,
+  Layers,
   ListChecks,
   ScrollText,
   Server,
@@ -94,6 +95,12 @@ export function AppSidebar() {
           label: "Activity",
           href: `${base}/activity`,
           icon: Activity,
+        },
+        {
+          key: "versions",
+          label: "Versions",
+          href: `${base}/versions`,
+          icon: Layers,
         },
       ],
     });

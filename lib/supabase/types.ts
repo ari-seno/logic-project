@@ -18,6 +18,16 @@ export type Project = {
   updated_at: string;
 };
 
+export type ProjectVersion = {
+  id: string;
+  project_id: string;
+  label: string;
+  item_count: number;
+  bundle: Json;
+  created_by: string | null;
+  created_at: string;
+};
+
 export type Profile = {
   id: string;
   email: string;
@@ -783,6 +793,28 @@ type Tables = {
       share_enabled?: boolean;
       created_at?: string;
       updated_at?: string;
+    };
+    Relationships: [];
+  };
+  project_versions: {
+    Row: ProjectVersion;
+    Insert: {
+      id?: string;
+      project_id: string;
+      label: string;
+      item_count?: number;
+      bundle: Json;
+      created_by?: string | null;
+      created_at?: string;
+    };
+    Update: {
+      id?: string;
+      project_id?: string;
+      label?: string;
+      item_count?: number;
+      bundle?: Json;
+      created_by?: string | null;
+      created_at?: string;
     };
     Relationships: [];
   };
