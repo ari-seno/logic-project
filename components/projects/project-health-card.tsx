@@ -1,7 +1,10 @@
 import Link from "next/link";
 
-import { loadProjectBundle } from "@/lib/export/bundle";
-import { computeProjectHealth, type HealthStatus } from "@/lib/projects/health";
+import {
+  computeProjectHealth,
+  type HealthStatus,
+  type ProjectHealthInput,
+} from "@/lib/projects/health";
 import { cn } from "@/lib/utils";
 
 const STATUS_LABELS: Record<HealthStatus, string> = {
@@ -40,14 +43,14 @@ function percent(score: number, weight: number): number {
   return Math.max(0, Math.min(100, Math.round((score / weight) * 100)));
 }
 
-export async function ProjectHealthCard({ projectId }: { projectId: string }) {
-  const bundle = await loadProjectBundle(projectId);
-
-  if (!bundle) {
-    return null;
-  }
-
-  const health = computeProjectHealth(bundle);
+export function ProjectHealthCard({
+  projectId,
+  input,
+}: {
+  projectId: string;
+  input: ProjectHealthInput;
+}) {
+  const health = computeProjectHealth(input);
   const warnings = health.issues.filter(
     (issue) => issue.severity === "warning",
   );

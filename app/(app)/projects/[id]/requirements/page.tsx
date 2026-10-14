@@ -13,7 +13,10 @@ import {
 } from "@/components/ui/requirements/requirements-table";
 import { formatDate } from "@/lib/utils";
 import { getProject } from "@/lib/projects/queries";
-import { listRequirements } from "@/lib/requirements/queries";
+import {
+  countRequirementsByStatus,
+  listRequirements,
+} from "@/lib/requirements/queries";
 import { REQUIREMENT_BULK_STATUSES } from "@/lib/requirements/bulk";
 import { getProjectCredentialAction } from "@/lib/ai/credentials-actions";
 import { SavedViews } from "@/components/projects/saved-views";
@@ -52,8 +55,12 @@ export default async function RequirementsListPage({
     : "all";
   const currentQuery = status === "all" ? "" : `status=${status}`;
 
-  const [requirements, credentialResult, views] = await Promise.all([
-    listRequirements({ projectId: project.id }),
+  const [requirements, statusCounts, credentialResult, views] = await Promise.all([
+    listRequirements({
+      projectId: project.id,
+      status: status === "all" ? undefined : status,
+    }),
+    countRequirementsByStatus(project.id),
     getProjectCredentialAction(project.id),
     listProjectViews(project.id, "requirements"),
   ]);
@@ -62,17 +69,12 @@ export default async function RequirementsListPage({
       ? credentialResult.credential
       : null;
 
-  const counts = new Map<string, number>();
-  for (const requirement of requirements) {
-    counts.set(requirement.status, (counts.get(requirement.status) ?? 0) + 1);
-  }
+  const totalCount = REQUIREMENT_BULK_STATUSES.reduce(
+    (sum, key) => sum + (statusCounts[key] ?? 0),
+    0,
+  );
 
-  const filtered =
-    status === "all"
-      ? requirements
-      : requirements.filter((requirement) => requirement.status === status);
-
-  const rows: RequirementTableRow[] = filtered.map((requirement) => ({
+  const rows: RequirementTableRow[] = requirements.map((requirement) => ({
     id: requirement.id,
     title: requirement.title,
     type: requirement.type,
@@ -116,7 +118,7 @@ export default async function RequirementsListPage({
         </div>
       </div>
 
-      {requirements.length === 0 ? (
+      {totalCount === 0 ? (
         <EmptyState
           icon={
             <EmptyStateIcon>
@@ -152,10 +154,7 @@ export default async function RequirementsListPage({
                 key === "all"
                   ? `/projects/${project.id}/requirements`
                   : `/projects/${project.id}/requirements?status=${key}`,
-              count:
-                key === "all"
-                  ? requirements.length
-                  : (counts.get(key) ?? 0),
+              count: key === "all" ? totalCount : (statusCounts[key] ?? 0),
             }))}
           />
 
@@ -166,7 +165,7 @@ export default async function RequirementsListPage({
             currentQuery={currentQuery}
           />
 
-          {filtered.length === 0 ? (
+          {requirements.length === 0 ? (
             <p className="rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--surface-1)] p-6 text-center text-sm text-[var(--muted-foreground)]">
               No requirements with status “{status}”.
             </p>

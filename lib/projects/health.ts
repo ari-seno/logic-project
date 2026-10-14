@@ -1,6 +1,40 @@
-import type { ProjectBundle } from "@/lib/export/bundle";
-
 export type HealthStatus = "complete" | "partial" | "empty";
+
+/**
+ * The only fields the completeness checks read. A full `ProjectBundle`
+ * satisfies this shape structurally, so callers may pass either the whole
+ * bundle or a narrow projection loaded straight from the database.
+ */
+export interface ProjectHealthInput {
+  requirements: Array<{ id: string; type: string | null; description: string | null }>;
+  decisions: Array<{ id: string; status: string | null }>;
+  domains: Array<{ id: string }>;
+  entities: Array<{ id: string }>;
+  attributes: Array<{ entity_id: string; is_primary_key: boolean }>;
+  relationships: Array<{ id: string }>;
+  architecture: {
+    components: Array<{ id: string }>;
+    technologies: Array<{ id: string }>;
+    dependencies: Array<{ id: string }>;
+  };
+  api: {
+    endpoints: Array<{ id: string; group_id: string | null }>;
+    responses: Array<{ endpoint_id: string }>;
+  };
+  ui: {
+    screens: Array<{ id: string }>;
+    screenComponents: Array<{ screen_id: string }>;
+    interactions: Array<{ screen_id: string }>;
+  };
+  tasks: Array<{
+    id: string;
+    acceptance_criteria: string | null;
+    estimated_effort: string | null;
+  }>;
+  taskLinks: {
+    requirements: Array<{ id: string }>;
+  };
+}
 export type HealthSeverity = "warning" | "info";
 
 export interface ProjectHealthSection {
@@ -38,8 +72,8 @@ interface SectionDefinition {
   label: string;
   weight: number;
   detailNoun: string;
-  isEmpty: (bundle: ProjectBundle) => boolean;
-  checks: (bundle: ProjectBundle) => HealthCheck[];
+  isEmpty: (bundle: ProjectHealthInput) => boolean;
+  checks: (bundle: ProjectHealthInput) => HealthCheck[];
 }
 
 function hasText(value: string | null | undefined): boolean {
@@ -270,7 +304,7 @@ const SECTION_DEFINITIONS: SectionDefinition[] = [
   },
 ];
 
-export function computeProjectHealth(bundle: ProjectBundle): ProjectHealth {
+export function computeProjectHealth(bundle: ProjectHealthInput): ProjectHealth {
   const sections: ProjectHealthSection[] = [];
   const issues: ProjectHealthIssue[] = [];
 

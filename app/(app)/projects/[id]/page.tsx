@@ -20,26 +20,12 @@ import { SectionCard, SectionHeader } from "@/components/ui/section-card";
 import { formatDate, formatDateTime } from "@/lib/utils";
 import { getProject } from "@/lib/projects/queries";
 import { createClient } from "@/lib/supabase/server";
+import { listRequirements } from "@/lib/requirements/queries";
+import { listDecisions } from "@/lib/decisions/queries";
 import {
-  countRequirements,
-  listRequirements,
-} from "@/lib/requirements/queries";
-import {
-  countDecisions,
-  listDecisions,
-} from "@/lib/decisions/queries";
-import { countDomains } from "@/lib/domains/queries";
-import { countEntitiesByProject } from "@/lib/entities/queries";
-import { countRelationshipsByProject } from "@/lib/relationships/queries";
-import { countArchitectureComponentsByProject } from "@/lib/architecture/components/queries";
-import { countArchitectureTechnologiesByProject } from "@/lib/architecture/technologies/queries";
-import { countArchitectureDecisionsByProject } from "@/lib/architecture/decisions/queries";
-import { countArchitectureComponentDependenciesByProject } from "@/lib/architecture/dependencies/queries";
-import { countApiGroupsByProject } from "@/lib/api/groups/queries";
-import { countApiEndpointsByProject } from "@/lib/api/endpoints/queries";
-import { countUiScreensByProject } from "@/lib/ui/screens/queries";
-import { countUiComponentsByProject } from "@/lib/ui/components/queries";
-import { countTasksByStatus } from "@/lib/tasks/queries";
+  loadProjectOverview,
+  mapProjectOverview,
+} from "@/lib/projects/overview";
 import { AiCredentialPicker } from "@/components/projects/ai-credential-picker";
 import { getProjectCredentialAction } from "@/lib/ai/credentials-actions";
 
@@ -59,43 +45,16 @@ export default async function ProjectOverviewPage({
     notFound();
   }
 
-  const [
-    requirementCount,
-    decisionCount,
-    domainCount,
-    entityCount,
-    relationshipCount,
-    componentCount,
-    technologyCount,
-    archDecisionCount,
-    dependencyCount,
-    apiGroupCount,
-    apiEndpointCount,
-    uiScreenCount,
-    uiComponentCount,
-    taskCounts,
-    recentRequirements,
-    recentDecisions,
-    credentialResult,
-  ] = await Promise.all([
-    countRequirements(project.id, supabase),
-    countDecisions(project.id, supabase),
-    countDomains(project.id, supabase),
-    countEntitiesByProject(project.id, supabase),
-    countRelationshipsByProject(project.id, supabase),
-    countArchitectureComponentsByProject(project.id, supabase),
-    countArchitectureTechnologiesByProject(project.id, supabase),
-    countArchitectureDecisionsByProject(project.id, supabase),
-    countArchitectureComponentDependenciesByProject(project.id, supabase),
-    countApiGroupsByProject(project.id, supabase),
-    countApiEndpointsByProject(project.id, supabase),
-    countUiScreensByProject(project.id, supabase),
-    countUiComponentsByProject(project.id, supabase),
-    countTasksByStatus(project.id, supabase),
-    listRequirements({ projectId: project.id, limit: 5, client: supabase }),
-    listDecisions({ projectId: project.id, limit: 5, client: supabase }),
-    getProjectCredentialAction(project.id),
-  ]);
+  const [overviewResult, recentRequirements, recentDecisions, credentialResult] =
+    await Promise.all([
+      loadProjectOverview(project.id, supabase),
+      listRequirements({ projectId: project.id, limit: 5, client: supabase }),
+      listDecisions({ projectId: project.id, limit: 5, client: supabase }),
+      getProjectCredentialAction(project.id),
+    ]);
+
+  const overview = overviewResult ?? mapProjectOverview(null);
+  const counts = overview.counts;
 
   const aiCredentialSummary = credentialResult.ok
     ? credentialResult.credential
@@ -173,53 +132,53 @@ export default async function ProjectOverviewPage({
             title="Discover"
             subtitle="Requirements and decisions"
             href={`/projects/${project.id}/requirements`}
-            done={requirementCount > 0 || decisionCount > 0}
+            done={counts.requirements > 0 || counts.decisions > 0}
             metrics={[
-              { label: "Requirements", value: requirementCount },
-              { label: "Decisions", value: decisionCount },
+              { label: "Requirements", value: counts.requirements },
+              { label: "Decisions", value: counts.decisions },
             ]}
           />
           <StageCard
             title="Model"
             subtitle="Domains, entities, and relationships"
             href={`/projects/${project.id}/domains/erd`}
-            done={domainCount > 0}
+            done={counts.domains > 0}
             metrics={[
-              { label: "Domains", value: domainCount },
-              { label: "Entities", value: entityCount },
-              { label: "Relations", value: relationshipCount },
+              { label: "Domains", value: counts.domains },
+              { label: "Entities", value: counts.entities },
+              { label: "Relations", value: counts.relationships },
             ]}
           />
           <StageCard
             title="Architect"
             subtitle="Components, technologies, and decisions"
             href={`/projects/${project.id}/architecture`}
-            done={componentCount > 0}
+            done={counts.architectureComponents > 0}
             metrics={[
-              { label: "Components", value: componentCount },
-              { label: "Technologies", value: technologyCount },
-              { label: "Decisions", value: archDecisionCount },
-              { label: "Dependencies", value: dependencyCount },
+              { label: "Components", value: counts.architectureComponents },
+              { label: "Technologies", value: counts.architectureTechnologies },
+              { label: "Decisions", value: counts.architectureDecisions },
+              { label: "Dependencies", value: counts.architectureDependencies },
             ]}
           />
           <StageCard
             title="Ship"
             subtitle="API, UI, and tasks"
             href={`/projects/${project.id}/tasks`}
-            done={taskCounts.total > 0}
+            done={counts.tasks.total > 0}
             metrics={[
-              { label: "API groups", value: apiGroupCount },
-              { label: "API endpoints", value: apiEndpointCount },
-              { label: "Screens", value: uiScreenCount },
-              { label: "UI components", value: uiComponentCount },
-              { label: "Tasks", value: taskCounts.total },
-              { label: "In progress", value: taskCounts.in_progress },
-              { label: "Done", value: taskCounts.done },
+              { label: "API groups", value: counts.apiGroups },
+              { label: "API endpoints", value: counts.apiEndpoints },
+              { label: "Screens", value: counts.uiScreens },
+              { label: "UI components", value: counts.uiComponents },
+              { label: "Tasks", value: counts.tasks.total },
+              { label: "In progress", value: counts.tasks.in_progress },
+              { label: "Done", value: counts.tasks.done },
             ]}
           />
         </div>
         <SectionCard variant="flat" padding="lg">
-          <ProjectHealthCard projectId={project.id} />
+          <ProjectHealthCard projectId={project.id} input={overview.health} />
         </SectionCard>
       </section>
 
