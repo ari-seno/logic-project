@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 const OPTIONS = [
   { format: "md", label: "Markdown", hint: "Full project spec" },
   { format: "json", label: "Project JSON", hint: "Structured bundle" },
+  { format: "bundle", label: "Project bundle", hint: "Re-importable backup" },
   { format: "openapi", label: "OpenAPI 3.1", hint: "API contract" },
   { format: "sql", label: "SQL schema", hint: "PostgreSQL DDL" },
   { format: "mermaid", label: "Mermaid diagram", hint: "Architecture graph" },

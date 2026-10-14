@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { DeleteProjectButton } from "@/components/projects/delete-project-button";
+import { ImportProjectDialog } from "@/components/projects/import-project-dialog";
 import { ButtonLink } from "@/components/ui/button";
 import { formatDate } from "@/lib/utils";
 import { listProjects } from "@/lib/projects/queries";
@@ -17,7 +18,10 @@ export default async function ProjectsPage() {
             Manage and open your projects.
           </p>
         </div>
-        <ButtonLink href="/projects/new">New project</ButtonLink>
+        <div className="flex flex-wrap items-center gap-2">
+          <ImportProjectDialog />
+          <ButtonLink href="/projects/new">New project</ButtonLink>
+        </div>
       </div>
 
       {projects.length === 0 ? (

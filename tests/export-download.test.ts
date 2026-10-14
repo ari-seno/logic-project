@@ -25,10 +25,11 @@ describe("isExportFormat", () => {
     expect(isExportFormat(3)).toBe(false);
   });
 
-  it("exposes the five documented formats", () => {
+  it("exposes the documented formats", () => {
     expect([...EXPORT_FORMATS]).toEqual([
       "md",
       "json",
+      "bundle",
       "openapi",
       "sql",
       "mermaid",

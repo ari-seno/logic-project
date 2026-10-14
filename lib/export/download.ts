@@ -1,6 +1,6 @@
 import { buildArchitectureMermaid, buildErdMermaid } from "@/lib/diagrams/mermaid";
 import type { ProjectBundle } from "@/lib/export/bundle";
-import { serializeProjectJson } from "@/lib/export/bundle-json";
+import { serializeBundleJson, serializeProjectJson } from "@/lib/export/bundle-json";
 import { projectToMarkdown } from "@/lib/export/markdown";
 import { serializeOpenApi } from "@/lib/export/openapi";
 import { serializeSql } from "@/lib/export/sql";
@@ -9,6 +9,7 @@ import { slugify } from "@/lib/utils";
 export const EXPORT_FORMATS = [
   "md",
   "json",
+  "bundle",
   "openapi",
   "sql",
   "mermaid",
@@ -30,6 +31,7 @@ export interface ExportFileOptions {
 const CONTENT_TYPES: Record<ExportFormat, string> = {
   md: "text/markdown; charset=utf-8",
   json: "application/json; charset=utf-8",
+  bundle: "application/json; charset=utf-8",
   openapi: "application/json; charset=utf-8",
   sql: "application/sql; charset=utf-8",
   mermaid: "text/plain; charset=utf-8",
@@ -38,6 +40,7 @@ const CONTENT_TYPES: Record<ExportFormat, string> = {
 const EXTENSIONS: Record<ExportFormat, string> = {
   md: "md",
   json: "json",
+  bundle: "bundle.json",
   openapi: "openapi.json",
   sql: "sql",
   mermaid: "mmd",
@@ -75,6 +78,8 @@ function renderExport(
       return projectToMarkdown(bundle, { generatedAt: options.generatedAt });
     case "json":
       return serializeProjectJson(bundle, { generatedAt: options.generatedAt });
+    case "bundle":
+      return serializeBundleJson(bundle, { generatedAt: options.generatedAt });
     case "openapi":
       return serializeOpenApi(
         bundle.api,

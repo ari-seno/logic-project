@@ -452,6 +452,30 @@ export function serializeProjectJson(
   return JSON.stringify(projectToJson(bundle, options), null, 2);
 }
 
+export const BUNDLE_FORMAT = "logic-project/bundle";
+export const BUNDLE_VERSION = 1;
+
+/**
+ * Raw, loss-free dump of a project. Unlike `serializeProjectJson`, which is a
+ * human-oriented view, this keeps every table row so the file can be imported
+ * back with no data loss.
+ */
+export function serializeBundleJson(
+  bundle: ProjectBundle,
+  options: BundleJsonOptions = {},
+): string {
+  return JSON.stringify(
+    {
+      format: BUNDLE_FORMAT,
+      version: BUNDLE_VERSION,
+      generatedAt: options.generatedAt ?? new Date().toISOString(),
+      bundle,
+    },
+    null,
+    2,
+  );
+}
+
 export function projectJsonFilename(projectName: string): string {
   return `${slugify(projectName, "project")}.json`;
 }
