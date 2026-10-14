@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { Command } from "cmdk";
 import {
+  Activity,
   Boxes,
   FileText,
   Gauge,
@@ -39,6 +40,7 @@ const SECTIONS = [
   { label: "UI", suffix: "ui", icon: LayoutGrid },
   { label: "Tasks", suffix: "tasks", icon: ListChecks },
   { label: "AI history", suffix: "ai-history", icon: History },
+  { label: "Activity", suffix: "activity", icon: Activity },
 ];
 
 const RESULT_ICONS: Record<SearchResultKind, typeof FileText> = {

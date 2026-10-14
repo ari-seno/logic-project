@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import {
+  Activity,
   BarChart3,
   Boxes,
   FileText,
@@ -87,6 +88,12 @@ export function AppSidebar() {
           label: "AI history",
           href: `${base}/ai-history`,
           icon: History,
+        },
+        {
+          key: "activity",
+          label: "Activity",
+          href: `${base}/activity`,
+          icon: Activity,
         },
       ],
     });
