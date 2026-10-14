@@ -6,6 +6,7 @@ import { ExportMenu } from "@/components/projects/export-menu";
 import { ProjectHealthCard } from "@/components/projects/project-health-card";
 import { ProjectTabs } from "@/components/projects/project-tabs";
 import { ProjectHeaderMenu } from "@/components/projects/project-header-menu";
+import { ShareProjectDialog } from "@/components/projects/share-project-dialog";
 import { StageCard } from "@/components/projects/stage-card";
 import {
   DecisionStatusBadge,
@@ -122,6 +123,11 @@ export default async function ProjectOverviewPage({
                 currentLabel={aiCredentialSummary?.label ?? null}
               />
               <ExportMenu projectId={project.id} />
+              <ShareProjectDialog
+                projectId={project.id}
+                shareEnabled={project.share_enabled}
+                shareToken={project.share_token}
+              />
               <ProjectHeaderMenu
                 projectId={project.id}
                 projectName={project.name}

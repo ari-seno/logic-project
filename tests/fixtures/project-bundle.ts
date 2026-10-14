@@ -63,6 +63,8 @@ export function makeBundle(
     name: "Library Management System",
     description: "A system to manage books and loans.",
     ai_credential_id: null,
+    share_token: null,
+    share_enabled: false,
   };
 
   const requirements: Requirement[] = [
