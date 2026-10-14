@@ -10,6 +10,11 @@ import {
 } from "@/lib/validation/requirements";
 import { createClient } from "@/lib/supabase/server";
 import { getProject } from "@/lib/projects/queries";
+import {
+  isRequirementBulkPriority,
+  isRequirementBulkStatus,
+  normalizeBulkRequirementIds,
+} from "./bulk";
 
 function emptyToOptional(
   value: FormDataEntryValue | null,
@@ -172,4 +177,93 @@ export async function deleteRequirement(formData: FormData) {
   revalidatePath(`/projects/${projectId}`);
   revalidatePath(`/projects/${projectId}/requirements`);
   redirect(`/projects/${projectId}/requirements`);
+}
+
+export type BulkRequirementResult =
+  | { ok: true; count: number }
+  | { error: string };
+
+function revalidateRequirementSurfaces(projectId: string) {
+  revalidatePath(`/projects/${projectId}`);
+  revalidatePath(`/projects/${projectId}/requirements`);
+}
+
+export async function bulkSetRequirementStatus(input: {
+  projectId: string;
+  ids: string[];
+  status: string;
+}): Promise<BulkRequirementResult> {
+  const ids = normalizeBulkRequirementIds(input.ids);
+  if (ids.length === 0) return { error: "Select at least one requirement." };
+  if (!isRequirementBulkStatus(input.status)) {
+    return { error: "Unsupported status." };
+  }
+
+  const owned = await assertOwnsProject(input.projectId);
+  if (!owned.ok) return { error: owned.error };
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("requirements")
+    .update({ status: input.status })
+    .in("id", ids)
+    .eq("project_id", input.projectId)
+    .select("id");
+
+  if (error) return { error: error.message };
+
+  revalidateRequirementSurfaces(input.projectId);
+  return { ok: true, count: data?.length ?? 0 };
+}
+
+export async function bulkSetRequirementPriority(input: {
+  projectId: string;
+  ids: string[];
+  priority: string;
+}): Promise<BulkRequirementResult> {
+  const ids = normalizeBulkRequirementIds(input.ids);
+  if (ids.length === 0) return { error: "Select at least one requirement." };
+  if (!isRequirementBulkPriority(input.priority)) {
+    return { error: "Unsupported priority." };
+  }
+
+  const owned = await assertOwnsProject(input.projectId);
+  if (!owned.ok) return { error: owned.error };
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("requirements")
+    .update({ priority: input.priority })
+    .in("id", ids)
+    .eq("project_id", input.projectId)
+    .select("id");
+
+  if (error) return { error: error.message };
+
+  revalidateRequirementSurfaces(input.projectId);
+  return { ok: true, count: data?.length ?? 0 };
+}
+
+export async function bulkDeleteRequirements(input: {
+  projectId: string;
+  ids: string[];
+}): Promise<BulkRequirementResult> {
+  const ids = normalizeBulkRequirementIds(input.ids);
+  if (ids.length === 0) return { error: "Select at least one requirement." };
+
+  const owned = await assertOwnsProject(input.projectId);
+  if (!owned.ok) return { error: owned.error };
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("requirements")
+    .delete()
+    .in("id", ids)
+    .eq("project_id", input.projectId)
+    .select("id");
+
+  if (error) return { error: error.message };
+
+  revalidateRequirementSurfaces(input.projectId);
+  return { ok: true, count: data?.length ?? 0 };
 }

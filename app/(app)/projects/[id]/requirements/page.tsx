@@ -1,31 +1,53 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { ProjectTabs } from "@/components/projects/project-tabs";
 import { Breadcrumb } from "@/components/ui/page-header";
-import {
-  PriorityBadge,
-  RequirementStatusBadge,
-  TypeBadge,
-} from "@/components/projects/badges";
 import { AiGeneratePanel } from "@/components/ai/ai-generate-panel";
 import { ButtonLink } from "@/components/ui/button";
 import { EmptyState, EmptyStateIcon } from "@/components/ui/empty-state";
+import { SegmentedNav } from "@/components/ui/segmented-nav";
+import type { DataListColumn } from "@/components/ui/data-list";
+import {
+  RequirementsTable,
+  type RequirementTableRow,
+} from "@/components/ui/requirements/requirements-table";
 import { formatDate } from "@/lib/utils";
 import { getProject } from "@/lib/projects/queries";
 import { listRequirements } from "@/lib/requirements/queries";
+import { REQUIREMENT_BULK_STATUSES } from "@/lib/requirements/bulk";
 import { getProjectCredentialAction } from "@/lib/ai/credentials-actions";
+
+const STATUS_FILTERS = ["all", ...REQUIREMENT_BULK_STATUSES] as const;
+type StatusFilter = (typeof STATUS_FILTERS)[number];
+
+const COLUMNS: DataListColumn[] = [
+  { key: "title", label: "Requirement" },
+  { key: "type", label: "Type" },
+  { key: "status", label: "Status" },
+  { key: "priority", label: "Priority" },
+  { key: "actions", label: "", align: "right" },
+];
 
 export default async function RequirementsListPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ status?: string }>;
 }) {
   const { id } = await params;
+  const sp = await searchParams;
   const project = await getProject(id);
   if (!project) {
     notFound();
   }
+
+  const rawStatus = typeof sp.status === "string" ? sp.status : "all";
+  const status: StatusFilter = (STATUS_FILTERS as readonly string[]).includes(
+    rawStatus,
+  )
+    ? (rawStatus as StatusFilter)
+    : "all";
 
   const requirements = await listRequirements({ projectId: project.id });
   const credentialResult = await getProjectCredentialAction(project.id);
@@ -33,6 +55,25 @@ export default async function RequirementsListPage({
     credentialResult.ok && credentialResult.credential
       ? credentialResult.credential
       : null;
+
+  const counts = new Map<string, number>();
+  for (const requirement of requirements) {
+    counts.set(requirement.status, (counts.get(requirement.status) ?? 0) + 1);
+  }
+
+  const filtered =
+    status === "all"
+      ? requirements
+      : requirements.filter((requirement) => requirement.status === status);
+
+  const rows: RequirementTableRow[] = filtered.map((requirement) => ({
+    id: requirement.id,
+    title: requirement.title,
+    type: requirement.type,
+    status: requirement.status,
+    priority: requirement.priority,
+    updatedLabel: formatDate(requirement.updated_at),
+  }));
 
   return (
     <div className="flex flex-col gap-6">
@@ -94,43 +135,36 @@ export default async function RequirementsListPage({
           }
         />
       ) : (
-        <ul className="flex flex-col gap-3">
-          {requirements.map((req) => (
-            <li
-              key={req.id}
-              className="card-glass p-5 transition-shadow hover:shadow-md"
-            >
-              <Link
-                href={`/projects/${project.id}/requirements/${req.id}`}
-                className="flex flex-col gap-3"
-              >
-                <div className="flex items-start justify-between gap-4">
-                  <span className="text-base font-semibold tracking-tight">
-                    {req.title}
-                  </span>
-                  <div className="flex shrink-0 flex-wrap justify-end gap-1.5">
-                    <TypeBadge type={req.type} />
-                    <RequirementStatusBadge status={req.status} />
-                    <PriorityBadge priority={req.priority} />
-                  </div>
-                </div>
-                {req.description ? (
-                  <p className="line-clamp-3 text-sm text-[var(--muted-foreground)] leading-relaxed">
-                    {req.description}
-                  </p>
-                ) : (
-                  <p className="italic text-sm text-[var(--muted-foreground)]">
-                    No description
-                  </p>
-                )}
-                <div className="flex flex-wrap gap-x-4 text-xs text-[var(--muted-foreground)]">
-                  <span>Created {formatDate(req.created_at)}</span>
-                  <span>Updated {formatDate(req.updated_at)}</span>
-                </div>
-              </Link>
-            </li>
-          ))}
-        </ul>
+        <>
+          <SegmentedNav
+            ariaLabel="Filter requirements by status"
+            activeKey={status}
+            items={STATUS_FILTERS.map((key) => ({
+              key,
+              label: key === "all" ? "All" : key,
+              href:
+                key === "all"
+                  ? `/projects/${project.id}/requirements`
+                  : `/projects/${project.id}/requirements?status=${key}`,
+              count:
+                key === "all"
+                  ? requirements.length
+                  : (counts.get(key) ?? 0),
+            }))}
+          />
+
+          {filtered.length === 0 ? (
+            <p className="rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--surface-1)] p-6 text-center text-sm text-[var(--muted-foreground)]">
+              No requirements with status “{status}”.
+            </p>
+          ) : (
+            <RequirementsTable
+              projectId={project.id}
+              rows={rows}
+              columns={COLUMNS}
+            />
+          )}
+        </>
       )}
     </div>
   );
