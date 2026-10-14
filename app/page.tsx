@@ -90,7 +90,7 @@ export default async function HomePage() {
               <ButtonLink
                 href="/register"
                 size="lg"
-                className="!bg-[var(--surface-1)] !text-[var(--brand)] hover:!bg-[var(--surface-1)]/90"
+                className="!bg-none !bg-[var(--surface-1)] !text-[var(--brand)] hover:!bg-[var(--surface-1)]/90"
               >
                 Create account
               </ButtonLink>
