@@ -2,9 +2,11 @@ import Link from "next/link";
 
 import { DeleteProjectButton } from "@/components/projects/delete-project-button";
 import { ImportProjectDialog } from "@/components/projects/import-project-dialog";
+import { TemplateMenu } from "@/components/projects/template-menu";
 import { ButtonLink } from "@/components/ui/button";
 import { formatDate } from "@/lib/utils";
 import { listProjects } from "@/lib/projects/queries";
+import { PROJECT_TEMPLATE_SUMMARIES } from "@/lib/projects/templates";
 
 export default async function ProjectsPage() {
   const projects = await listProjects();
@@ -19,6 +21,7 @@ export default async function ProjectsPage() {
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
+          <TemplateMenu templates={PROJECT_TEMPLATE_SUMMARIES} />
           <ImportProjectDialog />
           <ButtonLink href="/projects/new">New project</ButtonLink>
         </div>
@@ -30,8 +33,9 @@ export default async function ProjectsPage() {
           <p className="mt-1 text-sm text-[var(--muted-foreground)]">
             Create your first project to start organizing your work.
           </p>
-          <div className="mt-4">
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
             <ButtonLink href="/projects/new">Create your first project</ButtonLink>
+            <TemplateMenu templates={PROJECT_TEMPLATE_SUMMARIES} />
           </div>
         </div>
       ) : (

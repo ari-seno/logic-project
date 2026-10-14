@@ -535,17 +535,19 @@ async function writeBundle(
 export async function importProjectBundle(
   raw: unknown,
   ownerId: string,
+  options: { nameSuffix?: string } = {},
 ): Promise<ImportBundleOutcome> {
   const parsed = parseImportBundle(raw);
   if (!parsed.ok) return parsed;
 
   const supabase = await createClient();
+  const nameSuffix = options.nameSuffix ?? " (imported)";
 
   const { data: created, error: projectError } = await supabase
     .from("projects")
     .insert({
       owner_id: ownerId,
-      name: `${parsed.bundle.project.name} (imported)`.slice(0, 200),
+      name: `${parsed.bundle.project.name}${nameSuffix}`.slice(0, 200),
       description:
         typeof parsed.bundle.project.description === "string"
           ? parsed.bundle.project.description
