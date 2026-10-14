@@ -1,20 +1,8 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { ProjectTabs } from "@/components/projects/project-tabs";
-import {
-  TaskBlockedBadge,
-  TaskPriorityBadge,
-  TaskStatusBadge,
-  TaskTypeBadge,
-} from "@/components/projects/badges";
 import { ButtonLink } from "@/components/ui/button";
-import {
-  DataCell,
-  DataList,
-  DataRow,
-  type DataListColumn,
-} from "@/components/ui/data-list";
+import { type DataListColumn } from "@/components/ui/data-list";
 import { EmptyState, EmptyStateIcon } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
 import { SegmentedNav } from "@/components/ui/segmented-nav";
@@ -28,7 +16,10 @@ import {
   deriveBlockedByDependency,
   listDependenciesByProject,
 } from "@/lib/tasks/dependencies/queries";
-import { TaskActions } from "@/components/ui/tasks/task-actions";
+import {
+  TasksTable,
+  type TaskTableRow,
+} from "@/components/ui/tasks/tasks-table";
 
 type SortKey = "position" | "priority" | "updated" | "title";
 const STATUS_FILTERS = [
@@ -143,6 +134,20 @@ export default async function TasksListPage({
   });
 
   const typesAvailable = Array.from(new Set(allTasks.map((t) => t.task_type)));
+
+  const rows: TaskTableRow[] = sorted.map((t) => {
+    const parent = allTasks.find((p) => p.id === t.parent_task_id);
+    return {
+      id: t.id,
+      title: t.title,
+      taskType: t.task_type,
+      status: t.status,
+      priority: t.priority,
+      updatedLabel: formatDate(t.updated_at),
+      parent: parent ? { id: parent.id, title: parent.title } : null,
+      blocked: deriveBlockedByDependency(t.id, allDeps, allTasks).blocked,
+    };
+  });
 
   return (
     <div className="flex flex-col gap-6">
@@ -268,56 +273,11 @@ export default async function TasksListPage({
           }
         />
       ) : (
-        <DataList
-          caption="Project tasks"
+        <TasksTable
+          projectId={project.id}
+          rows={rows}
           columns={TASK_COLUMNS(sort)}
-        >
-          {sorted.map((t) => {
-            const parent = allTasks.find((p) => p.id === t.parent_task_id);
-            const blocked = deriveBlockedByDependency(t.id, allDeps, allTasks);
-            return (
-              <DataRow key={t.id} interactive>
-                <DataCell>
-                  <Link
-                    href={`/projects/${project.id}/tasks/${t.id}`}
-                    className="font-medium hover:underline"
-                  >
-                    {t.title}
-                  </Link>
-                  <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[var(--muted-foreground)]">
-                    {parent ? (
-                      <span>
-                        Parent:{" "}
-                        <Link
-                          href={`/projects/${project.id}/tasks/${parent.id}`}
-                          className="hover:underline"
-                        >
-                          {parent.title}
-                        </Link>
-                      </span>
-                    ) : null}
-                    <span>Updated {formatDate(t.updated_at)}</span>
-                  </div>
-                </DataCell>
-                <DataCell>
-                  <TaskTypeBadge type={t.task_type} />
-                </DataCell>
-                <DataCell>
-                  <TaskStatusBadge status={t.status} />
-                </DataCell>
-                <DataCell>
-                  <TaskPriorityBadge priority={t.priority} />
-                </DataCell>
-                <DataCell>
-                  {blocked.blocked ? <TaskBlockedBadge /> : null}
-                </DataCell>
-                <DataCell align="right">
-                  <TaskActions taskId={t.id} />
-                </DataCell>
-              </DataRow>
-            );
-          })}
-        </DataList>
+        />
       )}
     </div>
   );

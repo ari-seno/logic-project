@@ -11,6 +11,11 @@ import {
 import { createClient } from "@/lib/supabase/server";
 import { getProject } from "@/lib/projects/queries";
 import {
+  isBulkPriority,
+  isBulkStatus,
+  normalizeBulkIds,
+} from "./bulk";
+import {
   getTask,
   nextTaskPosition,
   wouldCreateParentCycle,
@@ -205,4 +210,86 @@ export async function deleteTask(formData: FormData) {
   if (error) return { error: error.message } as const;
   revalidatePath(`/projects/${ownership.projectId}/tasks`);
   redirect(`/projects/${ownership.projectId}/tasks`);
+}
+
+export type BulkTaskResult =
+  | { ok: true; count: number }
+  | { error: string };
+
+function revalidateTaskSurfaces(projectId: string) {
+  revalidatePath(`/projects/${projectId}/tasks`);
+  revalidatePath(`/projects/${projectId}/tasks/board`);
+}
+
+export async function bulkSetTaskStatus(input: {
+  projectId: string;
+  ids: unknown;
+  status: unknown;
+}): Promise<BulkTaskResult> {
+  const ids = normalizeBulkIds(input.ids);
+  if (ids.length === 0) return { error: "Select at least one task." };
+  if (!isBulkStatus(input.status)) return { error: "Unsupported status." };
+
+  const owned = await assertOwnsProject(input.projectId);
+  if (!owned.ok) return { error: owned.error };
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("tasks")
+    .update({ status: input.status as never })
+    .in("id", ids)
+    .eq("project_id", input.projectId)
+    .select("id");
+  if (error) return { error: error.message };
+
+  revalidateTaskSurfaces(input.projectId);
+  return { ok: true, count: data?.length ?? 0 };
+}
+
+export async function bulkSetTaskPriority(input: {
+  projectId: string;
+  ids: unknown;
+  priority: unknown;
+}): Promise<BulkTaskResult> {
+  const ids = normalizeBulkIds(input.ids);
+  if (ids.length === 0) return { error: "Select at least one task." };
+  if (!isBulkPriority(input.priority)) return { error: "Unsupported priority." };
+
+  const owned = await assertOwnsProject(input.projectId);
+  if (!owned.ok) return { error: owned.error };
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("tasks")
+    .update({ priority: input.priority as never })
+    .in("id", ids)
+    .eq("project_id", input.projectId)
+    .select("id");
+  if (error) return { error: error.message };
+
+  revalidateTaskSurfaces(input.projectId);
+  return { ok: true, count: data?.length ?? 0 };
+}
+
+export async function bulkDeleteTasks(input: {
+  projectId: string;
+  ids: unknown;
+}): Promise<BulkTaskResult> {
+  const ids = normalizeBulkIds(input.ids);
+  if (ids.length === 0) return { error: "Select at least one task." };
+
+  const owned = await assertOwnsProject(input.projectId);
+  if (!owned.ok) return { error: owned.error };
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("tasks")
+    .delete()
+    .in("id", ids)
+    .eq("project_id", input.projectId)
+    .select("id");
+  if (error) return { error: error.message };
+
+  revalidateTaskSurfaces(input.projectId);
+  return { ok: true, count: data?.length ?? 0 };
 }
