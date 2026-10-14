@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 
 const OPTIONS = [
+  { format: "zip", label: "Everything (.zip)", hint: "All formats in one file" },
   { format: "md", label: "Markdown", hint: "Full project spec" },
   { format: "json", label: "Project JSON", hint: "Structured bundle" },
   { format: "bundle", label: "Project bundle", hint: "Re-importable backup" },
